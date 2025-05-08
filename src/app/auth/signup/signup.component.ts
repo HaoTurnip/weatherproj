@@ -14,7 +14,7 @@ import { ThemeService } from '../../core/services/theme.service';
 import { Observable } from 'rxjs';
 
 @Component({
-  selector: 'app-login',
+  selector: 'app-signup',
   standalone: true,
   imports: [
     CommonModule,
@@ -29,12 +29,16 @@ import { Observable } from 'rxjs';
   ],
   template: `
     <div class="flex justify-center items-center min-h-screen" [class.bg-gray-100]="!(isDarkMode$ | async)" [class.bg-gray-900]="isDarkMode$ | async">
-      <mat-card class="login-card" [class.dark]="isDarkMode$ | async">
+      <mat-card class="signup-card" [class.dark]="isDarkMode$ | async">
         <mat-card-header>
-          <mat-card-title class="text-2xl font-bold mb-6">Welcome Back</mat-card-title>
+          <mat-card-title class="text-2xl font-bold mb-6">Create Account</mat-card-title>
         </mat-card-header>
         <mat-card-content>
           <form (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
+            <mat-form-field appearance="outline">
+              <mat-label>Full Name</mat-label>
+              <input matInput [(ngModel)]="displayName" name="displayName" required>
+            </mat-form-field>
             <mat-form-field appearance="outline">
               <mat-label>Email</mat-label>
               <input matInput type="email" [(ngModel)]="email" name="email" required>
@@ -43,27 +47,25 @@ import { Observable } from 'rxjs';
               <mat-label>Password</mat-label>
               <input matInput type="password" [(ngModel)]="password" name="password" required>
             </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Confirm Password</mat-label>
+              <input matInput type="password" [(ngModel)]="confirmPassword" name="confirmPassword" required>
+            </mat-form-field>
             <button mat-raised-button color="primary" type="submit" class="w-full">
-              Sign in
+              Sign Up
             </button>
           </form>
-
-          <div class="mt-4 text-center">
-            <button mat-button color="primary" (click)="resetPassword()">
-              Forgot Password?
-            </button>
-          </div>
 
           <mat-divider class="my-6"></mat-divider>
 
           <button mat-stroked-button color="primary" (click)="loginWithGoogle()" class="w-full">
             <mat-icon>google</mat-icon>
-            <span class="ml-2">Sign in with Google</span>
+            <span class="ml-2">Sign up with Google</span>
           </button>
 
           <div class="mt-4 text-center">
-            <span>Don't have an account? </span>
-            <a routerLink="/signup" class="text-primary">Sign Up</a>
+            <span>Already have an account? </span>
+            <a routerLink="/login" class="text-primary">Login</a>
           </div>
 
           @if (error) {
@@ -74,7 +76,7 @@ import { Observable } from 'rxjs';
     </div>
   `,
   styles: [`
-    .login-card {
+    .signup-card {
       background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
       color: white;
       border-radius: 12px;
@@ -84,54 +86,54 @@ import { Observable } from 'rxjs';
       transition: all 0.3s ease;
     }
 
-    .login-card.dark {
+    .signup-card.dark {
       background: linear-gradient(135deg, var(--dark-blue), var(--primary-blue));
     }
 
-    .login-card .mat-mdc-form-field {
+    .signup-card .mat-mdc-form-field {
       color: white;
     }
 
-    .login-card .mat-mdc-form-field-label {
+    .signup-card .mat-mdc-form-field-label {
       color: rgba(255, 255, 255, 0.8);
     }
 
-    .login-card .mat-mdc-form-field-outline {
+    .signup-card .mat-mdc-form-field-outline {
       color: rgba(255, 255, 255, 0.3);
     }
 
-    .login-card .mat-mdc-input-element {
+    .signup-card .mat-mdc-input-element {
       color: white;
     }
 
-    .login-card .mat-mdc-button {
+    .signup-card .mat-mdc-button {
       color: white;
     }
 
-    .login-card .mat-mdc-raised-button {
+    .signup-card .mat-mdc-raised-button {
       background-color: white;
       color: var(--primary-blue);
     }
 
-    .login-card .mat-mdc-raised-button:hover {
+    .signup-card .mat-mdc-raised-button:hover {
       background-color: rgba(255, 255, 255, 0.9);
     }
 
-    .login-card .mat-mdc-stroked-button {
+    .signup-card .mat-mdc-stroked-button {
       border-color: white;
       color: white;
     }
 
-    .login-card .mat-mdc-stroked-button:hover {
+    .signup-card .mat-mdc-stroked-button:hover {
       background-color: rgba(255, 255, 255, 0.1);
     }
 
-    .login-card .text-primary {
+    .signup-card .text-primary {
       color: white;
       text-decoration: underline;
     }
 
-    .login-card .text-primary:hover {
+    .signup-card .text-primary:hover {
       color: rgba(255, 255, 255, 0.8);
     }
 
@@ -140,9 +142,11 @@ import { Observable } from 'rxjs';
     }
   `]
 })
-export class LoginComponent {
+export class SignupComponent {
+  displayName: string = '';
   email: string = '';
   password: string = '';
+  confirmPassword: string = '';
   error: string = '';
   isDarkMode$ = this.themeService.isDarkMode$;
 
@@ -153,8 +157,13 @@ export class LoginComponent {
   ) {}
 
   async onSubmit() {
+    if (this.password !== this.confirmPassword) {
+      this.error = 'Passwords do not match';
+      return;
+    }
+
     try {
-      await this.authService.login(this.email, this.password);
+      await this.authService.register(this.email, this.password, this.displayName);
       this.router.navigate(['/']);
     } catch (error: any) {
       this.error = error.message;
@@ -165,19 +174,6 @@ export class LoginComponent {
     try {
       await this.authService.loginWithGoogle();
       this.router.navigate(['/']);
-    } catch (error: any) {
-      this.error = error.message;
-    }
-  }
-
-  async resetPassword() {
-    if (!this.email) {
-      this.error = 'Please enter your email address first';
-      return;
-    }
-    try {
-      await this.authService.resetPassword(this.email);
-      this.error = ''; // Clear any previous errors
     } catch (error: any) {
       this.error = error.message;
     }

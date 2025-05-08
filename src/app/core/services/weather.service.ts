@@ -23,20 +23,37 @@ export interface WeatherData {
 }
 
 export interface ForecastData {
-  forecastday: Array<{
-    date: string;
-    day: {
-      maxtemp_f: number;
-      mintemp_f: number;
-      condition: {
-        text: string;
-        icon: string;
-      };
-      daily_chance_of_rain: number;
-      avghumidity: number;
-      maxwind_mph: number;
+  location: {
+    name: string;
+    region: string;
+    country: string;
+  };
+  current: {
+    temp_f: number;
+    condition: {
+      text: string;
+      icon: string;
     };
-  }>;
+    humidity: number;
+    wind_mph: number;
+    precip_in: number;
+  };
+  forecast: {
+    forecastday: Array<{
+      date: string;
+      day: {
+        maxtemp_f: number;
+        mintemp_f: number;
+        condition: {
+          text: string;
+          icon: string;
+        };
+        daily_chance_of_rain: number;
+        avghumidity: number;
+        maxwind_mph: number;
+      };
+    }>;
+  };
 }
 
 export interface WeatherAlert {
@@ -105,8 +122,8 @@ export class WeatherService {
   }
 
   getMapOverlay(type: 'temperature' | 'precipitation' | 'wind' | 'clouds'): Observable<string> {
-    // Using OpenWeatherMap's map layer API
-    const mapUrl = `https://tile.openweathermap.org/map/${type}/0/0/0.png?appid=${environment.weatherApiKey}`;
+    // Using WeatherAPI's map service with the correct endpoint
+    const mapUrl = `${this.baseUrl}/maps/v1/weather/${type}/0/0/0.png?key=${this.apiKey}&lang=en`;
     return of(mapUrl).pipe(
       catchError(error => {
         console.error('Error fetching map overlay:', error);

@@ -1,30 +1,107 @@
-import { Injectable } from '@angular/core';
-import { FirebaseService } from './firebase.service';
+import { Injectable, inject } from '@angular/core';
 import { 
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signOut,
+  Auth, 
+  signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword, 
+  signOut, 
   User,
-  AuthError
+  GoogleAuthProvider,
+  signInWithPopup,
+  sendPasswordResetEmail,
+  updateProfile
 } from 'firebase/auth';
-import { Observable, from, throwError, BehaviorSubject } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
+import { Router } from '@angular/router';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { FIREBASE_AUTH } from '../../app.config';
+import { NotificationService } from './notification.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private user = new BehaviorSubject<User | null>(null);
+  private auth: Auth = inject(FIREBASE_AUTH);
+  private router = inject(Router);
+  private notificationService = inject(NotificationService);
+  private currentUserSubject = new BehaviorSubject<User | null>(null);
+  public currentUser$: Observable<User | null> = this.currentUserSubject.asObservable();
 
-  constructor(private firebaseService: FirebaseService) {
-    // Listen for auth state changes
-    this.firebaseService.getAuth().onAuthStateChanged(user => {
-      this.user.next(user);
+  constructor() {
+    this.auth.onAuthStateChanged((user) => {
+      this.currentUserSubject.next(user);
     });
   }
 
-  private handleAuthError(error: AuthError): string {
-    switch (error.code) {
+  async login(email: string, password: string): Promise<void> {
+    try {
+      await signInWithEmailAndPassword(this.auth, email, password);
+      this.notificationService.showSuccess('Successfully logged in!');
+      this.router.navigate(['/dashboard']);
+    } catch (error: any) {
+      console.error('Login error:', error);
+      this.notificationService.showError(this.getErrorMessage(error.code));
+      throw error;
+    }
+  }
+
+  async register(email: string, password: string, displayName: string): Promise<void> {
+    try {
+      const userCredential = await createUserWithEmailAndPassword(this.auth, email, password);
+      await updateProfile(userCredential.user, { displayName });
+      this.notificationService.showSuccess('Account created successfully!');
+      this.router.navigate(['/dashboard']);
+    } catch (error: any) {
+      console.error('Registration error:', error);
+      this.notificationService.showError(this.getErrorMessage(error.code));
+      throw error;
+    }
+  }
+
+  async loginWithGoogle(): Promise<void> {
+    try {
+      const provider = new GoogleAuthProvider();
+      await signInWithPopup(this.auth, provider);
+      this.notificationService.showSuccess('Successfully logged in with Google!');
+      this.router.navigate(['/dashboard']);
+    } catch (error: any) {
+      console.error('Google login error:', error);
+      this.notificationService.showError(this.getErrorMessage(error.code));
+      throw error;
+    }
+  }
+
+  async resetPassword(email: string): Promise<void> {
+    try {
+      await sendPasswordResetEmail(this.auth, email);
+      this.notificationService.showSuccess('Password reset email sent!');
+    } catch (error: any) {
+      console.error('Password reset error:', error);
+      this.notificationService.showError(this.getErrorMessage(error.code));
+      throw error;
+    }
+  }
+
+  async logout(): Promise<void> {
+    try {
+      await signOut(this.auth);
+      this.notificationService.showSuccess('Successfully logged out!');
+      this.router.navigate(['/login']);
+    } catch (error: any) {
+      console.error('Logout error:', error);
+      this.notificationService.showError(this.getErrorMessage(error.code));
+      throw error;
+    }
+  }
+
+  getCurrentUser(): User | null {
+    return this.currentUserSubject.value;
+  }
+
+  isAuthenticated(): boolean {
+    return !!this.currentUserSubject.value;
+  }
+
+  private getErrorMessage(errorCode: string): string {
+    switch (errorCode) {
       case 'auth/email-already-in-use':
         return 'This email is already registered.';
       case 'auth/invalid-email':
@@ -39,42 +116,14 @@ export class AuthService {
         return 'No account found with this email.';
       case 'auth/wrong-password':
         return 'Incorrect password.';
+      case 'auth/popup-closed-by-user':
+        return 'Login popup was closed before completing the sign in.';
+      case 'auth/cancelled-popup-request':
+        return 'Multiple popup requests were made. Please try again.';
+      case 'auth/popup-blocked':
+        return 'The popup was blocked by the browser. Please allow popups for this site.';
       default:
         return 'An error occurred. Please try again.';
     }
-  }
-
-  login(email: string, password: string): Observable<User> {
-    return from(signInWithEmailAndPassword(
-      this.firebaseService.getAuth(),
-      email,
-      password
-    )).pipe(
-      map(result => result.user),
-      catchError(error => throwError(() => this.handleAuthError(error)))
-    );
-  }
-
-  register(email: string, password: string): Observable<User> {
-    return from(createUserWithEmailAndPassword(
-      this.firebaseService.getAuth(),
-      email,
-      password
-    )).pipe(
-      map(result => result.user),
-      catchError(error => throwError(() => this.handleAuthError(error)))
-    );
-  }
-
-  logout(): Observable<void> {
-    return from(signOut(this.firebaseService.getAuth()));
-  }
-
-  isAuthenticated(): Observable<boolean> {
-    return this.user.pipe(map(user => !!user));
-  }
-
-  getCurrentUser(): Observable<User | null> {
-    return this.user.asObservable();
   }
 } 

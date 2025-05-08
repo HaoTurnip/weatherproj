@@ -7,6 +7,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { AuthService } from '../../core/services/auth.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { ThemeService } from '../../core/services/theme.service';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-header',
@@ -20,7 +23,7 @@ import { NotificationService } from '../../core/services/notification.service';
     MatMenuModule
   ],
   template: `
-    <mat-toolbar color="primary" class="flex justify-between">
+    <mat-toolbar [class.dark-toolbar]="isDarkMode$ | async" color="primary" class="flex justify-between">
       <div class="flex items-center">
         <span class="text-xl font-bold mr-4">Weather App</span>
         <nav class="hidden md:flex space-x-4">
@@ -33,7 +36,7 @@ import { NotificationService } from '../../core/services/notification.service';
       </div>
       <div class="flex items-center space-x-4">
         <button mat-icon-button (click)="toggleDarkMode()">
-          <mat-icon>{{ isDarkMode ? 'light_mode' : 'dark_mode' }}</mat-icon>
+          <mat-icon>{{ (isDarkMode$ | async) ? 'light_mode' : 'dark_mode' }}</mat-icon>
         </button>
         
         @if (isAuthenticated$ | async) {
@@ -52,32 +55,35 @@ import { NotificationService } from '../../core/services/notification.service';
       </div>
     </mat-toolbar>
   `,
-  styles: [],
+  styles: [`
+    .dark-toolbar {
+      background-color: #1a1a1a !important;
+      color: white !important;
+    }
+  `]
 })
 export class HeaderComponent {
-  isDarkMode = false;
-  isAuthenticated$;
+  isDarkMode$: Observable<boolean>;
+  isAuthenticated$: Observable<boolean>;
 
   constructor(
     private authService: AuthService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private themeService: ThemeService
   ) {
-    this.isAuthenticated$ = this.authService.isAuthenticated();
+    this.isDarkMode$ = this.themeService.isDarkMode$;
+    this.isAuthenticated$ = this.authService.currentUser$.pipe(
+      map(user => !!user)
+    );
   }
 
   toggleDarkMode() {
-    this.isDarkMode = !this.isDarkMode;
-    document.documentElement.classList.toggle('dark');
+    this.themeService.toggleTheme();
   }
 
   logout() {
-    this.authService.logout().subscribe({
-      next: () => {
-        this.notificationService.showSuccess('Successfully logged out!');
-      },
-      error: (error) => {
-        this.notificationService.showError(error.message);
-      }
+    this.authService.logout().catch(error => {
+      console.error('Logout error:', error);
     });
   }
 } 

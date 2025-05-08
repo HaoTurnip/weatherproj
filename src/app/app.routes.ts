@@ -1,12 +1,18 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/auth.guard';
 import { LoginComponent } from './auth/login/login.component';
+import { SignupComponent } from './auth/signup/signup.component';
 
 export const routes: Routes = [
   {
     path: 'login',
     component: LoginComponent,
     title: 'Login'
+  },
+  {
+    path: 'signup',
+    component: SignupComponent,
+    title: 'Sign Up'
   },
   {
     path: '',

@@ -5,6 +5,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { WeatherService, WeatherData } from '../../core/services/weather.service';
 import { TemperaturePipe } from '../../shared/pipes/temperature.pipe';
 import { WeatherConditionPipe } from '../../shared/pipes/weather-condition.pipe';
+import { ThemeService } from '../../core/services/theme.service';
 
 @Component({
   selector: 'app-home',
@@ -19,7 +20,7 @@ import { WeatherConditionPipe } from '../../shared/pipes/weather-condition.pipe'
   template: `
     <div class="container mx-auto px-4 py-8">
       <h1 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white">Current Weather</h1>
-      <mat-card class="bg-white dark:bg-gray-800">
+      <mat-card class="weather-card" [class.dark]="(isDarkMode$ | async)">
         <mat-card-content class="p-6">
           @if (loading) {
             <div class="flex justify-center items-center py-8">
@@ -31,19 +32,19 @@ import { WeatherConditionPipe } from '../../shared/pipes/weather-condition.pipe'
             </div>
           } @else if (weather) {
             <div class="text-center">
-              <h2 class="text-2xl font-semibold text-gray-900 dark:text-white mb-2">
+              <h2 class="text-2xl font-semibold mb-2">
                 {{ weather.location.name }}, {{ weather.location.region }}
               </h2>
               <div class="flex items-center justify-center mb-4">
                 <img [src]="weather.current.condition.icon" [alt]="weather.current.condition.text" class="w-24 h-24">
               </div>
-              <div class="text-4xl font-bold text-gray-900 dark:text-white mb-2">
+              <div class="text-4xl font-bold mb-2">
                 {{ weather.current.temp_f | temperature }}
               </div>
-              <div class="text-xl text-gray-600 dark:text-gray-400 mb-4">
+              <div class="text-xl mb-4">
                 {{ weather.current.condition.text | weatherCondition }}
               </div>
-              <div class="grid grid-cols-3 gap-4 text-sm text-gray-600 dark:text-gray-400">
+              <div class="grid grid-cols-3 gap-4 text-sm">
                 <div>
                   <div class="font-semibold">Humidity</div>
                   <div>{{ weather.current.humidity }}%</div>
@@ -63,14 +64,47 @@ import { WeatherConditionPipe } from '../../shared/pipes/weather-condition.pipe'
       </mat-card>
     </div>
   `,
-  styles: []
+  styles: [`
+    .weather-card {
+      background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+      color: white;
+      border-radius: 12px;
+      padding: 24px;
+      transition: all 0.3s ease;
+    }
+
+    .weather-card.dark {
+      background: linear-gradient(135deg, var(--dark-blue), var(--primary-blue));
+    }
+
+    h1 {
+      color: var(--text-primary);
+      transition: color 0.3s ease;
+    }
+
+    .dark h1 {
+      color: white;
+    }
+
+    .text-red-600 {
+      color: #dc2626;
+    }
+
+    .dark .text-red-600 {
+      color: #f87171;
+    }
+  `]
 })
 export class HomeComponent implements OnInit {
   weather: WeatherData | null = null;
   loading = true;
   error: string | null = null;
+  isDarkMode$ = this.themeService.isDarkMode$;
 
-  constructor(private weatherService: WeatherService) {}
+  constructor(
+    private weatherService: WeatherService,
+    private themeService: ThemeService
+  ) {}
 
   ngOnInit() {
     // For demo purposes, using a default location

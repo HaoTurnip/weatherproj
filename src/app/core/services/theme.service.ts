@@ -9,30 +9,40 @@ export class ThemeService {
   isDarkMode$ = this.isDarkMode.asObservable();
 
   constructor() {
-    this.isDarkMode.subscribe(isDark => {
-      if (isDark) {
-        document.documentElement.classList.add('dark');
-        localStorage.setItem('theme', 'dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-        localStorage.setItem('theme', 'light');
+    // Apply initial theme
+    this.applyTheme(this.getInitialTheme());
+
+    // Listen for system theme changes
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+      if (!localStorage.getItem('theme')) {
+        this.setTheme(e.matches);
       }
     });
   }
 
   private getInitialTheme(): boolean {
+    // Check localStorage first
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme) {
       return savedTheme === 'dark';
     }
+    // Then check system preference
     return window.matchMedia('(prefers-color-scheme: dark)').matches;
   }
 
   toggleTheme() {
-    this.isDarkMode.next(!this.isDarkMode.value);
+    const newTheme = !this.isDarkMode.value;
+    this.setTheme(newTheme);
   }
 
-  setTheme(isDark: boolean) {
+  private setTheme(isDark: boolean) {
     this.isDarkMode.next(isDark);
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    this.applyTheme(isDark);
+  }
+
+  private applyTheme(isDark: boolean) {
+    document.documentElement.classList.remove('light', 'dark');
+    document.documentElement.classList.add(isDark ? 'dark' : 'light');
   }
 } 

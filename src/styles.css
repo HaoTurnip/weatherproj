@@ -6,31 +6,203 @@
 @tailwind utilities;
 
 /* Global styles */
+:root {
+  --primary-blue: #1a73e8;
+  --secondary-blue: #4285f4;
+  --dark-blue: #0d47a1;
+  --light-blue: #e8f0fe;
+  --text-primary: #202124;
+  --text-secondary: #5f6368;
+  --background-light: #ffffff;
+  --background-dark: #202124;
+  --card-light: #ffffff;
+  --card-dark: #2d2d2d;
+  --border-light: #dadce0;
+  --border-dark: #3c4043;
+}
+
 html, body {
   height: 100%;
   margin: 0;
-  font-family: Roboto, "Helvetica Neue", sans-serif;
+  font-family: 'Roboto', sans-serif;
+  color: var(--text-primary);
 }
 
+/* Dark mode styles */
 .dark {
-  @apply bg-gray-900 text-white;
+  background-color: var(--background-dark);
+  color: #ffffff;
+}
+
+.dark .mat-mdc-card {
+  background-color: var(--card-dark);
+  border: 1px solid var(--border-dark);
+}
+
+.dark .mat-mdc-form-field {
+  color: #ffffff;
+}
+
+.dark .mat-mdc-form-field-label {
+  color: #9aa0a6;
+}
+
+.dark .mat-mdc-form-field-outline {
+  color: var(--border-dark);
+}
+
+.dark .mat-mdc-input-element {
+  color: #ffffff;
+}
+
+.dark .mat-mdc-button {
+  color: #ffffff;
+}
+
+.dark .mat-mdc-raised-button {
+  background-color: var(--primary-blue);
+  color: #ffffff;
+}
+
+.dark .mat-mdc-stroked-button {
+  border-color: var(--border-dark);
+  color: #ffffff;
+}
+
+.dark .mat-mdc-menu-panel {
+  background-color: var(--card-dark);
+}
+
+.dark .mat-mdc-menu-item {
+  color: #ffffff;
+}
+
+.dark .mat-mdc-menu-item:hover {
+  background-color: #3c4043;
+}
+
+/* Light mode styles */
+.light {
+  background-color: var(--background-light);
+  color: var(--text-primary);
+}
+
+.light .mat-mdc-card {
+  background-color: var(--card-light);
+  border: 1px solid var(--border-light);
+  box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+}
+
+.light .mat-mdc-form-field {
+  color: var(--text-primary);
+}
+
+.light .mat-mdc-form-field-label {
+  color: var(--text-secondary);
+}
+
+.light .mat-mdc-form-field-outline {
+  color: var(--border-light);
+}
+
+.light .mat-mdc-input-element {
+  color: var(--text-primary);
+}
+
+.light .mat-mdc-button {
+  color: var(--primary-blue);
+}
+
+.light .mat-mdc-raised-button {
+  background-color: var(--primary-blue);
+  color: #ffffff;
+}
+
+.light .mat-mdc-stroked-button {
+  border-color: var(--border-light);
+  color: var(--text-primary);
+}
+
+.light .mat-mdc-menu-panel {
+  background-color: var(--card-light);
+  box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+}
+
+.light .mat-mdc-menu-item {
+  color: var(--text-primary);
+}
+
+.light .mat-mdc-menu-item:hover {
+  background-color: var(--light-blue);
 }
 
 /* Material overrides */
 .mat-mdc-card {
-  @apply bg-white dark:bg-gray-800;
+  border-radius: 8px;
+  padding: 16px;
 }
 
 .mat-mdc-form-field {
-  @apply w-full;
+  width: 100%;
 }
 
 .mat-mdc-button {
-  @apply font-medium;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0.25px;
 }
 
 .mat-mdc-raised-button {
-  @apply font-medium;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0.25px;
+  border-radius: 4px;
 }
 
-/* Your custom styles below */
+/* AccuWeather specific styles */
+.weather-card {
+  background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+  color: white;
+  border-radius: 12px;
+  padding: 24px;
+  margin: 16px 0;
+}
+
+.weather-card.dark {
+  background: linear-gradient(135deg, var(--dark-blue), var(--primary-blue));
+}
+
+.temperature {
+  font-size: 48px;
+  font-weight: 300;
+  line-height: 1;
+}
+
+.weather-icon {
+  width: 64px;
+  height: 64px;
+  margin: 16px 0;
+}
+
+.weather-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.weather-detail-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.weather-detail-label {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.weather-detail-value {
+  font-size: 16px;
+  font-weight: 500;
+}
