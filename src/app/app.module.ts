@@ -34,7 +34,7 @@ import { ThemeService } from './core/services/theme.service';
 import { FirebaseService } from './core/services/firebase.service';
 
 // Routes
-import { AppRoutingModule } from './app-routing.module';
+import { routes } from './app.routes';
 
 @NgModule({
   imports: [
@@ -43,8 +43,7 @@ import { AppRoutingModule } from './app-routing.module';
     HttpClientModule,
     FormsModule,
     ReactiveFormsModule,
-    RouterModule,
-    AppRoutingModule,
+    RouterModule.forRoot(routes),
     MatToolbarModule,
     MatButtonModule,
     MatIconModule,

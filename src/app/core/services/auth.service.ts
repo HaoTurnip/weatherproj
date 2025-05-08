@@ -26,16 +26,19 @@ export class AuthService {
   public currentUser$: Observable<User | null> = this.currentUserSubject.asObservable();
 
   constructor() {
+    // Subscribe to auth state changes
     this.auth.onAuthStateChanged((user) => {
+      console.log('Auth state changed:', user);
       this.currentUserSubject.next(user);
     });
   }
 
   async login(email: string, password: string): Promise<void> {
     try {
-      await signInWithEmailAndPassword(this.auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(this.auth, email, password);
+      console.log('Login successful:', userCredential.user);
       this.notificationService.showSuccess('Successfully logged in!');
-      this.router.navigate(['/dashboard']);
+      this.router.navigate(['/']);
     } catch (error: any) {
       console.error('Login error:', error);
       this.notificationService.showError(this.getErrorMessage(error.code));
@@ -47,8 +50,9 @@ export class AuthService {
     try {
       const userCredential = await createUserWithEmailAndPassword(this.auth, email, password);
       await updateProfile(userCredential.user, { displayName });
+      console.log('Registration successful:', userCredential.user);
       this.notificationService.showSuccess('Account created successfully!');
-      this.router.navigate(['/dashboard']);
+      this.router.navigate(['/']);
     } catch (error: any) {
       console.error('Registration error:', error);
       this.notificationService.showError(this.getErrorMessage(error.code));
@@ -59,9 +63,10 @@ export class AuthService {
   async loginWithGoogle(): Promise<void> {
     try {
       const provider = new GoogleAuthProvider();
-      await signInWithPopup(this.auth, provider);
+      const userCredential = await signInWithPopup(this.auth, provider);
+      console.log('Google login successful:', userCredential.user);
       this.notificationService.showSuccess('Successfully logged in with Google!');
-      this.router.navigate(['/dashboard']);
+      this.router.navigate(['/']);
     } catch (error: any) {
       console.error('Google login error:', error);
       this.notificationService.showError(this.getErrorMessage(error.code));
@@ -83,6 +88,7 @@ export class AuthService {
   async logout(): Promise<void> {
     try {
       await signOut(this.auth);
+      console.log('Logout successful');
       this.notificationService.showSuccess('Successfully logged out!');
       this.router.navigate(['/login']);
     } catch (error: any) {

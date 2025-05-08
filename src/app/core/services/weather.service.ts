@@ -39,20 +39,20 @@ export interface ForecastData {
     precip_in: number;
   };
   forecast: {
-    forecastday: Array<{
-      date: string;
-      day: {
-        maxtemp_f: number;
-        mintemp_f: number;
-        condition: {
-          text: string;
-          icon: string;
-        };
-        daily_chance_of_rain: number;
-        avghumidity: number;
-        maxwind_mph: number;
+  forecastday: Array<{
+    date: string;
+    day: {
+      maxtemp_f: number;
+      mintemp_f: number;
+      condition: {
+        text: string;
+        icon: string;
       };
-    }>;
+      daily_chance_of_rain: number;
+      avghumidity: number;
+      maxwind_mph: number;
+    };
+  }>;
   };
 }
 

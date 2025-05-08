@@ -31,23 +31,23 @@ import { ThemeService } from '../../core/services/theme.service';
         <div class="flex flex-col gap-4 w-full md:w-auto">
           <div class="controls-wrapper">
             <mat-button-toggle-group [(ngModel)]="selectedOverlay" (change)="updateMap()" class="map-controls">
-              <mat-button-toggle value="temperature">
-                <mat-icon>thermostat</mat-icon>
+          <mat-button-toggle value="temperature">
+            <mat-icon>thermostat</mat-icon>
                 <span>Temperature</span>
-              </mat-button-toggle>
-              <mat-button-toggle value="precipitation">
-                <mat-icon>water_drop</mat-icon>
+          </mat-button-toggle>
+          <mat-button-toggle value="precipitation">
+            <mat-icon>water_drop</mat-icon>
                 <span>Precipitation</span>
-              </mat-button-toggle>
-              <mat-button-toggle value="wind">
-                <mat-icon>air</mat-icon>
+          </mat-button-toggle>
+          <mat-button-toggle value="wind">
+            <mat-icon>air</mat-icon>
                 <span>Wind</span>
-              </mat-button-toggle>
-              <mat-button-toggle value="clouds">
-                <mat-icon>cloud</mat-icon>
+          </mat-button-toggle>
+          <mat-button-toggle value="clouds">
+            <mat-icon>cloud</mat-icon>
                 <span>Clouds</span>
-              </mat-button-toggle>
-            </mat-button-toggle-group>
+          </mat-button-toggle>
+        </mat-button-toggle-group>
             <button mat-raised-button color="primary" (click)="updateMap()" [disabled]="loading" class="refresh-button">
               <mat-icon>refresh</mat-icon>
               <span>Refresh Map</span>
@@ -85,7 +85,7 @@ import { ThemeService } from '../../core/services/theme.service';
                 <mat-icon class="no-map-icon">map_off</mat-icon>
                 <h2 class="no-map-title">No Map Data</h2>
                 <p class="no-map-message">Select a map overlay to view weather data</p>
-              </div>
+            </div>
             }
           </div>
         </mat-card>
