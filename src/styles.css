@@ -1,0 +1,36 @@
+/* You can add global styles to this file, and also import other style files */
+
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Global styles */
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+.dark {
+  @apply bg-gray-900 text-white;
+}
+
+/* Material overrides */
+.mat-mdc-card {
+  @apply bg-white dark:bg-gray-800;
+}
+
+.mat-mdc-form-field {
+  @apply w-full;
+}
+
+.mat-mdc-button {
+  @apply font-medium;
+}
+
+.mat-mdc-raised-button {
+  @apply font-medium;
+}
+
+/* Your custom styles below */
