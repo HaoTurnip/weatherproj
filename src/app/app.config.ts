@@ -1,37 +1,36 @@
-import { ApplicationConfig, importProvidersFrom, InjectionToken } from '@angular/core';
+import { ApplicationConfig, importProvidersFrom } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { provideAnimations } from '@angular/platform-browser/animations';
 import { routes } from './app.routes';
-import { CoreModule } from './core/core.module';
-import { SharedModule } from './shared/shared.module';
-import { initializeApp } from 'firebase/app';
-import { getAuth, Auth } from 'firebase/auth';
-import { getAnalytics, Analytics } from 'firebase/analytics';
-import { firebaseConfig } from './firebase.config';
+import { provideAnimations } from '@angular/platform-browser/animations';
+import { provideHttpClient } from '@angular/common/http';
 
-export const FIREBASE_APP = new InjectionToken('FIREBASE_APP');
-export const FIREBASE_AUTH = new InjectionToken<Auth>('FIREBASE_AUTH');
-export const FIREBASE_ANALYTICS = new InjectionToken<Analytics>('FIREBASE_ANALYTICS');
+// Firebase Imports
+import { AngularFireModule } from '@angular/fire/compat';
+import { AngularFirestoreModule } from '@angular/fire/compat/firestore';
+import { AngularFireAuthModule } from '@angular/fire/compat/auth';
+import { environment } from '../environments/environment';
+
+// Services
+import { AuthService } from './core/services/auth.service';
+import { WeatherService } from './core/services/weather.service';
+import { ThemeService } from './core/services/theme.service';
+import { FirebaseService } from './core/services/firebase.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
     provideAnimations(),
+    provideHttpClient(),
+    // Firebase
     importProvidersFrom(
-      CoreModule,
-      SharedModule
+      AngularFireModule.initializeApp(environment.firebase),
+      AngularFirestoreModule,
+      AngularFireAuthModule
     ),
-    {
-      provide: FIREBASE_APP,
-      useValue: initializeApp(firebaseConfig)
-    },
-    {
-      provide: FIREBASE_AUTH,
-      useFactory: () => getAuth()
-    },
-    {
-      provide: FIREBASE_ANALYTICS,
-      useFactory: () => getAnalytics()
-    }
+    // Services
+    AuthService,
+    WeatherService,
+    ThemeService,
+    FirebaseService
   ]
 };

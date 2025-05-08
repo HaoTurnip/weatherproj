@@ -17,7 +17,13 @@ export const authGuard = () => {
         return true;
       } else {
         console.log('No user found, redirecting to login');
-        router.navigate(['/login']);
+        // Store the attempted URL for redirecting
+        const currentUrl = router.url;
+        if (currentUrl !== '/login' && currentUrl !== '/signup') {
+          router.navigate(['/login'], { 
+            queryParams: { returnUrl: currentUrl }
+          });
+        }
         return false;
       }
     })

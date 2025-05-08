@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
@@ -39,20 +39,20 @@ export interface ForecastData {
     precip_in: number;
   };
   forecast: {
-  forecastday: Array<{
-    date: string;
-    day: {
-      maxtemp_f: number;
-      mintemp_f: number;
-      condition: {
-        text: string;
-        icon: string;
+    forecastday: Array<{
+      date: string;
+      day: {
+        maxtemp_f: number;
+        mintemp_f: number;
+        condition: {
+          text: string;
+          icon: string;
+        };
+        daily_chance_of_rain: number;
+        avghumidity: number;
+        maxwind_mph: number;
       };
-      daily_chance_of_rain: number;
-      avghumidity: number;
-      maxwind_mph: number;
-    };
-  }>;
+    }>;
   };
 }
 
@@ -72,8 +72,7 @@ export interface WeatherAlert {
 export class WeatherService {
   private apiKey = environment.weatherApiKey;
   private baseUrl = environment.weatherApiBaseUrl;
-
-  constructor(private http: HttpClient) {}
+  private http = inject(HttpClient);
 
   getCurrentWeather(location: string): Observable<WeatherData> {
     return this.http.get<WeatherData>(`${this.baseUrl}/current.json`, {
@@ -122,7 +121,6 @@ export class WeatherService {
   }
 
   getMapOverlay(type: 'temperature' | 'precipitation' | 'wind' | 'clouds'): Observable<string> {
-    // Using WeatherAPI's map service with the correct endpoint
     const mapUrl = `${this.baseUrl}/maps/v1/weather/${type}/0/0/0.png?key=${this.apiKey}&lang=en`;
     return of(mapUrl).pipe(
       catchError(error => {

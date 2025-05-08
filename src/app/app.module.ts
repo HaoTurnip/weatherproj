@@ -5,6 +5,12 @@ import { HttpClientModule } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 
+// Firebase Imports
+import { AngularFireModule } from '@angular/fire/compat';
+import { AngularFirestoreModule } from '@angular/fire/compat/firestore';
+import { AngularFireAuthModule } from '@angular/fire/compat/auth';
+import { environment } from '../environments/environment';
+
 // Material Imports
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
@@ -16,6 +22,11 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
 
 // Components
 import { AppComponent } from './app.component';
@@ -26,6 +37,7 @@ import { MapComponent } from './features/map/map.component';
 import { AlertsComponent } from './features/alerts/alerts.component';
 import { SettingsComponent } from './features/settings/settings.component';
 import { LoginComponent } from './auth/login/login.component';
+import { NewAlertDialogComponent } from './features/alerts/new-alert-dialog.component';
 
 // Services
 import { AuthService } from './core/services/auth.service';
@@ -44,6 +56,11 @@ import { routes } from './app.routes';
     FormsModule,
     ReactiveFormsModule,
     RouterModule.forRoot(routes),
+    // Firebase
+    AngularFireModule.initializeApp(environment.firebase),
+    AngularFirestoreModule,
+    AngularFireAuthModule,
+    // Material
     MatToolbarModule,
     MatButtonModule,
     MatIconModule,
@@ -54,6 +71,11 @@ import { routes } from './app.routes';
     MatProgressSpinnerModule,
     MatSnackBarModule,
     MatSlideToggleModule,
+    MatDialogModule,
+    MatChipsModule,
+    MatTooltipModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
     // Standalone Components
     AppComponent,
     HeaderComponent,
@@ -62,14 +84,14 @@ import { routes } from './app.routes';
     MapComponent,
     AlertsComponent,
     SettingsComponent,
-    LoginComponent
+    LoginComponent,
+    NewAlertDialogComponent
   ],
   providers: [
     AuthService,
     WeatherService,
     ThemeService,
     FirebaseService
-  ],
-  bootstrap: [AppComponent]
+  ]
 })
 export class AppModule { } 

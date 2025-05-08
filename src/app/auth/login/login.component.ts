@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
 import { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -12,13 +12,14 @@ import { MatIconModule } from '@angular/material/icon';
 import { RouterLink } from '@angular/router';
 import { ThemeService } from '../../core/services/theme.service';
 import { Observable } from 'rxjs';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-login',
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule,
+    ReactiveFormsModule,
     MatButtonModule,
     MatInputModule,
     MatFormFieldModule,
@@ -34,16 +35,16 @@ import { Observable } from 'rxjs';
           <mat-card-title class="text-2xl font-bold mb-6">Welcome Back</mat-card-title>
         </mat-card-header>
         <mat-card-content>
-          <form (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
+          <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
             <mat-form-field appearance="outline">
               <mat-label>Email</mat-label>
-              <input matInput type="email" [(ngModel)]="email" name="email" required>
+              <input matInput type="email" formControlName="email" required>
             </mat-form-field>
             <mat-form-field appearance="outline">
               <mat-label>Password</mat-label>
-              <input matInput type="password" [(ngModel)]="password" name="password" required>
+              <input matInput type="password" formControlName="password" required>
             </mat-form-field>
-            <button mat-raised-button color="primary" type="submit" class="w-full">
+            <button mat-raised-button color="primary" type="submit" class="w-full" [disabled]="!form.valid">
               Sign in
             </button>
           </form>
@@ -141,23 +142,33 @@ import { Observable } from 'rxjs';
   `]
 })
 export class LoginComponent {
-  email: string = '';
-  password: string = '';
+  form: FormGroup;
   error: string = '';
   isDarkMode$ = this.themeService.isDarkMode$;
 
   constructor(
     private authService: AuthService,
     private router: Router,
-    private themeService: ThemeService
-  ) {}
+    private themeService: ThemeService,
+    private snackBar: MatSnackBar,
+    private fb: FormBuilder
+  ) {
+    this.form = this.fb.group({
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required, Validators.minLength(6)]]
+    });
+  }
 
   async onSubmit() {
-    try {
-      await this.authService.login(this.email, this.password);
-      this.router.navigate(['/']);
-    } catch (error: any) {
-      this.error = error.message;
+    if (this.form.valid) {
+      const { email, password } = this.form.value;
+      try {
+        await this.authService.signIn(email, password);
+        this.router.navigate(['/']);
+      } catch (error) {
+        console.error('Error signing in:', error);
+        this.snackBar.open('Failed to sign in', 'Close', { duration: 3000 });
+      }
     }
   }
 
@@ -171,12 +182,13 @@ export class LoginComponent {
   }
 
   async resetPassword() {
-    if (!this.email) {
+    const email = this.form.get('email')?.value;
+    if (!email) {
       this.error = 'Please enter your email address first';
       return;
     }
     try {
-      await this.authService.resetPassword(this.email);
+      await this.authService.resetPassword(email);
       this.error = ''; // Clear any previous errors
     } catch (error: any) {
       this.error = error.message;

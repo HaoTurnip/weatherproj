@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -230,12 +230,9 @@ export class ForecastComponent implements OnInit {
   forecast: ForecastData | null = null;
   loading = false;
   error: string | null = null;
+  private weatherService = inject(WeatherService);
+  private themeService = inject(ThemeService);
   isDarkMode$ = this.themeService.isDarkMode$;
-
-  constructor(
-    private weatherService: WeatherService,
-    private themeService: ThemeService
-  ) {}
 
   ngOnInit() {
     this.loadForecast();
@@ -250,10 +247,10 @@ export class ForecastComponent implements OnInit {
         this.forecast = data;
         this.loading = false;
       },
-      error: (error) => {
+      error: (err) => {
         this.error = 'Failed to load forecast data. Please try again later.';
         this.loading = false;
-        console.error('Forecast error:', error);
+        console.error('Error loading forecast:', err);
       }
     });
   }
