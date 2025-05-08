@@ -19,6 +19,8 @@ interface User {
 export class AuthService {
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   currentUser$ = this.currentUserSubject.asObservable();
+  private isLoggedInSubject = new BehaviorSubject<boolean>(false);
+  isLoggedIn$: Observable<boolean> = this.isLoggedInSubject.asObservable();
 
   constructor(
     private afAuth: AngularFireAuth,
@@ -34,10 +36,18 @@ export class AuthService {
           displayName: user.displayName || '',
           photoURL: user.photoURL || ''
         });
+        this.isLoggedInSubject.next(true);
       } else {
         this.currentUserSubject.next(null);
+        this.isLoggedInSubject.next(false);
       }
     });
+
+    // Check if user is already logged in (e.g., from localStorage)
+    const savedAuth = localStorage.getItem('isLoggedIn');
+    if (savedAuth) {
+      this.isLoggedInSubject.next(true);
+    }
   }
 
   async signIn(email: string, password: string): Promise<User> {
@@ -124,10 +134,8 @@ export class AuthService {
     return this.currentUserSubject.value;
   }
 
-  isAuthenticated(): Observable<boolean> {
-    return this.currentUser$.pipe(
-      map(user => !!user)
-    );
+  isAuthenticated(): boolean {
+    return this.isLoggedInSubject.value;
   }
 
   async resetPassword(email: string): Promise<void> {
@@ -163,5 +171,31 @@ export class AuthService {
       default:
         return 'An error occurred. Please try again.';
     }
+  }
+
+  login(email: string, password: string): Promise<void> {
+    // Here you would typically make an API call to your backend
+    // For now, we'll just simulate a successful login
+    return new Promise((resolve) => {
+      localStorage.setItem('isLoggedIn', 'true');
+      this.isLoggedInSubject.next(true);
+      resolve();
+    });
+  }
+
+  signup(email: string, password: string): Promise<void> {
+    // Here you would typically make an API call to your backend
+    // For now, we'll just simulate a successful signup
+    return new Promise((resolve) => {
+      localStorage.setItem('isLoggedIn', 'true');
+      this.isLoggedInSubject.next(true);
+      resolve();
+    });
+  }
+
+  logout(): void {
+    localStorage.removeItem('isLoggedIn');
+    this.isLoggedInSubject.next(false);
+    this.router.navigate(['/login']);
   }
 } 

@@ -7,6 +7,7 @@
 
 /* Global styles */
 :root {
+  /* Light theme colors */
   --primary-blue: #1a73e8;
   --secondary-blue: #4285f4;
   --dark-blue: #0d47a1;
@@ -14,195 +15,325 @@
   --text-primary: #202124;
   --text-secondary: #5f6368;
   --background-light: #ffffff;
-  --background-dark: #202124;
   --card-light: #ffffff;
-  --card-dark: #2d2d2d;
   --border-light: #dadce0;
+  --shadow-light: rgba(60, 64, 67, 0.3);
+  
+  /* Dark theme colors */
+  --background-dark: #202124;
+  --card-dark: #2d2d2d;
   --border-dark: #3c4043;
+  --shadow-dark: rgba(0, 0, 0, 0.3);
+  
+  /* Common colors */
+  --success: #34a853;
+  --warning: #fbbc05;
+  --error: #ea4335;
+  --info: #4285f4;
 }
 
+/* Base styles */
 html, body {
   height: 100%;
   margin: 0;
   font-family: 'Roboto', sans-serif;
   color: var(--text-primary);
+  background-color: var(--background-light);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Dark mode styles */
-.dark {
+/* Dark theme */
+.dark-theme {
   background-color: var(--background-dark);
   color: #ffffff;
 }
 
-.dark .mat-mdc-card {
+.dark-theme .mat-mdc-card {
   background-color: var(--card-dark);
   border: 1px solid var(--border-dark);
+  box-shadow: 0 1px 2px 0 var(--shadow-dark);
 }
 
-.dark .mat-mdc-form-field {
+.dark-theme .mat-mdc-form-field {
   color: #ffffff;
 }
 
-.dark .mat-mdc-form-field-label {
+.dark-theme .mat-mdc-form-field-label {
   color: #9aa0a6;
 }
 
-.dark .mat-mdc-form-field-outline {
+.dark-theme .mat-mdc-form-field-outline {
   color: var(--border-dark);
 }
 
-.dark .mat-mdc-input-element {
+.dark-theme .mat-mdc-input-element {
   color: #ffffff;
 }
 
-.dark .mat-mdc-button {
+.dark-theme .mat-mdc-button {
   color: #ffffff;
 }
 
-.dark .mat-mdc-raised-button {
+.dark-theme .mat-mdc-raised-button {
   background-color: var(--primary-blue);
   color: #ffffff;
 }
 
-.dark .mat-mdc-stroked-button {
+.dark-theme .mat-mdc-stroked-button {
   border-color: var(--border-dark);
   color: #ffffff;
 }
 
-.dark .mat-mdc-menu-panel {
-  background-color: var(--card-dark);
-}
-
-.dark .mat-mdc-menu-item {
-  color: #ffffff;
-}
-
-.dark .mat-mdc-menu-item:hover {
-  background-color: #3c4043;
-}
-
-/* Light mode styles */
-.light {
+/* Light theme */
+.light-theme {
   background-color: var(--background-light);
   color: var(--text-primary);
 }
 
-.light .mat-mdc-card {
+.light-theme .mat-mdc-card {
   background-color: var(--card-light);
   border: 1px solid var(--border-light);
-  box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+  box-shadow: 0 1px 2px 0 var(--shadow-light);
 }
 
-.light .mat-mdc-form-field {
-  color: var(--text-primary);
+/* App specific styles */
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
-.light .mat-mdc-form-field-label {
-  color: var(--text-secondary);
+.header {
+  background-color: var(--background-light);
+  border-bottom: 1px solid var(--border-light);
+  padding: 1rem;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
-.light .mat-mdc-form-field-outline {
-  color: var(--border-light);
+.dark-theme .header {
+  background-color: var(--background-dark);
+  border-bottom-color: var(--border-dark);
 }
 
-.light .mat-mdc-input-element {
-  color: var(--text-primary);
+.header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
 }
 
-.light .mat-mdc-button {
-  color: var(--primary-blue);
+.logo-img {
+  height: 40px;
 }
 
-.light .mat-mdc-raised-button {
-  background-color: var(--primary-blue);
-  color: #ffffff;
+.search-field {
+  flex: 1;
+  max-width: 600px;
 }
 
-.light .mat-mdc-stroked-button {
-  border-color: var(--border-light);
-  color: var(--text-primary);
-}
-
-.light .mat-mdc-menu-panel {
-  background-color: var(--card-light);
-  box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
-}
-
-.light .mat-mdc-menu-item {
-  color: var(--text-primary);
-}
-
-.light .mat-mdc-menu-item:hover {
-  background-color: var(--light-blue);
-}
-
-/* Material overrides */
-.mat-mdc-card {
-  border-radius: 8px;
-  padding: 16px;
-}
-
-.mat-mdc-form-field {
+.main-content {
+  flex: 1;
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
   width: 100%;
 }
 
-.mat-mdc-button {
-  font-weight: 500;
-  text-transform: none;
-  letter-spacing: 0.25px;
-}
-
-.mat-mdc-raised-button {
-  font-weight: 500;
-  text-transform: none;
-  letter-spacing: 0.25px;
-  border-radius: 4px;
-}
-
-/* AccuWeather specific styles */
+/* Weather card styles */
 .weather-card {
   background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
   color: white;
   border-radius: 12px;
   padding: 24px;
-  margin: 16px 0;
+  margin-bottom: 24px;
 }
 
-.weather-card.dark {
-  background: linear-gradient(135deg, var(--dark-blue), var(--primary-blue));
+.weather-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.location h1 {
+  font-size: 2rem;
+  margin: 0;
+  font-weight: 500;
+}
+
+.date-time {
+  color: rgba(255, 255, 255, 0.8);
+  margin: 4px 0 0;
 }
 
 .temperature {
-  font-size: 48px;
+  text-align: right;
+}
+
+.temp-value {
+  font-size: 3.5rem;
   font-weight: 300;
   line-height: 1;
 }
 
-.weather-icon {
-  width: 64px;
-  height: 64px;
-  margin: 16px 0;
+.temp-unit {
+  font-size: 1.5rem;
+  vertical-align: super;
 }
 
 .weather-details {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 16px;
-  margin-top: 16px;
-}
-
-.weather-detail-item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 24px;
 }
 
-.weather-detail-label {
-  font-size: 14px;
+.weather-icon img {
+  width: 64px;
+  height: 64px;
+}
+
+.weather-info {
+  flex: 1;
+}
+
+.weather-condition {
+  font-size: 1.5rem;
+  margin: 0;
+}
+
+.feels-like {
   color: rgba(255, 255, 255, 0.8);
+  margin: 4px 0 0;
 }
 
-.weather-detail-value {
-  font-size: 16px;
+/* Hourly forecast styles */
+.hourly-forecast {
+  margin-bottom: 32px;
+}
+
+.hourly-forecast h2 {
+  font-size: 1.5rem;
+  margin-bottom: 16px;
   font-weight: 500;
+}
+
+.hourly-scroll {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding-bottom: 16px;
+}
+
+.hourly-item {
+  flex: 0 0 auto;
+  text-align: center;
+  padding: 16px;
+  border-radius: 8px;
+  background-color: var(--card-light);
+  min-width: 100px;
+  transition: background-color 0.3s ease;
+}
+
+.dark-theme .hourly-item {
+  background-color: var(--card-dark);
+}
+
+.hourly-item img {
+  width: 32px;
+  height: 32px;
+  margin: 8px 0;
+}
+
+.hourly-item .hour {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.hourly-item .temp {
+  font-size: 1.25rem;
+  font-weight: 500;
+  margin: 4px 0 0;
+}
+
+/* Daily forecast styles */
+.daily-forecast h2 {
+  font-size: 1.5rem;
+  margin-bottom: 16px;
+  font-weight: 500;
+}
+
+.daily-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.forecast-card {
+  padding: 16px;
+  text-align: center;
+}
+
+.forecast-card .day {
+  font-size: 1.125rem;
+  font-weight: 500;
+  margin: 0 0 8px;
+}
+
+.forecast-card img {
+  width: 48px;
+  height: 48px;
+  margin: 8px 0;
+}
+
+.temp-range {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.temp-range .high {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.temp-range .low {
+  color: var(--text-secondary);
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .header-content {
+    flex-wrap: wrap;
+  }
+  
+  .search-field {
+    order: 3;
+    max-width: none;
+    width: 100%;
+  }
+  
+  .main-content {
+    padding: 1rem;
+  }
+  
+  .weather-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .temperature {
+    text-align: left;
+    margin-top: 16px;
+  }
+  
+  .daily-grid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
 }

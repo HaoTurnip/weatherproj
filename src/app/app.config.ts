@@ -19,8 +19,8 @@ import { FirebaseService } from './core/services/firebase.service';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
-    provideAnimations(),
     provideHttpClient(),
+    provideAnimations(),
     // Firebase
     importProvidersFrom(
       AngularFireModule.initializeApp(environment.firebase),

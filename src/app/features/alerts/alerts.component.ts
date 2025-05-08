@@ -311,24 +311,34 @@ export class AlertsComponent implements OnInit {
 
   alerts: Alert[] = [];
   loading = true;
+  error: string | null = null;
   isLoggedIn = false;
 
   constructor() {
-    // Subscribe to authentication state
-    this.authService.isAuthenticated().subscribe(isAuthenticated => {
-      this.isLoggedIn = isAuthenticated;
-    });
+    this.authService.isLoggedIn$.subscribe(
+      (isLoggedIn: boolean) => this.isLoggedIn = isLoggedIn
+    );
   }
 
-  async ngOnInit() {
-    try {
-      this.alerts = await this.firebaseService.getAlerts();
-    } catch (error) {
+  ngOnInit() {
+    this.loadAlerts();
+  }
+
+  loadAlerts() {
+    this.loading = true;
+    this.error = null;
+
+    this.firebaseService.getAlerts().then(
+      (alerts: Alert[]) => {
+        this.alerts = alerts;
+        this.loading = false;
+      }
+    ).catch((error: string) => {
       console.error('Error loading alerts:', error);
       this.snackBar.open('Failed to load alerts', 'Close', { duration: 3000 });
-    } finally {
       this.loading = false;
-    }
+      this.error = error;
+    });
   }
 
   openNewAlertDialog() {
@@ -339,7 +349,7 @@ export class AlertsComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(async (result) => {
       if (result) {
-        this.alerts = await this.firebaseService.getAlerts();
+        this.loadAlerts();
       }
     });
   }
@@ -366,7 +376,7 @@ export class AlertsComponent implements OnInit {
 
     try {
       await this.firebaseService.voteOnAlert(alertId, voteType);
-      this.alerts = await this.firebaseService.getAlerts();
+      this.loadAlerts();
     } catch (error) {
       console.error('Error voting on alert:', error);
       this.snackBar.open('Failed to vote on alert', 'Close', {
