@@ -337,3 +337,94 @@ html, body {
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   }
 }
+
+/* AccuWeather-inspired dark mode styles for the whole app */
+body.dark-theme, body.dark-theme .home-container, body.dark-theme .forecast-container {
+  background: #181c23 !important;
+  color: #f4f6fb !important;
+}
+
+body.dark-theme .weather-card,
+body.dark-theme .forecast-card,
+body.dark-theme .mat-mdc-card {
+  background: #232a34 !important;
+  color: #f4f6fb !important;
+  border: 1px solid #232a34 !important;
+  box-shadow: 0 6px 24px rgba(30, 64, 175, 0.10);
+}
+
+body.dark-theme .location h1,
+body.dark-theme .forecast-card .day {
+  color: #90caf9 !important;
+}
+
+body.dark-theme .date-time {
+  color: #b0bec5 !important;
+}
+
+body.dark-theme .weather-info p,
+body.dark-theme .details {
+  color: #cfd8dc !important;
+}
+
+body.dark-theme .weather-condition {
+  color: #90caf9 !important;
+}
+
+body.dark-theme .weather-alerts h3 {
+  color: #90caf9 !important;
+}
+
+body.dark-theme .alert-item {
+  background: #2c3440 !important;
+  border-left: 4px solid #f47c20 !important;
+}
+
+body.dark-theme .alert-content p {
+  color: #cfd8dc !important;
+}
+
+body.dark-theme .hourly-forecast {
+  background: #232a34 !important;
+  color: #f4f6fb !important;
+}
+
+body.dark-theme .hourly-forecast h2 {
+  color: #90caf9 !important;
+}
+
+body.dark-theme .hourly-item {
+  background: #2c3440 !important;
+  color: #90caf9 !important;
+}
+
+body.dark-theme .hourly-item .hour {
+  color: #b0bec5 !important;
+}
+
+/* Light mode card and container colors (AccuWeather style) */
+.weather-card, .forecast-card, .mat-mdc-card {
+  background: #f9fbfd !important;
+  color: #1a237e !important;
+  border-radius: 18px;
+  box-shadow: 0 6px 24px rgba(30, 64, 175, 0.08);
+  border: 1px solid #e3eaf2 !important;
+}
+
+.home-container, .forecast-container {
+  background: #f4f6fb !important;
+}
+
+.location h1, .forecast-card .day {
+  color: #1a237e !important;
+}
+
+.weather-info p, .details {
+  color: #333 !important;
+}
+
+.weather-condition {
+  color: #1976d2 !important;
+}
+
+/* Add more dark-theme rules for other components as needed */

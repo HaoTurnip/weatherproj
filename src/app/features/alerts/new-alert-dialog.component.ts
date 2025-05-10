@@ -115,7 +115,7 @@ import { Alert } from '../../core/models/alert.model';
     .alert-form {
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 20px;
     }
 
     .alert-form.loading {
@@ -127,13 +127,55 @@ import { Alert } from '../../core/models/alert.model';
       width: 100%;
     }
 
+    mat-form-field.full-width {
+      border-radius: 12px;
+      background: #f8f9fa;
+      box-shadow: 0 1px 4px rgba(60,60,60,0.04);
+      padding: 2px 8px 2px 8px;
+      margin-bottom: 0;
+    }
+
+    mat-form-field.full-width textarea {
+      min-height: 100px;
+      border-radius: 8px;
+      background: #fff;
+      resize: vertical;
+    }
+
+    mat-form-field.full-width input,
+    mat-form-field.full-width textarea {
+      font-size: 1.05rem;
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    mat-form-field.full-width.mat-form-field-appearance-outline .mat-form-field-outline {
+      border-radius: 12px;
+      border-width: 2px;
+      border-color: #bdbdbd;
+    }
+
+    mat-form-field.full-width.mat-form-field-appearance-outline.mat-focused .mat-form-field-outline {
+      border-color: #1976d2;
+      box-shadow: 0 0 0 2px #1976d220;
+    }
+
+    mat-select {
+      border-radius: 8px;
+      background: #fff;
+    }
+
     .date-range {
       display: flex;
       gap: 16px;
     }
-
-    mat-form-field {
+    .date-range mat-form-field {
       flex: 1;
+      border-radius: 12px;
+      background: #f8f9fa;
+      box-shadow: 0 1px 4px rgba(60,60,60,0.04);
+      padding: 2px 8px 2px 8px;
     }
 
     .loading-overlay {

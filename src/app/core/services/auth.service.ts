@@ -1,53 +1,49 @@
 import { Injectable } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { Router } from '@angular/router';
+import { BehaviorSubject, Observable, from } from 'rxjs';
+import { map, switchMap, take } from 'rxjs/operators';
+import { User, UserSettings } from '../models/user.model';
 import { NotificationService } from './notification.service';
 import { GoogleAuthProvider } from 'firebase/auth';
-
-interface User {
-  uid: string;
-  email: string;
-  displayName: string;
-  photoURL: string;
-}
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private currentUserSubject = new BehaviorSubject<User | null>(null);
-  currentUser$ = this.currentUserSubject.asObservable();
-  private isLoggedInSubject = new BehaviorSubject<boolean>(false);
-  isLoggedIn$: Observable<boolean> = this.isLoggedInSubject.asObservable();
+  private userSubject = new BehaviorSubject<User | null>(null);
+  user$ = this.userSubject.asObservable();
+  userSettings$: Observable<UserSettings | null> = this.user$.pipe(
+    switchMap(user => {
+      if (user) {
+        return this.firestore.doc<User>(`users/${user.uid}`).valueChanges().pipe(
+          map(userData => userData?.settings || null)
+        );
+      }
+      return from([null]);
+    })
+  );
 
   constructor(
     private afAuth: AngularFireAuth,
+    private firestore: AngularFirestore,
     private router: Router,
     private notificationService: NotificationService
   ) {
-    // Subscribe to auth state changes
-    this.afAuth.authState.subscribe(user => {
-      if (user) {
-        this.currentUserSubject.next({
-          uid: user.uid,
-          email: user.email || '',
-          displayName: user.displayName || '',
-          photoURL: user.photoURL || ''
-        });
-        this.isLoggedInSubject.next(true);
-      } else {
-        this.currentUserSubject.next(null);
-        this.isLoggedInSubject.next(false);
-      }
+    this.afAuth.authState.pipe(
+      switchMap(user => {
+        if (user) {
+          return this.firestore.doc<User>(`users/${user.uid}`).valueChanges().pipe(
+            map(userData => userData || null)
+          );
+        } else {
+          return from([null]);
+        }
+      })
+    ).subscribe(user => {
+      this.userSubject.next(user);
     });
-
-    // Check if user is already logged in (e.g., from localStorage)
-    const savedAuth = localStorage.getItem('isLoggedIn');
-    if (savedAuth) {
-      this.isLoggedInSubject.next(true);
-    }
   }
 
   async signIn(email: string, password: string): Promise<User> {
@@ -71,27 +67,18 @@ export class AuthService {
     }
   }
 
-  async signUp(email: string, password: string, displayName: string): Promise<User> {
+  async signUp(email: string, password: string, displayName: string): Promise<void> {
     try {
-      const result = await this.afAuth.createUserWithEmailAndPassword(email, password);
-      if (!result.user) {
-        throw new Error('No user returned from sign up');
+      const userCredential = await this.afAuth.createUserWithEmailAndPassword(email, password);
+      if (userCredential.user) {
+        await this.createUserProfile(userCredential.user.uid, {
+          uid: userCredential.user.uid,
+          email,
+          displayName,
+          photoURL: userCredential.user.photoURL || undefined
+        });
       }
-      
-      // Update the user's display name
-      await result.user.updateProfile({ displayName });
-      
-      this.notificationService.showSuccess('Account created successfully!');
-      this.router.navigate(['/']);
-      return {
-        uid: result.user.uid,
-        email: result.user.email || '',
-        displayName: result.user.displayName || '',
-        photoURL: result.user.photoURL || ''
-      };
-    } catch (error: any) {
-      console.error('Error signing up:', error);
-      this.notificationService.showError(this.getErrorMessage(error.code));
+    } catch (error) {
       throw error;
     }
   }
@@ -108,21 +95,18 @@ export class AuthService {
     }
   }
 
-  async loginWithGoogle(): Promise<User> {
+  async loginWithGoogle(): Promise<void> {
     try {
       const provider = new GoogleAuthProvider();
-      const result = await this.afAuth.signInWithPopup(provider);
-      if (!result.user) {
-        throw new Error('No user returned from Google sign in');
+      const userCredential = await this.afAuth.signInWithPopup(provider);
+      if (userCredential.user) {
+        await this.createUserProfile(userCredential.user.uid, {
+          uid: userCredential.user.uid,
+          email: userCredential.user.email!,
+          displayName: userCredential.user.displayName || userCredential.user.email!,
+          photoURL: userCredential.user.photoURL || undefined
+        });
       }
-      this.notificationService.showSuccess('Successfully logged in with Google!');
-      this.router.navigate(['/']);
-      return {
-        uid: result.user.uid,
-        email: result.user.email || '',
-        displayName: result.user.displayName || '',
-        photoURL: result.user.photoURL || ''
-      };
     } catch (error: any) {
       console.error('Google login error:', error);
       this.notificationService.showError(this.getErrorMessage(error.code));
@@ -130,12 +114,35 @@ export class AuthService {
     }
   }
 
+  private async createUserProfile(uid: string, userData: User): Promise<void> {
+    const defaultSettings: UserSettings = {
+      theme: 'light',
+      temperatureUnit: 'celsius',
+      notifications: true,
+      language: 'en'
+    };
+
+    await this.firestore.collection('users').doc(uid).set({
+      ...userData,
+      settings: defaultSettings
+    });
+  }
+
+  async updateUserSettings(settings: Partial<UserSettings>): Promise<void> {
+    const user = await this.user$.pipe(take(1)).toPromise();
+    if (user) {
+      await this.firestore.collection('users').doc(user.uid).update({
+        settings: settings
+      });
+    }
+  }
+
   getCurrentUser(): User | null {
-    return this.currentUserSubject.value;
+    return this.userSubject.value;
   }
 
   isAuthenticated(): boolean {
-    return this.isLoggedInSubject.value;
+    return !!this.userSubject.value;
   }
 
   async resetPassword(email: string): Promise<void> {
@@ -178,7 +185,12 @@ export class AuthService {
     // For now, we'll just simulate a successful login
     return new Promise((resolve) => {
       localStorage.setItem('isLoggedIn', 'true');
-      this.isLoggedInSubject.next(true);
+      this.userSubject.next({
+        uid: '',
+        email,
+        displayName: '',
+        photoURL: ''
+      });
       resolve();
     });
   }
@@ -188,14 +200,23 @@ export class AuthService {
     // For now, we'll just simulate a successful signup
     return new Promise((resolve) => {
       localStorage.setItem('isLoggedIn', 'true');
-      this.isLoggedInSubject.next(true);
+      this.userSubject.next({
+        uid: '',
+        email,
+        displayName: '',
+        photoURL: ''
+      });
       resolve();
     });
   }
 
   logout(): void {
     localStorage.removeItem('isLoggedIn');
-    this.isLoggedInSubject.next(false);
+    this.userSubject.next(null);
     this.router.navigate(['/login']);
+  }
+
+  isLoggedIn(): boolean {
+    return !!this.userSubject.value;
   }
 } 

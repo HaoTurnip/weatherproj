@@ -3,6 +3,7 @@ import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { Alert } from '../models/alert.model';
 import { Observable, from, map } from 'rxjs';
 import firebase from 'firebase/compat/app';
+import { collection, query, where, orderBy, getDocs, addDoc } from '@angular/fire/firestore';
 
 interface AlertData {
   title: string;
@@ -18,6 +19,24 @@ interface AlertData {
   comments: any[];
   createdAt: firebase.firestore.Timestamp;
   updatedAt: firebase.firestore.Timestamp;
+}
+
+interface UserActivity {
+  id: string;
+  userId: string;
+  type: string;
+  description: string;
+  timestamp: Date;
+}
+
+interface Comment {
+  id: string;
+  alertId: string;
+  userId: string;
+  userName: string;
+  content: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 @Injectable({
@@ -256,6 +275,198 @@ export class FirebaseService {
     } catch (error) {
       console.error('Error deleting alert:', error);
       throw new Error('Failed to delete alert');
+    }
+  }
+
+  async getUserAlerts(userId: string): Promise<Alert[]> {
+    const snapshot = await this.firestore
+      .collection<Alert>('alerts', ref => 
+        ref.where('userId', '==', userId)
+           .orderBy('startTime', 'desc')
+      )
+      .get()
+      .toPromise();
+
+    return snapshot?.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    } as Alert)) || [];
+  }
+
+  async getUserActivity(userId: string): Promise<UserActivity[]> {
+    const snapshot = await this.firestore
+      .collection<UserActivity>('user_activity', ref => 
+        ref.where('userId', '==', userId)
+           .orderBy('timestamp', 'desc')
+           .limit(50)
+      )
+      .get()
+      .toPromise();
+
+    return snapshot?.docs.map(doc => {
+      const data = doc.data();
+      return {
+        ...data,
+        id: doc.id
+      } as UserActivity;
+    }) || [];
+  }
+
+  async addUserActivity(activity: Omit<UserActivity, 'id'>): Promise<void> {
+    await this.firestore.collection('user_activity').add(activity);
+  }
+
+  async addComment(alertId: string, comment: Omit<Comment, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
+    try {
+      const commentData = {
+        ...comment,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      };
+
+      const docRef = await this.firestore
+        .collection('alerts')
+        .doc(alertId)
+        .collection('comments')
+        .add(commentData);
+
+      // Add activity record
+      await this.addUserActivity({
+        userId: comment.userId,
+        type: 'comment_added',
+        description: `Added a comment to alert: ${alertId}`,
+        timestamp: new Date()
+      });
+
+      return docRef.id;
+    } catch (error) {
+      console.error('Error adding comment:', error);
+      throw new Error('Failed to add comment');
+    }
+  }
+
+  async getComments(alertId: string): Promise<Comment[]> {
+    try {
+      // Check if user is authenticated
+      const user = await this.firestore.firestore.app.auth().currentUser;
+      if (!user) {
+        throw new Error('User must be authenticated to view comments');
+      }
+
+      const snapshot = await this.firestore
+        .collection('alerts')
+        .doc(alertId)
+        .collection('comments', ref => ref.orderBy('createdAt', 'desc'))
+        .get()
+        .toPromise();
+
+      return snapshot?.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        createdAt: doc.data()?.['createdAt']?.toDate() || new Date(),
+        updatedAt: doc.data()?.['updatedAt']?.toDate() || new Date()
+      } as Comment)) || [];
+    } catch (error) {
+      console.error('Error getting comments:', error);
+      throw new Error('Failed to get comments: ' + (error instanceof Error ? error.message : 'Unknown error'));
+    }
+  }
+
+  async updateComment(alertId: string, commentId: string, content: string): Promise<void> {
+    try {
+      await this.firestore
+        .collection('alerts')
+        .doc(alertId)
+        .collection('comments')
+        .doc(commentId)
+        .update({
+          content,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+      // Add activity record
+      const comment = await this.getComment(alertId, commentId);
+      if (comment) {
+        await this.addUserActivity({
+          userId: comment.userId,
+          type: 'comment_edited',
+          description: `Edited a comment on alert: ${alertId}`,
+          timestamp: new Date()
+        });
+      }
+    } catch (error) {
+      console.error('Error updating comment:', error);
+      throw new Error('Failed to update comment');
+    }
+  }
+
+  async deleteComment(alertId: string, commentId: string): Promise<void> {
+    try {
+      const comment = await this.getComment(alertId, commentId);
+      await this.firestore
+        .collection('alerts')
+        .doc(alertId)
+        .collection('comments')
+        .doc(commentId)
+        .delete();
+
+      // Add activity record
+      if (comment) {
+        await this.addUserActivity({
+          userId: comment.userId,
+          type: 'comment_deleted',
+          description: `Deleted a comment from alert: ${alertId}`,
+          timestamp: new Date()
+        });
+      }
+    } catch (error) {
+      console.error('Error deleting comment:', error);
+      throw new Error('Failed to delete comment');
+    }
+  }
+
+  private async getComment(alertId: string, commentId: string): Promise<Comment | null> {
+    try {
+      const doc = await this.firestore
+        .collection('alerts')
+        .doc(alertId)
+        .collection('comments')
+        .doc(commentId)
+        .get()
+        .toPromise();
+
+      if (!doc?.exists) {
+        return null;
+      }
+
+      return {
+        id: doc.id,
+        ...doc.data(),
+        createdAt: doc.data()?.['createdAt']?.toDate() || new Date(),
+        updatedAt: doc.data()?.['updatedAt']?.toDate() || new Date()
+      } as Comment;
+    } catch (error) {
+      console.error('Error getting comment:', error);
+      return null;
+    }
+  }
+
+  async getUserSettings(userId: string): Promise<any> {
+    try {
+      const doc = await this.firestore.collection('users').doc(userId).collection('settings').doc('preferences').get().toPromise();
+      return doc?.data() || null;
+    } catch (error) {
+      console.error('Error getting user settings:', error);
+      throw new Error('Failed to load user settings');
+    }
+  }
+
+  async setUserSettings(userId: string, settings: any): Promise<void> {
+    try {
+      await this.firestore.collection('users').doc(userId).collection('settings').doc('preferences').set(settings, { merge: true });
+    } catch (error) {
+      console.error('Error saving user settings:', error);
+      throw new Error('Failed to save user settings');
     }
   }
 } 

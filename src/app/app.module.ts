@@ -30,7 +30,7 @@ import { MatNativeDateModule } from '@angular/material/core';
 
 // Components
 import { AppComponent } from './app.component';
-import { HeaderComponent } from './core/components/header/header.component';
+import { HeaderComponent } from './shared/components/header/header.component';
 import { HomeComponent } from './features/home/home.component';
 import { ForecastComponent } from './features/forecast/forecast.component';
 import { MapComponent } from './features/map/map.component';

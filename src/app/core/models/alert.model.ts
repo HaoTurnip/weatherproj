@@ -20,4 +20,17 @@ export interface Comment {
   userId: string;
   text: string;
   createdAt: Date;
+}
+
+export interface WeatherAlert {
+  id: string;
+  title: string;
+  type: string;
+  severity: 'Extreme' | 'Severe' | 'Moderate' | 'Minor';
+  description: string;
+  startTime: Date;
+  endTime: Date;
+  area: string;
+  source: string;
+  isActive: boolean;
 } 

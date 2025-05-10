@@ -1,13 +1,13 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { WeatherService, ForecastData } from '../../core/services/weather.service';
-import { TemperaturePipe } from '../../shared/pipes/temperature.pipe';
-import { WeatherConditionPipe } from '../../shared/pipes/weather-condition.pipe';
-import { ThemeService } from '../../core/services/theme.service';
+import { MatButtonModule } from '@angular/material/button';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { WeatherService } from '../../core/services/weather.service';
+import { ForecastData } from '../../core/models/weather.model';
+import { SkeletonLoaderComponent } from '../../shared/components/skeleton-loader/skeleton-loader.component';
+import { CityService } from '../../services/city.service';
 
 @Component({
   selector: 'app-forecast',
@@ -15,242 +15,208 @@ import { ThemeService } from '../../core/services/theme.service';
   imports: [
     CommonModule,
     MatCardModule,
-    MatProgressSpinnerModule,
-    MatButtonModule,
     MatIconModule,
-    TemperaturePipe,
-    WeatherConditionPipe
+    MatButtonModule,
+    MatProgressSpinnerModule,
+    SkeletonLoaderComponent
   ],
   template: `
-    <div class="container mx-auto px-4 py-8">
-      <div class="flex justify-between items-center mb-8">
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">5-Day Forecast</h1>
-        <button mat-raised-button color="primary" (click)="loadForecast()" [disabled]="loading">
-          <mat-icon>refresh</mat-icon>
-          Refresh
-        </button>
-      </div>
-
+    <div class="forecast-container">
       @if (loading) {
-        <div class="flex justify-center items-center h-64">
-          <mat-spinner class="text-primary"></mat-spinner>
+        <div class="skeleton-container">
+          <app-skeleton-loader [lines]="[100, 80, 60]" />
         </div>
       } @else if (error) {
-        <div class="error-card" [class.dark]="(isDarkMode$ | async)">
+        <div class="error-container">
           <mat-icon class="error-icon">error_outline</mat-icon>
-          <div class="error-content">
-            <strong class="error-title">Error!</strong>
-            <span class="error-message">{{ error }}</span>
-          </div>
-        </div>
-      } @else if (forecast) {
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-          @for (day of forecast.forecast.forecastday; track day.date) {
-            <mat-card class="weather-card" [class.dark]="(isDarkMode$ | async)">
-              <div class="text-center">
-                <h3 class="text-lg font-semibold mb-2">
-                  {{ day.date | date:'EEE, MMM d' }}
-                </h3>
-                <img [src]="day.day.condition.icon" [alt]="day.day.condition.text" class="weather-icon">
-                <p class="mb-2">
-                  {{ day.day.condition.text | weatherCondition }}
-                </p>
-                <div class="weather-details">
-                  <div class="weather-detail-item">
-                    <span class="weather-detail-label">High:</span>
-                    <span>{{ day.day.maxtemp_f | temperature }}</span>
-                  </div>
-                  <div class="weather-detail-item">
-                    <span class="weather-detail-label">Low:</span>
-                    <span>{{ day.day.mintemp_f | temperature }}</span>
-                  </div>
-                  <div class="weather-detail-item">
-                    <span class="weather-detail-label">Rain:</span>
-                    <span>{{ day.day.daily_chance_of_rain }}%</span>
-                  </div>
-                  <div class="weather-detail-item">
-                    <span class="weather-detail-label">Humidity:</span>
-                    <span>{{ day.day.avghumidity }}%</span>
-                  </div>
-                  <div class="weather-detail-item">
-                    <span class="weather-detail-label">Wind:</span>
-                    <span>{{ day.day.maxwind_mph }} mph</span>
-                  </div>
-                </div>
-              </div>
-            </mat-card>
-          }
-        </div>
-      } @else {
-        <div class="no-data" [class.dark]="(isDarkMode$ | async)">
-          <mat-icon class="no-data-icon">cloud_off</mat-icon>
-          <h2 class="no-data-title">No Forecast Data</h2>
-          <p class="no-data-message">Unable to load forecast data. Please try again.</p>
-          <button mat-raised-button color="primary" (click)="loadForecast()" class="mt-4">
-            <mat-icon>refresh</mat-icon>
+          <h2>Error Loading Forecast</h2>
+          <p>{{ error }}</p>
+          <button mat-raised-button color="primary" (click)="loadForecast()">
             Retry
           </button>
+        </div>
+      } @else {
+        <div class="forecast-grid">
+          @if (forecast?.daily) {
+            @for (day of forecast!.daily; track day.day) {
+              <mat-card class="forecast-card">
+                <mat-card-header>
+                  <mat-card-title>{{ day.day }}</mat-card-title>
+                  <!-- You may want to format the date differently -->
+                </mat-card-header>
+                <mat-card-content>
+                  <div class="forecast-info">
+                    <img [src]="day.icon" [alt]="day.condition">
+                    <div class="temperature">
+                      <span class="max">{{ day.high }}°C</span>
+                      <span class="min">{{ day.low }}°C</span>
+                    </div>
+                    <div class="details">
+                      <div>Condition: {{ day.condition }}</div>
+                    </div>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+            }
+          }
         </div>
       }
     </div>
   `,
   styles: [`
-    .weather-card {
-      background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
-      color: white;
-      border-radius: 12px;
+    .forecast-container {
       padding: 24px;
-      transition: all 0.3s ease;
+      max-width: 1200px;
+      margin: 0 auto;
     }
 
-    .weather-card.dark {
-      background: linear-gradient(135deg, var(--dark-blue), var(--primary-blue));
-    }
-
-    .weather-icon {
-      width: 64px;
-      height: 64px;
-      margin: 16px 0;
-    }
-
-    .weather-details {
+    .forecast-grid {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
-      margin-top: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 28px;
+      margin-top: 24px;
     }
 
-    .weather-detail-item {
+    .forecast-card {
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 4px 20px rgba(30, 64, 175, 0.10);
+      transition: transform 0.2s, box-shadow 0.3s, background 0.3s, color 0.3s;
+      color: #222;
+      font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
+    }
+
+    .forecast-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 8px 24px rgba(30, 64, 175, 0.16);
+    }
+
+    .dark-theme .forecast-card {
+      background: #232a34;
+      color: #f4f6fb;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+    }
+
+    .forecast-info {
+      text-align: center;
+      padding: 20px 8px 8px 8px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 8px;
-      background-color: rgba(255, 255, 255, 0.1);
-      border-radius: 8px;
+      gap: 10px;
     }
 
-    .weather-detail-label {
-      font-size: 0.875rem;
-      opacity: 0.8;
+    .forecast-info img {
+      width: 64px;
+      height: 64px;
+      margin: 12px 0 8px 0;
     }
 
-    .weather-detail-item span:last-child {
-      font-weight: 500;
+    .temperature {
+      display: flex;
+      justify-content: center;
+      gap: 18px;
+      margin: 10px 0 8px 0;
+    }
+
+    .max {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #e67e22;
+      letter-spacing: 0.5px;
+    }
+
+    .min {
+      font-size: 1.3rem;
+      color: #1976d2;
+      font-weight: 600;
+      align-self: flex-end;
+    }
+
+    .dark-theme .max {
+      color: #ffb74d;
+    }
+    .dark-theme .min {
+      color: #90caf9;
+    }
+
+    .details {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      color: #666;
+      font-size: 1.05rem;
       margin-top: 4px;
     }
-
-    h1 {
-      color: var(--text-primary);
-      transition: color 0.3s ease;
+    .dark-theme .details {
+      color: #cfd8dc;
     }
 
-    .dark h1 {
-      color: white;
-    }
-
-    .error-card {
-      background: linear-gradient(135deg, #fee2e2, #fecaca);
-      color: #991b1b;
-      border-radius: 12px;
-      padding: 16px;
+    .details div {
       display: flex;
       align-items: center;
-      gap: 16px;
-      margin-bottom: 16px;
+      gap: 0.5em;
+      font-weight: 500;
     }
 
-    .error-card.dark {
-      background: linear-gradient(135deg, #7f1d1d, #991b1b);
-      color: #fecaca;
+    .error-container {
+      text-align: center;
+      padding: 48px;
+      background: #f5f5f5;
+      border-radius: 12px;
+      color: #222;
+    }
+    .dark-theme .error-container {
+      background: #232a34;
+      color: #f4f6fb;
     }
 
     .error-icon {
-      font-size: 24px;
-      width: 24px;
-      height: 24px;
-    }
-
-    .error-title {
-      font-weight: 600;
-      display: block;
-      margin-bottom: 4px;
-    }
-
-    .error-message {
-      font-size: 0.875rem;
-    }
-
-    .no-data {
-      background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
-      color: white;
-      border-radius: 12px;
-      padding: 48px 24px;
-      text-align: center;
-      transition: all 0.3s ease;
-    }
-
-    .no-data.dark {
-      background: linear-gradient(135deg, var(--dark-blue), var(--primary-blue));
-    }
-
-    .no-data-icon {
       font-size: 48px;
       width: 48px;
       height: 48px;
+      color: #f44336;
       margin-bottom: 16px;
-      opacity: 0.8;
     }
 
-    .no-data-title {
-      font-size: 1.5rem;
-      font-weight: 600;
-      margin-bottom: 8px;
-    }
-
-    .no-data-message {
-      opacity: 0.8;
-    }
-
-    .text-primary {
-      color: var(--primary-blue);
-    }
-
-    .dark .text-primary {
-      color: var(--light-blue);
-    }
-
-    button[mat-raised-button] {
-      display: flex;
-      align-items: center;
-      gap: 8px;
+    @media (max-width: 768px) {
+      .forecast-grid {
+        grid-template-columns: 1fr;
+      }
+      .forecast-container {
+        padding: 12px;
+      }
     }
   `]
 })
 export class ForecastComponent implements OnInit {
   forecast: ForecastData | null = null;
-  loading = false;
+  loading = true;
   error: string | null = null;
-  private weatherService = inject(WeatherService);
-  private themeService = inject(ThemeService);
-  isDarkMode$ = this.themeService.isDarkMode$;
+  cityName = 'New York';
+
+  constructor(private weatherService: WeatherService, private cityService: CityService) {}
 
   ngOnInit() {
-    this.loadForecast();
+    this.cityService.city$.subscribe(city => {
+      this.cityName = city;
+      this.loadForecast();
+    });
   }
 
   loadForecast() {
     this.loading = true;
     this.error = null;
 
-    this.weatherService.getForecast('London').subscribe({
-      next: (data) => {
+    this.weatherService.getForecast(this.cityName).subscribe({
+      next: (data: ForecastData) => {
         this.forecast = data;
         this.loading = false;
       },
-      error: (err) => {
-        this.error = 'Failed to load forecast data. Please try again later.';
+      error: (error: any) => {
+        console.error('Error loading forecast:', error);
+        this.error = 'Failed to load forecast data. Please try again.';
         this.loading = false;
-        console.error('Error loading forecast:', err);
       }
     });
   }

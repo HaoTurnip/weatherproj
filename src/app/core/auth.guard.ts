@@ -7,7 +7,7 @@ export const authGuard = () => {
   const router = inject(Router);
   const authService = inject(AuthService);
 
-  return authService.currentUser$.pipe(
+  return authService.user$.pipe(
     take(1),
     tap(user => {
       console.log('Auth guard checking user:', user);

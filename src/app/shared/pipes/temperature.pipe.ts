@@ -5,10 +5,11 @@ import { Pipe, PipeTransform } from '@angular/core';
   standalone: true
 })
 export class TemperaturePipe implements PipeTransform {
-  transform(value: number): string {
-    if (value === null || value === undefined) {
-      return '';
+  transform(value: number, unit: 'celsius' | 'fahrenheit' = 'celsius'): string {
+    if (unit === 'fahrenheit') {
+      const fahrenheit = (value * 9/5) + 32;
+      return `${fahrenheit.toFixed(1)}°F`;
     }
-    return `${Math.round(value)}°F`;
+    return `${value.toFixed(1)}°C`;
   }
 } 

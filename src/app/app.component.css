@@ -91,13 +91,11 @@
 /* Main content styles */
 .main-content {
   flex: 1;
-  padding: 2rem;
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  gap: 1.5rem;
-  max-width: 1400px;
+  padding: 20px;
+  max-width: 1200px;
   margin: 0 auto;
   width: 100%;
+  box-sizing: border-box;
 }
 
 /* Weather card styles */
@@ -111,6 +109,7 @@
   padding: 1.75rem;
   box-shadow: 0 4px 20px rgba(0,0,0,0.1);
   height: 100%;
+  margin-bottom: 20px;
 }
 
 .weather-header {
@@ -331,13 +330,13 @@
 /* Loading and error states */
 .loading-container,
 .error-container {
-  grid-column: span 12;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   min-height: 400px;
   text-align: center;
+  width: 100%;
 }
 
 .error-icon {
@@ -502,6 +501,10 @@
   .hourly-item .temp {
     margin-left: 0;
   }
+
+  .main-content {
+    padding: 20px;
+  }
 }
 
 @media (max-width: 768px) {
@@ -527,7 +530,7 @@
   }
 
   .main-content {
-    padding: 1rem;
+    padding: 16px;
     gap: 1rem;
   }
 

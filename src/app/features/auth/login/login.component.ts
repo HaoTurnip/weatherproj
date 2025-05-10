@@ -96,67 +96,78 @@ import { MatSnackBar } from '@angular/material/snack-bar';
       align-items: center;
       min-height: 100vh;
       padding: 2rem;
-      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      background: #f4f6fb;
+      transition: background 0.3s;
     }
-
+    .dark-theme .login-container {
+      background: #181c23;
+    }
     .login-card {
       max-width: 420px;
       width: 100%;
       padding: 2.5rem;
-      border-radius: 16px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+      border-radius: 18px;
+      box-shadow: 0 4px 20px rgba(30, 64, 175, 0.10);
+      background: #fff;
+      color: #222;
+      font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
+      transition: background 0.3s, color 0.3s;
     }
-
+    .dark-theme .login-card {
+      background: #232a34;
+      color: #f4f6fb;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+    }
     mat-card-header {
       margin-bottom: 2rem;
       text-align: center;
     }
-
     mat-card-title {
       font-size: 2rem;
-      color: #1a237e;
+      color: #1976d2;
       margin-bottom: 0.75rem;
-      font-weight: 500;
+      font-weight: 700;
+      letter-spacing: 0.5px;
     }
-
+    .dark-theme mat-card-title {
+      color: #90caf9;
+    }
     mat-card-subtitle {
       color: #666;
       font-size: 1.1rem;
+      font-weight: 500;
     }
-
+    .dark-theme mat-card-subtitle {
+      color: #b0bec5;
+    }
     .full-width {
       width: 100%;
       margin-bottom: 1.5rem;
     }
-
     mat-form-field {
       margin-bottom: 1.25rem;
     }
-
     .forgot-password {
       text-align: right;
       margin: -0.75rem 0 1.5rem;
     }
-
     .forgot-password a {
-      color: #1a73e8;
+      color: #1976d2;
       text-decoration: none;
       font-size: 0.9rem;
       font-weight: 500;
       transition: color 0.2s ease;
     }
-
     .forgot-password a:hover {
       color: #1557b0;
     }
-
     .divider {
       margin: 2rem 0;
       text-align: center;
-      color: #666;
+      color: #888;
       font-size: 0.9rem;
+      font-weight: 500;
     }
-
     .divider::before,
     .divider::after {
       content: '';
@@ -167,71 +178,70 @@ import { MatSnackBar } from '@angular/material/snack-bar';
       vertical-align: middle;
       margin: 0 1rem;
     }
-
+    .dark-theme .divider {
+      color: #b0bec5;
+    }
+    .dark-theme .divider::before,
+    .dark-theme .divider::after {
+      background: #333a4d;
+    }
     .google-btn {
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 0.75rem;
       padding: 0.75rem 1.5rem;
-      border: 1px solid #e0e0e0;
-      background: white;
-      border-radius: 8px;
-      transition: background-color 0.2s ease;
+      border: 1.5px solid #e0e0e0;
+      background: #fff;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: background-color 0.2s, border 0.2s;
     }
-
     .google-btn:hover {
-      background-color: #f5f5f5;
+      background-color: #f4f6fb;
+      border-color: #1976d2;
     }
-
+    .dark-theme .google-btn {
+      background: #232a34;
+      color: #90caf9;
+      border: 1.5px solid #333a4d;
+    }
+    .dark-theme .google-btn:hover {
+      background: #181c23;
+      border-color: #90caf9;
+    }
     .google-logo {
       width: 20px;
       height: 20px;
     }
-
     .signup-link {
       text-align: center;
       margin-top: 2rem;
-      color: #666;
+      color: #888;
       font-size: 0.95rem;
     }
-
     .signup-link a {
-      color: #1a73e8;
+      color: #1976d2;
+      font-weight: 600;
       text-decoration: none;
-      font-weight: 500;
-      margin-left: 0.5rem;
-      transition: color 0.2s ease;
+      transition: color 0.2s;
     }
-
     .signup-link a:hover {
       color: #1557b0;
     }
-
-    button[type="submit"] {
-      padding: 0.75rem;
-      font-size: 1rem;
-      font-weight: 500;
-      border-radius: 8px;
-      margin-top: 1rem;
+    .dark-theme .signup-link {
+      color: #b0bec5;
     }
-
-    @media (max-width: 480px) {
-      .login-container {
-        padding: 1rem;
-      }
-
+    .dark-theme .signup-link a {
+      color: #90caf9;
+    }
+    @media (max-width: 600px) {
       .login-card {
-        padding: 1.5rem;
+        padding: 1.2rem;
       }
-
       mat-card-title {
-        font-size: 1.75rem;
-      }
-
-      .divider::before,
-      .divider::after {
-        width: 30%;
+        font-size: 1.3rem;
       }
     }
   `]

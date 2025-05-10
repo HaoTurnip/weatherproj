@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { LoginComponent } from './auth/login/login.component';
 import { SignupComponent } from './auth/signup/signup.component';
 import { SettingsComponent } from './features/settings/settings.component';
+import { NotFoundComponent } from './core/pages/not-found/not-found.component';
 
 export const routes: Routes = [
   {
@@ -32,13 +33,19 @@ export const routes: Routes = [
   },
   {
     path: 'alerts',
-    loadChildren: () => import('./features/alerts/alerts.routes').then(m => m.ALERTS_ROUTES),
-    title: 'Alerts'
+    loadChildren: () => import('./features/alerts/alerts.module').then(m => m.AlertsModule)
   },
   {
     path: 'settings',
     component: SettingsComponent,
     title: 'Settings'
   },
-  { path: '**', redirectTo: '' },
+  {
+    path: 'profile',
+    loadChildren: () => import('./features/profile/profile.module').then(m => m.ProfileModule)
+  },
+  {
+    path: '**',
+    component: NotFoundComponent
+  }
 ];

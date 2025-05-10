@@ -1,132 +1,165 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
-import { environment } from '../../../environments/environment';
-
-export interface WeatherData {
-  location: {
-    name: string;
-    region: string;
-    country: string;
-  };
-  current: {
-    temp_f: number;
-    condition: {
-      text: string;
-      icon: string;
-    };
-    humidity: number;
-    wind_mph: number;
-    precip_in: number;
-  };
-}
-
-export interface ForecastData {
-  location: {
-    name: string;
-    region: string;
-    country: string;
-  };
-  current: {
-    temp_f: number;
-    condition: {
-      text: string;
-      icon: string;
-    };
-    humidity: number;
-    wind_mph: number;
-    precip_in: number;
-  };
-  forecast: {
-    forecastday: Array<{
-      date: string;
-      day: {
-        maxtemp_f: number;
-        mintemp_f: number;
-        condition: {
-          text: string;
-          icon: string;
-        };
-        daily_chance_of_rain: number;
-        avghumidity: number;
-        maxwind_mph: number;
-      };
-    }>;
-  };
-}
-
-export interface WeatherAlert {
-  id: string;
-  type: string;
-  severity: 'minor' | 'moderate' | 'severe' | 'extreme';
-  title: string;
-  description: string;
-  startTime: Date;
-  endTime: Date;
-}
+import { Observable, map, forkJoin, of } from 'rxjs';
+import { WeatherData, HourlyForecast, DailyForecast } from '../models/weather.model';
+import { ForecastData } from '../models/weather.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class WeatherService {
-  private apiKey = environment.weatherApiKey;
-  private baseUrl = environment.weatherApiBaseUrl;
-  private http = inject(HttpClient);
+  private baseUrl = 'https://api.open-meteo.com/v1';
 
-  getCurrentWeather(location: string): Observable<WeatherData> {
-    return this.http.get<WeatherData>(`${this.baseUrl}/current.json`, {
-      params: {
-        key: this.apiKey,
-        q: location,
-        aqi: 'no'
-      }
-    }).pipe(
-      catchError(error => {
-        console.error('Error fetching current weather:', error);
-        throw new Error('Failed to fetch current weather data');
+  constructor(private http: HttpClient) {}
+
+  getCurrentWeather(latitude: number, longitude: number): Observable<WeatherData> {
+    const url = `${this.baseUrl}/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,wind_direction_10m,precipitation,weather_code,uv_index`;
+    
+    return this.http.get(url).pipe(
+      map((response: any) => {
+        const current = response.current;
+        return {
+          temperature: current.temperature_2m,
+          condition: this.getWeatherCondition(current.weather_code),
+          icon: this.getWeatherIcon(current.weather_code),
+          humidity: current.relative_humidity_2m,
+          windSpeed: current.wind_speed_10m,
+          windDirection: this.getWindDirection(current.wind_direction_10m),
+          precipitation: current.precipitation,
+          uvIndex: current.uv_index
+        };
       })
     );
   }
 
-  getForecast(location: string): Observable<ForecastData> {
-    return this.http.get<ForecastData>(`${this.baseUrl}/forecast.json`, {
-      params: {
-        key: this.apiKey,
-        q: location,
-        days: '5',
-        aqi: 'no',
-        alerts: 'yes'
-      }
-    }).pipe(
-      catchError(error => {
-        console.error('Error fetching forecast:', error);
-        throw new Error('Failed to fetch forecast data');
+  getHourlyForecast(latitude: number, longitude: number): Observable<HourlyForecast[]> {
+    const url = `${this.baseUrl}/forecast?latitude=${latitude}&longitude=${longitude}&hourly=temperature_2m,weather_code`;
+    
+    return this.http.get(url).pipe(
+      map((response: any) => {
+        const hourly = response.hourly;
+        return hourly.time.map((time: string, index: number) => ({
+          time: new Date(time).toLocaleTimeString([], { hour: 'numeric' }),
+          temperature: hourly.temperature_2m[index],
+          condition: this.getWeatherCondition(hourly.weather_code[index]),
+          icon: this.getWeatherIcon(hourly.weather_code[index])
+        })).slice(0, 24);
       })
     );
   }
 
-  getAlerts(location: string): Observable<any> {
-    return this.http.get(`${this.baseUrl}/alerts.json`, {
-      params: {
-        key: this.apiKey,
-        q: location
-      }
-    }).pipe(
-      catchError(error => {
-        console.error('Error fetching alerts:', error);
-        throw new Error('Failed to fetch weather alerts');
+  getDailyForecast(latitude: number, longitude: number): Observable<DailyForecast[]> {
+    const url = `${this.baseUrl}/forecast?latitude=${latitude}&longitude=${longitude}&daily=weather_code,temperature_2m_max,temperature_2m_min`;
+    
+    return this.http.get(url).pipe(
+      map((response: any) => {
+        const daily = response.daily;
+        return daily.time.map((time: string, index: number) => ({
+          day: new Date(time).toLocaleDateString([], { weekday: 'short' }),
+          high: daily.temperature_2m_max[index],
+          low: daily.temperature_2m_min[index],
+          condition: this.getWeatherCondition(daily.weather_code[index]),
+          icon: this.getWeatherIcon(daily.weather_code[index])
+        })).slice(0, 5);
       })
     );
   }
 
-  getMapOverlay(type: 'temperature' | 'precipitation' | 'wind' | 'clouds'): Observable<string> {
-    const mapUrl = `${this.baseUrl}/maps/v1/weather/${type}/0/0/0.png?key=${this.apiKey}&lang=en`;
-    return of(mapUrl).pipe(
-      catchError(error => {
-        console.error('Error fetching map overlay:', error);
-        throw new Error('Failed to load weather map');
-      })
+  private getWeatherCondition(code: number): string {
+    const conditions: { [key: number]: string } = {
+      0: 'Clear',
+      1: 'Mainly Clear',
+      2: 'Partly Cloudy',
+      3: 'Overcast',
+      45: 'Foggy',
+      48: 'Depositing Rime Fog',
+      51: 'Light Drizzle',
+      53: 'Moderate Drizzle',
+      55: 'Dense Drizzle',
+      61: 'Slight Rain',
+      63: 'Moderate Rain',
+      65: 'Heavy Rain',
+      71: 'Slight Snow',
+      73: 'Moderate Snow',
+      75: 'Heavy Snow',
+      77: 'Snow Grains',
+      80: 'Slight Rain Showers',
+      81: 'Moderate Rain Showers',
+      82: 'Violent Rain Showers',
+      85: 'Slight Snow Showers',
+      86: 'Heavy Snow Showers',
+      95: 'Thunderstorm',
+      96: 'Thunderstorm with Slight Hail',
+      99: 'Thunderstorm with Heavy Hail'
+    };
+    return conditions[code] || 'Unknown';
+  }
+
+  private getWeatherIcon(code: number): string {
+    const icons: { [key: number]: string } = {
+      0: 'assets/weather-icons/clear.svg',
+      1: 'assets/weather-icons/clear.svg',
+      2: 'assets/weather-icons/partly-cloudy.svg',
+      3: 'assets/weather-icons/cloudy.svg',
+      45: 'assets/weather-icons/cloudy.svg',
+      48: 'assets/weather-icons/cloudy.svg',
+      51: 'assets/weather-icons/rain.svg',
+      53: 'assets/weather-icons/rain.svg',
+      55: 'assets/weather-icons/rain.svg',
+      61: 'assets/weather-icons/rain.svg',
+      63: 'assets/weather-icons/rain.svg',
+      65: 'assets/weather-icons/rain.svg',
+      71: 'assets/weather-icons/rain.svg',
+      73: 'assets/weather-icons/rain.svg',
+      75: 'assets/weather-icons/rain.svg',
+      77: 'assets/weather-icons/rain.svg',
+      80: 'assets/weather-icons/rain.svg',
+      81: 'assets/weather-icons/rain.svg',
+      82: 'assets/weather-icons/rain.svg',
+      85: 'assets/weather-icons/rain.svg',
+      86: 'assets/weather-icons/rain.svg',
+      95: 'assets/weather-icons/rain.svg',
+      96: 'assets/weather-icons/rain.svg',
+      99: 'assets/weather-icons/rain.svg'
+    };
+    return icons[code] || 'assets/weather-icons/clear.svg';
+  }
+
+  private getWindDirection(degrees: number): string {
+    const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+    const index = Math.round(degrees / 45) % 8;
+    return directions[index];
+  }
+
+  getForecast(cityName: string): Observable<ForecastData> {
+    // Stub: map cityName to coordinates
+    const coords = this.getCoordinatesForCity(cityName);
+    return forkJoin({
+      hourly: this.getHourlyForecast(coords.lat, coords.lon),
+      daily: this.getDailyForecast(coords.lat, coords.lon)
+    }).pipe(
+      map(({ hourly, daily }) => ({
+        cityName,
+        hourly,
+        daily
+      }))
     );
+  }
+
+  private getCoordinatesForCity(cityName: string): { lat: number; lon: number } {
+    // Replace with real geocoding
+    const cityCoords: { [key: string]: { lat: number; lon: number } } = {
+      'Cairo': { lat: 30.0444, lon: 31.2357 },
+      'London': { lat: 51.5074, lon: -0.1278 },
+      'New York': { lat: 40.7128, lon: -74.0060 },
+      'Paris': { lat: 48.8566, lon: 2.3522 },
+      'Tokyo': { lat: 35.6895, lon: 139.6917 }
+    };
+    return cityCoords[cityName] || cityCoords['Cairo'];
+  }
+
+  getMapOverlay(overlayType: string): Observable<any> {
+    // Stub: return dummy overlay
+    return of({ overlayType, url: 'https://example.com/overlay.png' });
   }
 } 

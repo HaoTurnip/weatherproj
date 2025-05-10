@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -13,6 +13,10 @@ import { FirebaseService } from '../../core/services/firebase.service';
 import { AuthService } from '../../core/services/auth.service';
 import { NewAlertDialogComponent } from './new-alert-dialog.component';
 import { Alert } from '../../core/models/alert.model';
+import { ConfirmDialogComponent } from '../../core/components/confirm-dialog/confirm-dialog.component';
+import { FilterBarComponent } from '../../shared/components/filter-bar/filter-bar.component';
+import { SkeletonLoaderComponent } from '../../shared/components/skeleton-loader/skeleton-loader.component';
+import { CommentCardComponent } from '../../shared/components/comment-card/comment-card.component';
 
 @Component({
   selector: 'app-alerts',
@@ -24,7 +28,10 @@ import { Alert } from '../../core/models/alert.model';
     MatCardModule,
     MatChipsModule,
     MatTooltipModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    FilterBarComponent,
+    SkeletonLoaderComponent,
+    CommentCardComponent
   ],
   template: `
     <div class="alerts-container">
@@ -33,7 +40,7 @@ import { Alert } from '../../core/models/alert.model';
           <h1>Weather Alerts</h1>
           <p class="subtitle">Stay informed about severe weather conditions in your area</p>
         </div>
-        @if (isLoggedIn) {
+        @if (authService.isLoggedIn()) {
           <button mat-raised-button color="primary" (click)="openNewAlertDialog()" class="create-alert-btn">
             <mat-icon>add</mat-icon>
             Create Alert
@@ -41,25 +48,28 @@ import { Alert } from '../../core/models/alert.model';
         }
       </div>
 
+      <app-filter-bar (filterChange)="onFilterChange($event)" />
+
       @if (loading) {
-        <div class="loading-container">
-          <mat-spinner diameter="40"></mat-spinner>
-          <p>Loading alerts...</p>
+        <div class="skeleton-list">
+          @for (i of [1,2,3]; track i) {
+            <app-skeleton-loader [lines]="[100, 80, 60]" />
+          }
         </div>
       } @else if (alerts.length === 0) {
         <div class="no-alerts">
           <mat-icon class="no-alerts-icon">notifications_off</mat-icon>
           <h2>No Active Alerts</h2>
           <p>There are currently no active weather alerts in your area.</p>
-          @if (isLoggedIn) {
+          @if (authService.isLoggedIn()) {
             <button mat-raised-button color="primary" (click)="openNewAlertDialog()">
               Create First Alert
             </button>
           }
         </div>
       } @else {
-        <div class="alerts-grid">
-          @for (alert of alerts; track alert.id) {
+        <div class="alerts-list">
+          @for (alert of filteredAlerts; track alert.id) {
             <mat-card class="alert-card" [class.active]="isAlertActive(alert)">
               <div class="alert-header" [class]="'severity-' + alert.severity">
                 <div class="alert-type">
@@ -99,17 +109,26 @@ import { Alert } from '../../core/models/alert.model';
                   </div>
                   <div class="stat-item">
                     <mat-icon>comment</mat-icon>
-                    <span>{{ alert.comments?.length || 0 }}</span>
+                    <span>{{ comments[alert.id!]?.length || 0 }}</span>
                   </div>
                 </div>
+
+                @if (alert.id) {
+                  <app-comment-card
+                    [comments]="comments[alert.id] || []"
+                    [currentUserId]="authService.getCurrentUser()?.uid || ''"
+                    (addComment)="onAddComment(alert.id!, $event)"
+                    (deleteComment)="onDeleteComment(alert.id!, $event)"
+                  />
+                }
               </mat-card-content>
 
               <mat-card-actions>
-                <button mat-button color="primary" (click)="vote(alert.id!, 'up')" [disabled]="!isLoggedIn || !alert.id">
+                <button mat-button color="primary" (click)="vote(alert.id!, 'up')" [disabled]="!authService.isLoggedIn() || !alert.id">
                   <mat-icon>arrow_upward</mat-icon>
                   Upvote
                 </button>
-                <button mat-button color="warn" (click)="vote(alert.id!, 'down')" [disabled]="!isLoggedIn || !alert.id">
+                <button mat-button color="warn" (click)="vote(alert.id!, 'down')" [disabled]="!authService.isLoggedIn() || !alert.id">
                   <mat-icon>arrow_downward</mat-icon>
                   Downvote
                 </button>
@@ -117,14 +136,17 @@ import { Alert } from '../../core/models/alert.model';
                   <mat-icon>info</mat-icon>
                   Details
                 </button>
-                @if (isLoggedIn && alert.userId === currentUserId) {
-                  <button mat-button color="warn" (click)="deleteAlert(alert.id!)">
+                @if (authService.isLoggedIn() && alert.userId === authService.getCurrentUser()?.uid) {
+                  <button mat-button color="warn" (click)="onDeleteAlert(alert.id!)">
                     <mat-icon>delete</mat-icon>
                     Delete
                   </button>
                 }
               </mat-card-actions>
             </mat-card>
+          }
+          @if (filteredAlerts.length === 0) {
+            <p class="no-alerts">No alerts found.</p>
           }
         </div>
       }
@@ -145,214 +167,364 @@ import { Alert } from '../../core/models/alert.model';
       padding-bottom: 16px;
       border-bottom: 1px solid #e0e0e0;
     }
+    .dark-theme .alerts-header {
+      border-bottom: 1px solid #333a4d;
+    }
 
     .header-content h1 {
       margin: 0;
       font-size: 2.5rem;
       color: #1a237e;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    .dark-theme .header-content h1 {
+      color: #90caf9;
     }
 
     .subtitle {
       margin: 8px 0 0;
       color: #666;
       font-size: 1.1rem;
+      font-weight: 500;
+    }
+    .dark-theme .subtitle {
+      color: #b0bec5;
     }
 
     .create-alert-btn {
       display: flex;
       align-items: center;
       gap: 8px;
-      padding: 8px 24px;
-      font-size: 1rem;
+      padding: 10px 28px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      border-radius: 999px;
+      box-shadow: 0 2px 8px rgba(30, 64, 175, 0.08);
+      transition: background 0.2s, color 0.2s;
+    }
+    .create-alert-btn mat-icon {
+      font-size: 1.3rem;
     }
 
-    .loading-container {
+    .skeleton-list {
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 48px;
-      color: #666;
+      gap: 16px;
     }
 
-    .no-alerts {
-      text-align: center;
-      padding: 48px;
-      background: #f5f5f5;
-      border-radius: 8px;
-    }
-
-    .no-alerts-icon {
-      font-size: 48px;
-      width: 48px;
-      height: 48px;
-      color: #9e9e9e;
-      margin-bottom: 16px;
-    }
-
-    .alerts-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-      gap: 24px;
+    .alerts-list {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
     }
 
     .alert-card {
-      transition: transform 0.2s, box-shadow 0.2s;
-      border-radius: 12px;
-      overflow: hidden;
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 4px 20px rgba(30, 64, 175, 0.10);
+      transition: box-shadow 0.3s, background 0.3s, color 0.3s;
+      color: #222;
+      font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
+      padding-bottom: 8px;
     }
-
-    .alert-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-    }
-
     .alert-card.active {
-      border-left: 4px solid #4caf50;
+      border-left: 5px solid #e67e22;
+    }
+    .alert-card:hover {
+      box-shadow: 0 8px 24px rgba(30, 64, 175, 0.16);
+    }
+    .dark-theme .alert-card {
+      background: #232a34;
+      color: #f4f6fb;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+    }
+    .dark-theme .alert-card.active {
+      border-left: 5px solid #ffb74d;
     }
 
     .alert-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 16px;
-      background: #f5f5f5;
+      padding: 16px 20px 0 20px;
+      border-radius: 18px 18px 0 0;
+      font-size: 1.1rem;
+      font-weight: 600;
     }
-
-    .alert-header.severity-extreme {
-      background: #ffebee;
-    }
-
-    .alert-header.severity-severe {
-      background: #fff3e0;
-    }
-
-    .alert-header.severity-moderate {
-      background: #e8f5e9;
-    }
-
-    .alert-header.severity-minor {
-      background: #e3f2fd;
-    }
-
     .alert-type {
       display: flex;
       align-items: center;
       gap: 8px;
-      font-weight: 500;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #1976d2;
+    }
+    .alert-type mat-icon {
+      font-size: 1.5rem;
+    }
+    .alert-severity mat-chip[ng-reflect-color="warn"],
+    .alert-severity mat-chip.severity-extreme {
+      background: #d32f2f !important;
+      color: #fff !important;
+    }
+    .dark-theme .alert-severity mat-chip[ng-reflect-color="warn"],
+    .dark-theme .alert-severity mat-chip.severity-extreme {
+      background: #ff5252 !important;
+      color: #fff !important;
+    }
+    .alert-severity mat-chip[ng-reflect-color="accent"],
+    .alert-severity mat-chip.severity-severe {
+      background: #f57c00 !important;
+      color: #fff !important;
+    }
+    .dark-theme .alert-severity mat-chip[ng-reflect-color="accent"],
+    .dark-theme .alert-severity mat-chip.severity-severe {
+      background: #ffb300 !important;
+      color: #232a34 !important;
+    }
+    .alert-severity mat-chip[ng-reflect-color="primary"],
+    .alert-severity mat-chip.severity-moderate {
+      background: #1976d2 !important;
+      color: #fff !important;
+    }
+    .dark-theme .alert-severity mat-chip[ng-reflect-color="primary"],
+    .dark-theme .alert-severity mat-chip.severity-moderate {
+      background: #90caf9 !important;
+      color: #232a34 !important;
+    }
+    .alert-severity mat-chip[ng-reflect-color="basic"],
+    .alert-severity mat-chip.severity-minor {
+      background: #388e3c !important;
+      color: #fff !important;
+    }
+    .dark-theme .alert-severity mat-chip[ng-reflect-color="basic"],
+    .dark-theme .alert-severity mat-chip.severity-minor {
+      background: #81c784 !important;
+      color: #232a34 !important;
     }
 
     .alert-title {
-      margin: 16px 0 8px;
-      font-size: 1.25rem;
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin: 12px 0 4px 0;
       color: #1a237e;
     }
-
-    .alert-description {
-      color: #666;
-      margin-bottom: 16px;
-      line-height: 1.5;
+    .dark-theme .alert-title {
+      color: #90caf9;
     }
-
+    .alert-description {
+      color: #555;
+      font-size: 1.08rem;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+    .dark-theme .alert-description {
+      color: #cfd8dc;
+    }
     .alert-details {
       display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin: 16px 0;
-      padding: 16px;
-      background: #f5f5f5;
-      border-radius: 8px;
+      gap: 18px;
+      margin: 10px 0 8px 0;
+      color: #666;
+      font-size: 1.05rem;
+      font-weight: 500;
     }
-
-    .detail-item {
+    .alert-details .detail-item {
       display: flex;
       align-items: center;
-      gap: 8px;
-      color: #666;
+      gap: 4px;
     }
-
+    .dark-theme .alert-details {
+      color: #b0bec5;
+    }
     .alert-stats {
       display: flex;
-      gap: 16px;
-      margin: 16px 0;
-      padding: 8px 0;
-      border-top: 1px solid #e0e0e0;
+      gap: 18px;
+      margin: 8px 0 0 0;
+      color: #888;
+      font-size: 1rem;
+      font-weight: 500;
     }
-
-    .stat-item {
+    .alert-stats .stat-item {
       display: flex;
       align-items: center;
       gap: 4px;
-      color: #666;
     }
-
+    .dark-theme .alert-stats {
+      color: #b0bec5;
+    }
     mat-card-actions {
-      padding: 8px 16px;
       display: flex;
-      justify-content: space-between;
-      border-top: 1px solid #e0e0e0;
+      gap: 10px;
+      padding: 0 20px 12px 20px;
+      margin-top: 8px;
     }
-
     mat-card-actions button {
-      display: flex;
-      align-items: center;
-      gap: 4px;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 1rem;
+      padding: 6px 18px;
+      box-shadow: 0 2px 8px rgba(30, 64, 175, 0.08);
+      transition: background 0.2s, color 0.2s;
     }
-
-    @media (max-width: 768px) {
+    mat-card-actions button mat-icon {
+      font-size: 1.2rem;
+      margin-right: 4px;
+    }
+    .dark-theme mat-card-actions button {
+      background: #232a34;
+      color: #ffb74d;
+      border: 1.5px solid #ffb74d;
+    }
+    .no-alerts {
+      text-align: center;
+      color: #888;
+      margin: 32px 0;
+      font-size: 1.2rem;
+    }
+    .no-alerts-icon {
+      font-size: 3rem;
+      color: #b0bec5;
+      margin-bottom: 8px;
+    }
+    .dark-theme .no-alerts {
+      color: #b0bec5;
+    }
+    .dark-theme .no-alerts-icon {
+      color: #90caf9;
+    }
+    @media (max-width: 900px) {
       .alerts-header {
         flex-direction: column;
         align-items: flex-start;
-        gap: 16px;
+        gap: 12px;
       }
-
-      .alerts-grid {
-        grid-template-columns: 1fr;
+      .alerts-list {
+        gap: 12px;
+      }
+      .alert-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+      }
+      mat-card-actions {
+        flex-direction: column;
+        gap: 8px;
+        padding: 0 10px 12px 10px;
+      }
+    }
+    @media (max-width: 600px) {
+      .alerts-container {
+        padding: 10px;
+      }
+      .header-content h1 {
+        font-size: 1.5rem;
+      }
+      .alert-title {
+        font-size: 1.1rem;
+      }
+      .alert-card {
+        padding-bottom: 0;
       }
     }
   `]
 })
 export class AlertsComponent implements OnInit {
-  private dialog = inject(MatDialog);
-  private firebaseService = inject(FirebaseService);
-  private authService = inject(AuthService);
-  private snackBar = inject(MatSnackBar);
-  private router = inject(Router);
-
   alerts: Alert[] = [];
+  filteredAlerts: Alert[] = [];
   loading = true;
   error: string | null = null;
-  isLoggedIn = false;
-  currentUserId: string | null = null;
+  comments: { [key: string]: any[] } = {};
 
-  constructor() {
-    this.authService.isLoggedIn$.subscribe(
-      (isLoggedIn: boolean) => this.isLoggedIn = isLoggedIn
-    );
-    this.authService.currentUser$.subscribe(
-      (user) => this.currentUserId = user?.uid || null
-    );
-  }
+  constructor(
+    public authService: AuthService,
+    private firebaseService: FirebaseService,
+    private dialog: MatDialog,
+    private snackBar: MatSnackBar,
+    private router: Router
+  ) {}
 
   ngOnInit() {
     this.loadAlerts();
   }
 
-  loadAlerts() {
-    this.loading = true;
-    this.error = null;
-
-    this.firebaseService.getAlerts().then(
-      (alerts: Alert[]) => {
-        this.alerts = alerts;
-        this.loading = false;
+  async loadAlerts() {
+    try {
+      this.loading = true;
+      this.error = null;
+      this.alerts = await this.firebaseService.getAlerts();
+      this.filteredAlerts = [...this.alerts];
+      
+      // Load comments for each alert
+      for (const alert of this.alerts) {
+        if (alert.id) {
+          this.comments[alert.id] = await this.firebaseService.getComments(alert.id);
+        }
       }
-    ).catch((error: string) => {
+    } catch (error) {
       console.error('Error loading alerts:', error);
-      this.snackBar.open('Failed to load alerts', 'Close', { duration: 3000 });
+      this.snackBar.open('Failed to load alerts. Please try again.', 'Close', {
+        duration: 5000
+      });
+    } finally {
       this.loading = false;
-      this.error = error;
+    }
+  }
+
+  onFilterChange(filters: {
+    search: string;
+    type: string;
+    severity: string;
+    sortBy: string;
+  }) {
+    this.filteredAlerts = this.alerts.filter(alert => {
+      const matchesSearch = !filters.search || 
+        alert.title.toLowerCase().includes(filters.search.toLowerCase()) ||
+        alert.description.toLowerCase().includes(filters.search.toLowerCase()) ||
+        alert.location.toLowerCase().includes(filters.search.toLowerCase());
+
+      const matchesType = !filters.type || alert.type === filters.type;
+      const matchesSeverity = !filters.severity || alert.severity === filters.severity;
+
+      return matchesSearch && matchesType && matchesSeverity;
     });
+
+    // Sort alerts
+    this.filteredAlerts.sort((a, b) => {
+      switch (filters.sortBy) {
+        case 'date-desc':
+          return b.startTime.getTime() - a.startTime.getTime();
+        case 'date-asc':
+          return a.startTime.getTime() - b.startTime.getTime();
+        case 'severity-desc':
+          return this.getSeverityWeight(b.severity) - this.getSeverityWeight(a.severity);
+        case 'severity-asc':
+          return this.getSeverityWeight(a.severity) - this.getSeverityWeight(b.severity);
+        default:
+          return 0;
+      }
+    });
+  }
+
+  getSeverityWeight(severity: string): number {
+    const weights: { [key: string]: number } = {
+      extreme: 4,
+      severe: 3,
+      moderate: 2,
+      minor: 1
+    };
+    return weights[severity] || 0;
+  }
+
+  getSeverityColor(severity: string): string {
+    const colors: { [key: string]: string } = {
+      extreme: 'warn',
+      severe: 'accent',
+      moderate: 'primary',
+      minor: 'basic'
+    };
+    return colors[severity] || 'basic';
   }
 
   openNewAlertDialog() {
@@ -361,7 +533,7 @@ export class AlertsComponent implements OnInit {
       maxWidth: '90vw'
     });
 
-    dialogRef.afterClosed().subscribe(async (result) => {
+    dialogRef.afterClosed().subscribe(result => {
       if (result) {
         this.loadAlerts();
       }
@@ -374,7 +546,7 @@ export class AlertsComponent implements OnInit {
       return;
     }
 
-    if (!this.isLoggedIn) {
+    if (!this.authService.isLoggedIn()) {
       this.snackBar.open('Please sign in to vote', 'Sign In', {
         duration: 5000
       }).onAction().subscribe(() => {
@@ -421,16 +593,6 @@ export class AlertsComponent implements OnInit {
     return icons[type] || 'warning';
   }
 
-  getSeverityColor(severity: string): 'primary' | 'accent' | 'warn' {
-    const colors: { [key: string]: 'primary' | 'accent' | 'warn' } = {
-      'extreme': 'warn',
-      'severe': 'accent',
-      'moderate': 'primary',
-      'minor': 'primary'
-    };
-    return colors[severity] || 'primary';
-  }
-
   isAlertActive(alert: Alert): boolean {
     const now = new Date();
     return new Date(alert.startTime) <= now && new Date(alert.endTime) >= now;
@@ -448,14 +610,99 @@ export class AlertsComponent implements OnInit {
     return `${startDate.toLocaleDateString('en-US', options)} - ${endDate.toLocaleDateString('en-US', options)}`;
   }
 
-  async deleteAlert(alertId: string): Promise<void> {
-    try {
-      await this.firebaseService.deleteAlert(alertId);
-      this.snackBar.open('Alert deleted successfully', 'Close', { duration: 3000 });
-      this.loadAlerts(); // Reload the alerts list
-    } catch (error) {
-      console.error('Error deleting alert:', error);
-      this.snackBar.open('Failed to delete alert', 'Close', { duration: 5000 });
+  async onDeleteAlert(alertId: string) {
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Delete Alert',
+        message: 'Are you sure you want to delete this alert? This action cannot be undone.'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(async result => {
+      if (result) {
+        try {
+          await this.firebaseService.deleteAlert(alertId);
+          this.alerts = this.alerts.filter(a => a.id !== alertId);
+          this.filteredAlerts = this.filteredAlerts.filter(a => a.id !== alertId);
+          this.snackBar.open('Alert deleted successfully', 'Close', {
+            duration: 3000
+          });
+        } catch (error) {
+          console.error('Error deleting alert:', error);
+          this.snackBar.open('Failed to delete alert. Please try again.', 'Close', {
+            duration: 5000
+          });
+        }
+      }
+    });
+  }
+
+  async onAddComment(alertId: string, content: string) {
+    if (!this.authService.isLoggedIn()) {
+      this.snackBar.open('Please sign in to comment', 'Sign In', {
+        duration: 5000
+      }).onAction().subscribe(() => {
+        this.router.navigate(['/login'], {
+          queryParams: {
+            returnUrl: '/alerts',
+            message: 'Please sign in to comment on alerts'
+          }
+        });
+      });
+      return;
     }
+
+    try {
+      const currentUser = this.authService.getCurrentUser();
+      if (!currentUser) {
+        throw new Error('No user found');
+      }
+
+      await this.firebaseService.addComment(alertId, {
+        alertId,
+        userId: currentUser.uid,
+        userName: currentUser.displayName || 'Anonymous',
+        content
+      });
+
+      // Refresh comments
+      this.comments[alertId] = await this.firebaseService.getComments(alertId);
+      this.snackBar.open('Comment added successfully', 'Close', {
+        duration: 3000
+      });
+    } catch (error) {
+      console.error('Error adding comment:', error);
+      this.snackBar.open('Failed to add comment', 'Close', {
+        duration: 5000
+      });
+    }
+  }
+
+  async onDeleteComment(alertId: string, commentId: string) {
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Delete Comment',
+        message: 'Are you sure you want to delete this comment? This action cannot be undone.'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(async result => {
+      if (result) {
+        try {
+          await this.firebaseService.deleteComment(alertId, commentId);
+          this.comments[alertId] = await this.firebaseService.getComments(alertId);
+          this.snackBar.open('Comment deleted successfully', 'Close', {
+            duration: 3000
+          });
+        } catch (error) {
+          console.error('Error deleting comment:', error);
+          this.snackBar.open('Failed to delete comment', 'Close', {
+            duration: 5000
+          });
+        }
+      }
+    });
   }
 } 

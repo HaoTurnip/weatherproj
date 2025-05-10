@@ -1,33 +1,67 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { MatButtonModule } from '@angular/material/button';
+import { FormsModule } from '@angular/forms';
+
+// Material Imports
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatButtonModule } from '@angular/material/button';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatChipsModule } from '@angular/material/chips';
+
+// Standalone Components, Pipes, Directives
+import { WeatherCardComponent } from './components/weather-card/weather-card.component';
+import { AlertCardComponent } from './components/alert-card/alert-card.component';
+import { HeaderComponent } from './components/header/header.component';
 import { TemperaturePipe } from './pipes/temperature.pipe';
-import { WeatherConditionPipe } from './pipes/weather-condition.pipe';
+import { DateFormatPipe } from './pipes/date-format.pipe';
+import { DarkModeDirective } from './directives/dark-mode.directive';
+import { AnimateDirective } from './directives/animate.directive';
 
 @NgModule({
   imports: [
     CommonModule,
     RouterModule,
-    MatButtonModule,
+    FormsModule,
     MatCardModule,
     MatIconModule,
-    MatProgressSpinnerModule,
+    MatButtonModule,
+    MatInputModule,
+    MatFormFieldModule,
+    MatToolbarModule,
+    MatMenuModule,
+    MatChipsModule,
+    WeatherCardComponent,
+    AlertCardComponent,
+    HeaderComponent,
     TemperaturePipe,
-    WeatherConditionPipe
+    DateFormatPipe,
+    DarkModeDirective,
+    AnimateDirective
   ],
   exports: [
     CommonModule,
     RouterModule,
-    MatButtonModule,
+    FormsModule,
     MatCardModule,
     MatIconModule,
-    MatProgressSpinnerModule,
+    MatButtonModule,
+    MatInputModule,
+    MatFormFieldModule,
+    MatToolbarModule,
+    MatMenuModule,
+    MatChipsModule,
+    WeatherCardComponent,
+    AlertCardComponent,
+    HeaderComponent,
     TemperaturePipe,
-    WeatherConditionPipe
+    DateFormatPipe,
+    DarkModeDirective,
+    AnimateDirective
   ]
 })
 export class SharedModule { } 
