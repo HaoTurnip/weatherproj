@@ -248,4 +248,14 @@ export class FirebaseService {
       throw new Error('Failed to load active alerts: Unknown error');
     }
   }
+
+  async deleteAlert(alertId: string): Promise<void> {
+    try {
+      await this.firestore.collection('alerts').doc(alertId).delete();
+      console.log('Alert deleted successfully');
+    } catch (error) {
+      console.error('Error deleting alert:', error);
+      throw new Error('Failed to delete alert');
+    }
+  }
 } 

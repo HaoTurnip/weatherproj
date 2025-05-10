@@ -33,10 +33,12 @@ import { Alert } from '../../core/models/alert.model';
           <h1>Weather Alerts</h1>
           <p class="subtitle">Stay informed about severe weather conditions in your area</p>
         </div>
-        <button mat-raised-button color="primary" (click)="openNewAlertDialog()" class="create-alert-btn">
-          <mat-icon>add</mat-icon>
-          Create Alert
-        </button>
+        @if (isLoggedIn) {
+          <button mat-raised-button color="primary" (click)="openNewAlertDialog()" class="create-alert-btn">
+            <mat-icon>add</mat-icon>
+            Create Alert
+          </button>
+        }
       </div>
 
       @if (loading) {
@@ -49,9 +51,11 @@ import { Alert } from '../../core/models/alert.model';
           <mat-icon class="no-alerts-icon">notifications_off</mat-icon>
           <h2>No Active Alerts</h2>
           <p>There are currently no active weather alerts in your area.</p>
-          <button mat-raised-button color="primary" (click)="openNewAlertDialog()">
-            Create First Alert
-          </button>
+          @if (isLoggedIn) {
+            <button mat-raised-button color="primary" (click)="openNewAlertDialog()">
+              Create First Alert
+            </button>
+          }
         </div>
       } @else {
         <div class="alerts-grid">
@@ -113,6 +117,12 @@ import { Alert } from '../../core/models/alert.model';
                   <mat-icon>info</mat-icon>
                   Details
                 </button>
+                @if (isLoggedIn && alert.userId === currentUserId) {
+                  <button mat-button color="warn" (click)="deleteAlert(alert.id!)">
+                    <mat-icon>delete</mat-icon>
+                    Delete
+                  </button>
+                }
               </mat-card-actions>
             </mat-card>
           }
@@ -313,10 +323,14 @@ export class AlertsComponent implements OnInit {
   loading = true;
   error: string | null = null;
   isLoggedIn = false;
+  currentUserId: string | null = null;
 
   constructor() {
     this.authService.isLoggedIn$.subscribe(
       (isLoggedIn: boolean) => this.isLoggedIn = isLoggedIn
+    );
+    this.authService.currentUser$.subscribe(
+      (user) => this.currentUserId = user?.uid || null
     );
   }
 
@@ -432,5 +446,16 @@ export class AlertsComponent implements OnInit {
       minute: '2-digit'
     };
     return `${startDate.toLocaleDateString('en-US', options)} - ${endDate.toLocaleDateString('en-US', options)}`;
+  }
+
+  async deleteAlert(alertId: string): Promise<void> {
+    try {
+      await this.firebaseService.deleteAlert(alertId);
+      this.snackBar.open('Alert deleted successfully', 'Close', { duration: 3000 });
+      this.loadAlerts(); // Reload the alerts list
+    } catch (error) {
+      console.error('Error deleting alert:', error);
+      this.snackBar.open('Failed to delete alert', 'Close', { duration: 5000 });
+    }
   }
 } 
