@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -17,6 +17,8 @@ import { ConfirmDialogComponent } from '../../core/components/confirm-dialog/con
 import { FilterBarComponent } from '../../shared/components/filter-bar/filter-bar.component';
 import { SkeletonLoaderComponent } from '../../shared/components/skeleton-loader/skeleton-loader.component';
 import { CommentCardComponent } from '../../shared/components/comment-card/comment-card.component';
+import { Subscription } from 'rxjs';
+import { Comment } from '../../core/models/alert.model';
 
 @Component({
   selector: 'app-alerts',
@@ -109,18 +111,30 @@ import { CommentCardComponent } from '../../shared/components/comment-card/comme
                   </div>
                   <div class="stat-item">
                     <mat-icon>chat</mat-icon>
-                    <span>{{ comments[alert.id!].length || 0 }}</span>
+                    <span>{{ comments[alert.id!] ? comments[alert.id!].length : 0 }}</span>
                   </div>
                 </div>
 
-                @if (alert.id) {
-                  <app-comment-card
-                    [comments]="comments[alert.id] || []"
-                    [currentUserId]="authService.getCurrentUser()?.uid || ''"
-                    (addComment)="onAddComment(alert.id!, $event)"
-                    (deleteComment)="onDeleteComment(alert.id!, $event)"
-                  />
-                }
+                <ng-container *ngIf="alert.id">
+                  <ng-container *ngIf="authService.user$ | async as user; else commentCardLoggedOut">
+                    <app-comment-card
+                      [comments]="comments[alert.id] || []"
+                      [currentUserId]="user.uid"
+                      [isAuthenticated]="!!user"
+                      (addComment)="onAddComment(alert.id!, $event)"
+                      (deleteComment)="onDeleteComment(alert.id!, $event)"
+                    />
+                  </ng-container>
+                  <ng-template #commentCardLoggedOut>
+                    <app-comment-card
+                      [comments]="comments[alert.id] || []"
+                      [currentUserId]="''"
+                      [isAuthenticated]="false"
+                      (addComment)="onAddComment(alert.id!, $event)"
+                      (deleteComment)="onDeleteComment(alert.id!, $event)"
+                    />
+                  </ng-template>
+                </ng-container>
               </mat-card-content>
 
               <mat-card-actions>
@@ -499,12 +513,13 @@ import { CommentCardComponent } from '../../shared/components/comment-card/comme
     }
   `]
 })
-export class AlertsComponent implements OnInit {
+export class AlertsComponent implements OnInit, OnDestroy {
   alerts: Alert[] = [];
   filteredAlerts: Alert[] = [];
   loading = true;
   error: string | null = null;
-  comments: { [key: string]: any[] } = {};
+  comments: { [key: string]: Comment[] } = {};
+  private commentSubscriptions: { [key: string]: Subscription } = {};
 
   constructor(
     public authService: AuthService,
@@ -518,18 +533,35 @@ export class AlertsComponent implements OnInit {
     this.loadAlerts();
   }
 
+  ngOnDestroy() {
+    // Clean up all comment subscriptions
+    Object.values(this.commentSubscriptions).forEach(sub => sub.unsubscribe());
+  }
+
   async loadAlerts() {
     try {
       this.loading = true;
       this.error = null;
       this.alerts = await this.firebaseService.getAlerts();
       this.filteredAlerts = [...this.alerts];
-      
-      // Load comments for each alert
-      for (const alert of this.alerts) {
-        if (alert.id) {
-          this.comments[alert.id] = await this.firebaseService.getComments(alert.id);
+
+      // Only load comments if authenticated
+      if (this.authService.isLoggedIn()) {
+        // Clean up existing subscriptions
+        Object.values(this.commentSubscriptions).forEach(sub => sub.unsubscribe());
+        this.commentSubscriptions = {};
+
+        // Set up real-time listeners for each alert's comments
+        for (const alert of this.alerts) {
+          if (alert.id) {
+            this.commentSubscriptions[alert.id] = this.firebaseService.getComments(alert.id)
+              .subscribe(comments => {
+                this.comments[alert.id!] = comments;
+              });
+          }
         }
+      } else {
+        this.comments = {}; // Clear comments if not authenticated
       }
     } catch (error) {
       console.error('Error loading alerts:', error);
@@ -735,8 +767,6 @@ export class AlertsComponent implements OnInit {
         content
       });
 
-      // Refresh comments
-      this.comments[alertId] = await this.firebaseService.getComments(alertId);
       this.snackBar.open('Comment added successfully', 'Close', {
         duration: 3000
       });
@@ -761,7 +791,6 @@ export class AlertsComponent implements OnInit {
       if (result) {
         try {
           await this.firebaseService.deleteComment(alertId, commentId);
-          this.comments[alertId] = await this.firebaseService.getComments(alertId);
           this.snackBar.open('Comment deleted successfully', 'Close', {
             duration: 3000
           });

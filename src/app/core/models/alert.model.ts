@@ -18,8 +18,10 @@ export interface Alert {
 export interface Comment {
   id: string;
   userId: string;
-  text: string;
+  userName: string;
+  content: string;
   createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface WeatherAlert {

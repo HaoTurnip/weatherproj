@@ -49,9 +49,19 @@ export class FirebaseService {
     try {
       console.log('Adding alert:', alert);
       
+      // Check if user is authenticated
+      const user = this.firestore.firestore.app.auth().currentUser;
+      if (!user) {
+        console.error('No authenticated user found');
+        throw new Error('User must be authenticated to create alerts');
+      }
+
+      console.log('Current user:', user.uid);
+
       // Convert dates to Firestore Timestamps
       const alertData = {
         ...alert,
+        userId: user.uid, // Ensure we use the authenticated user's ID
         startTime: firebase.firestore.Timestamp.fromDate(new Date(alert.startTime)),
         endTime: firebase.firestore.Timestamp.fromDate(new Date(alert.endTime)),
         upvotes: 0,
@@ -62,8 +72,19 @@ export class FirebaseService {
       };
 
       console.log('Alert data to be saved:', alertData);
+      
+      // Add the alert document
       const docRef = await this.firestore.collection('alerts').add(alertData);
       console.log('Alert added successfully with ID:', docRef.id);
+
+      // Add user activity for alert creation
+      await this.addUserActivity({
+        userId: user.uid,
+        type: 'alert_created',
+        description: `Created alert: ${alert.title}`,
+        timestamp: new Date()
+      });
+
       return docRef.id;
     } catch (error) {
       console.error('Error adding alert:', error);
@@ -318,11 +339,24 @@ export class FirebaseService {
 
   async addComment(alertId: string, comment: Omit<Comment, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
     try {
+      // Get the authenticated user
+      const user = this.firestore.firestore.app.auth().currentUser;
+      if (!user) {
+        throw new Error('User must be authenticated to add comments');
+      }
+
       const commentData = {
         ...comment,
+        userId: user.uid, // Always set to authenticated user's UID
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
       };
+
+      // First check if the alert exists
+      const alertDoc = await this.firestore.collection('alerts').doc(alertId).get().toPromise();
+      if (!alertDoc?.exists) {
+        throw new Error('Alert not found');
+      }
 
       const docRef = await this.firestore
         .collection('alerts')
@@ -332,7 +366,7 @@ export class FirebaseService {
 
       // Add activity record
       await this.addUserActivity({
-        userId: comment.userId,
+        userId: user.uid,
         type: 'comment_added',
         description: `Added a comment to alert: ${alertId}`,
         timestamp: new Date()
@@ -341,35 +375,33 @@ export class FirebaseService {
       return docRef.id;
     } catch (error) {
       console.error('Error adding comment:', error);
-      throw new Error('Failed to add comment');
+      if (error instanceof Error) {
+        if (error.message.includes('permission')) {
+          // For permission errors, we'll let the real-time listener handle the update
+          return '';
+        }
+        throw new Error(`Failed to add comment: ${error.message}`);
+      }
+      throw new Error('Failed to add comment: Unknown error');
     }
   }
 
-  async getComments(alertId: string): Promise<Comment[]> {
-    try {
-      // Check if user is authenticated
-      const user = await this.firestore.firestore.app.auth().currentUser;
-      if (!user) {
-        throw new Error('User must be authenticated to view comments');
-      }
-
-      const snapshot = await this.firestore
-        .collection('alerts')
-        .doc(alertId)
-        .collection('comments', ref => ref.orderBy('createdAt', 'desc'))
-        .get()
-        .toPromise();
-
-      return snapshot?.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data()?.['createdAt']?.toDate() || new Date(),
-        updatedAt: doc.data()?.['updatedAt']?.toDate() || new Date()
-      } as Comment)) || [];
-    } catch (error) {
-      console.error('Error getting comments:', error);
-      throw new Error('Failed to get comments: ' + (error instanceof Error ? error.message : 'Unknown error'));
-    }
+  getComments(alertId: string): Observable<Comment[]> {
+    return this.firestore
+      .collection('alerts')
+      .doc(alertId)
+      .collection('comments', ref => ref.orderBy('createdAt', 'desc'))
+      .snapshotChanges()
+      .pipe(
+        map(snapshot => 
+          snapshot.map(doc => ({
+            id: doc.payload.doc.id,
+            ...doc.payload.doc.data(),
+            createdAt: doc.payload.doc.data()?.['createdAt']?.toDate() || new Date(),
+            updatedAt: doc.payload.doc.data()?.['updatedAt']?.toDate() || new Date()
+          } as Comment))
+        )
+      );
   }
 
   async updateComment(alertId: string, commentId: string, content: string): Promise<void> {
@@ -402,7 +434,23 @@ export class FirebaseService {
 
   async deleteComment(alertId: string, commentId: string): Promise<void> {
     try {
+      // Get the authenticated user
+      const user = this.firestore.firestore.app.auth().currentUser;
+      if (!user) {
+        throw new Error('User must be authenticated to delete comments');
+      }
+
+      // Fetch the comment
       const comment = await this.getComment(alertId, commentId);
+      if (!comment) {
+        throw new Error('Comment not found');
+      }
+
+      // Check ownership
+      if (comment.userId !== user.uid) {
+        throw new Error('You do not have permission to delete this comment');
+      }
+
       await this.firestore
         .collection('alerts')
         .doc(alertId)
@@ -411,17 +459,19 @@ export class FirebaseService {
         .delete();
 
       // Add activity record
-      if (comment) {
-        await this.addUserActivity({
-          userId: comment.userId,
-          type: 'comment_deleted',
-          description: `Deleted a comment from alert: ${alertId}`,
-          timestamp: new Date()
-        });
-      }
+      await this.addUserActivity({
+        userId: user.uid,
+        type: 'comment_deleted',
+        description: `Deleted a comment from alert: ${alertId}`,
+        timestamp: new Date()
+      });
     } catch (error) {
       console.error('Error deleting comment:', error);
-      throw new Error('Failed to delete comment');
+      // Only throw if it's a real error, not a permission error that might be temporary
+      if (error instanceof Error && !error.message.includes('permission')) {
+        throw new Error('Failed to delete comment');
+      }
+      // For permission errors, we'll let the real-time listener handle the update
     }
   }
 

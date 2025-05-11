@@ -42,6 +42,7 @@ export class AuthService {
         }
       })
     ).subscribe(user => {
+      console.log('AuthService user emitted:', user);
       this.userSubject.next(user);
     });
   }

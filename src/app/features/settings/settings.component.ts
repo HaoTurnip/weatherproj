@@ -8,18 +8,23 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatButtonModule } from '@angular/material/button';
 import { FormsModule } from '@angular/forms';
 import { ThemeService } from '../../core/services/theme.service';
-import { Observable } from 'rxjs';
+import { Observable, firstValueFrom, filter } from 'rxjs';
 import { MatDividerModule } from '@angular/material/divider';
 import { AuthService } from '../../core/services/auth.service';
 import { FirebaseService } from '../../core/services/firebase.service';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatIconModule } from '@angular/material/icon';
+import { WeatherService } from '../../core/services/weather.service';
+import { CityService } from '../../services/city.service';
 
 interface UserSettings {
   location: string;
   units: 'metric' | 'imperial';
   darkMode: boolean;
   highContrast: boolean;
+  defaultCity?: string;
+  notifications: boolean;
+  language: string;
 }
 
 @Component({
@@ -36,9 +41,10 @@ interface UserSettings {
     FormsModule,
     MatDividerModule,
     MatIconModule,
+    MatSnackBarModule
   ],
-  encapsulation: ViewEncapsulation.None,
   template: `
+
     <style>
       /* Global dark mode text styles for the settings page */
       .dark-theme .settings-container {
@@ -111,9 +117,25 @@ interface UserSettings {
         border-color: var(--primary-light);
       }
 
-      .dark-theme .mat-mdc-slide-toggle .mdc-switch__handle {
-        background-color: var(--primary-light);
-      }
+
+        <mat-card-content>
+          <form (ngSubmit)="saveSettings()" #settingsForm="ngForm">
+            <!-- Location Settings -->
+            <div class="settings-section">
+              <h3>Location Settings</h3>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Default Location</mat-label>
+                <input
+                  matInput
+                  [(ngModel)]="settings.defaultCity"
+                  name="defaultCity"
+                  placeholder="Enter your default city"
+                  required
+                />
+                <mat-icon matSuffix>location_on</mat-icon>
+              </mat-form-field>
+            </div>
+
 
       /* Improve focus states */
       .dark-theme .mat-mdc-slide-toggle:focus-within .mdc-switch {
@@ -152,553 +174,176 @@ interface UserSettings {
         box-shadow: 0 6px 25px rgba(0, 0, 0, 0.5);
       }
 
-      /* Fix dark mode form input text colors */
-      .dark-theme .form-group input,
-      .dark-theme .form-group select,
-      .dark-theme .form-group textarea {
-        color: var(--text-primary-dark);
-      }
-
-      /* Specific dark mode styling for units select */
-      .select-input {
-        width: 100%;
-        padding: 12px 16px;
-        border: 1px solid var(--border-light);
-        border-radius: var(--radius-lg);
-        color: var(--text-primary);
-        font-size: 1rem;
-        outline: none;
-        cursor: pointer;
-        background-color: var(--card-light);
-        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2364748b'><path d='M0 3 L6 9 L12 3 Z'/></svg>");
-        background-repeat: no-repeat;
-        background-position: right 12px center;
-        -webkit-appearance: none;
-        -moz-appearance: none;
-        appearance: none;
-        padding-right: 30px;
-        transition: all 0.2s ease;
-      }
-      
-      .select-input:focus {
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-        transform: translateY(-1px);
-      }
-      
-      .select-input:hover {
-        border-color: var(--primary-color);
-        box-shadow: var(--shadow-sm);
-      }
-      
-      :host-context(.dark-theme) .select-input {
-        background-color: var(--card-dark);
-        border-color: var(--border-dark);
-        color: var(--text-primary-dark);
-        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23f8fafc'><path d='M0 3 L6 9 L12 3 Z'/></svg>");
-      }
-      
-      :host-context(.dark-theme) .select-input:focus {
-        border-color: var(--primary-light);
-        box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
-      }
-      
-      :host-context(.dark-theme) .select-input:hover {
-        border-color: var(--primary-light);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
-        background-color: rgba(30, 41, 59, 0.8);
-      }
-
-      /* Fix dropdown option colors in dark mode */
-      :host-context(.dark-theme) select option {
-        background-color: var(--background-dark);
-        color: var(--text-primary-dark);
-      }
-      
-      /* Improve form labels in dark mode */
-      .form-label {
-        font-size: 0.95rem;
-        font-weight: 500;
-        color: var(--text-secondary);
-        margin-bottom: 4px;
-        transition: color 0.2s ease;
-      }
-      
-      :host-context(.dark-theme) .form-label {
-        color: var(--text-secondary-dark);
-      }
-    </style>
-    <div class="settings-container">
-      <div class="settings-card">
-        <div class="settings-header">
-          <h2 class="settings-title">User Settings</h2>
-          <p class="settings-subtitle">Manage your weather app preferences</p>
-        </div>
-        <div class="settings-divider"></div>
-        <form class="settings-form" (ngSubmit)="saveSettings()">
-          <div class="form-group">
-            <label class="form-label">Default Location</label>
-            <div class="search-field-wrapper">
-              <mat-icon class="search-icon">search</mat-icon>
-              <input 
-                class="search-input" 
-                [(ngModel)]="settings.location" 
-                name="location" 
-                placeholder="Enter city name"
-              >
-              <button 
-                *ngIf="settings.location" 
-                type="button"
-                class="clear-button" 
-                (click)="clearLocation()" 
-                aria-label="Clear location"
-              >
-                <mat-icon>close</mat-icon>
-              </button>
+            <!-- Units Settings -->
+            <div class="settings-section">
+              <h3>Units</h3>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Temperature Unit</mat-label>
+                <mat-select [(ngModel)]="settings.units" name="units">
+                  <mat-option value="metric">Celsius (°C)</mat-option>
+                  <mat-option value="imperial">Fahrenheit (°F)</mat-option>
+                </mat-select>
+              </mat-form-field>
             </div>
-          </div>
 
-          <div class="form-group">
-            <label class="form-label">Units</label>
-            <select class="select-input" [(ngModel)]="settings.units" name="units">
-              <option value="metric">Metric (°C, km/h)</option>
-              <option value="imperial">Imperial (°F, mph)</option>
-            </select>
-          </div>
+            <mat-divider></mat-divider>
 
-          <div class="settings-toggles">
-            <div class="toggle-group">
-              <mat-slide-toggle [(ngModel)]="settings.darkMode" name="darkMode" (change)="onThemeChange()" color="primary" class="toggle-switch">
+            <!-- Appearance Settings -->
+            <div class="settings-section">
+              <h3>Appearance</h3>
+              <mat-slide-toggle
+                [(ngModel)]="settings.darkMode"
+                name="darkMode"
+                (change)="onThemeChange()"
+              >
                 Dark Mode
               </mat-slide-toggle>
-              <p class="toggle-description">Switch between light and dark theme</p>
-            </div>
-            
-            <div class="toggle-group">
-              <mat-slide-toggle [(ngModel)]="settings.highContrast" name="highContrast" color="primary" class="toggle-switch">
-                High Contrast Mode
-              </mat-slide-toggle>
-              <p class="toggle-description">Increase contrast for better readability</p>
-            </div>
-          </div>
 
-          <div class="settings-actions">
-            <button type="button" class="cancel-button" (click)="resetSettings()">
-              Reset
-            </button>
-            <button type="submit" class="save-button">
-              Save Changes
-            </button>
-          </div>
-        </form>
-      </div>
+              <mat-slide-toggle
+                [(ngModel)]="settings.highContrast"
+                name="highContrast"
+              >
+                High Contrast
+              </mat-slide-toggle>
+            </div>
+
+            <mat-divider></mat-divider>
+
+            <!-- Notifications -->
+            <div class="settings-section">
+              <h3>Notifications</h3>
+              <mat-slide-toggle
+                [(ngModel)]="settings.notifications"
+                name="notifications"
+              >
+                Enable Weather Alerts
+              </mat-slide-toggle>
+            </div>
+
+            <mat-divider></mat-divider>
+
+            <!-- Language -->
+            <div class="settings-section">
+              <h3>Language</h3>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Language</mat-label>
+                <mat-select [(ngModel)]="settings.language" name="language">
+                  <mat-option value="en">English</mat-option>
+                  <mat-option value="es">Español</mat-option>
+                  <mat-option value="fr">Français</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+
+            <div class="settings-actions">
+              <button
+                mat-raised-button
+                color="primary"
+                type="submit"
+                [disabled]="!settingsForm.form.valid"
+              >
+                Save Settings
+              </button>
+              <button
+                mat-button
+                type="button"
+                (click)="resetSettings()"
+              >
+                Reset to Default
+              </button>
+            </div>
+          </form>
+        </mat-card-content>
+      </mat-card>
     </div>
   `,
   styles: [`
     .settings-container {
-      max-width: 600px;
-      margin: 40px auto;
-      padding: 0 16px;
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 0 1rem;
     }
-    
-    .settings-card {
-      background: var(--card-light);
-      border-radius: var(--radius-2xl);
-      box-shadow: var(--shadow-md);
-      color: var(--text-primary);
-      font-family: 'Inter', 'Roboto', 'Segoe UI', Arial, sans-serif;
-      padding: 32px 28px 24px 28px;
-      transition: all 0.3s ease;
-      border: 1px solid var(--border-light);
+
+    .settings-section {
+      margin: 1.5rem 0;
     }
-    
-    :host-context(.dark-theme) .settings-card {
-      background: var(--card-dark);
-      color: var(--text-primary-dark);
-      border-color: var(--border-dark);
+
+    .settings-section h3 {
+      margin-bottom: 1rem;
+      color: #333;
     }
-    
-    .settings-header {
-      margin-bottom: 24px;
-      text-align: left;
+
+    .full-width {
+      width: 100%;
     }
-    
-    .settings-title {
-      font-size: 2rem;
-      font-weight: 700;
-      margin: 0 0 10px 0;
-      color: var(--primary-color);
-    }
-    
-    :host-context(.dark-theme) .settings-title {
-      color: var(--primary-light);
-    }
-    
-    .settings-subtitle {
-      font-size: 1.1rem;
-      color: var(--text-secondary);
-      margin: 0;
-      font-weight: 500;
-    }
-    
-    :host-context(.dark-theme) .settings-subtitle {
-      color: var(--text-secondary-dark);
-    }
-    
-    .settings-divider {
-      height: 1px;
-      background-color: var(--border-light);
-      margin-bottom: 24px;
-    }
-    
-    :host-context(.dark-theme) .settings-divider {
-      background-color: var(--border-dark);
-    }
-    
-    .settings-form {
-      display: flex;
-      flex-direction: column;
-      gap: 24px;
-    }
-    
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    
-    .form-label {
-      font-size: 0.95rem;
-      font-weight: 500;
-      color: var(--text-secondary);
-    }
-    
-    :host-context(.dark-theme) .form-label {
-      color: var(--text-secondary-dark);
-    }
-    
-    .toggle-group {
-      margin-bottom: 16px;
-    }
-    
-    /* Toggle switch specific styles */
-    .toggle-switch {
-      margin-bottom: 4px;
-    }
-    
-    .toggle-switch.mat-mdc-slide-toggle {
-      --mdc-switch-selected-track-color: var(--primary-color);
-      --mdc-switch-selected-handle-color: var(--primary-color);
-      --mdc-switch-selected-icon-color: white;
-      --mdc-switch-unselected-track-color: rgba(0, 0, 0, 0.15);
-      --mdc-switch-unselected-handle-color: white;
-      --mdc-switch-unselected-icon-color: var(--text-secondary);
-    }
-    
-    :host-context(.dark-theme) .toggle-switch.mat-mdc-slide-toggle {
-      --mdc-switch-selected-track-color: var(--primary-light);
-      --mdc-switch-selected-handle-color: var(--primary-light);
-      --mdc-switch-selected-icon-color: var(--background-dark);
-      --mdc-switch-unselected-track-color: rgba(255, 255, 255, 0.15);
-      --mdc-switch-unselected-handle-color: var(--card-dark);
-      --mdc-switch-unselected-icon-color: var(--text-secondary-dark);
-    }
-    
-    .toggle-description {
-      font-size: 0.9rem;
-      color: var(--text-tertiary);
-      margin: 4px 0 0 32px;
-    }
-    
-    :host-context(.dark-theme) .toggle-description {
-      color: var(--text-tertiary-dark);
-    }
-    
-    .settings-toggles {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-    
+
     .settings-actions {
       display: flex;
-      justify-content: flex-end;
-      gap: 16px;
-      margin-top: 16px;
-    }
-    
-    .save-button {
-      background-color: var(--primary-color);
-      color: white;
-      border: none;
-      border-radius: var(--radius-full);
-      font-weight: 600;
-      font-size: 0.95rem;
-      padding: 10px 24px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    
-    .save-button:hover {
-      background-color: var(--primary-dark);
-      transform: translateY(-1px);
-      box-shadow: var(--shadow-md);
-    }
-    
-    :host-context(.dark-theme) .save-button {
-      background-color: var(--primary-light);
-      color: var(--background-dark);
-    }
-    
-    :host-context(.dark-theme) .save-button:hover {
-      background-color: var(--primary-color);
-      box-shadow: 0 0 15px rgba(96, 165, 250, 0.4);
-    }
-    
-    .cancel-button {
-      background-color: transparent;
-      color: var(--text-secondary);
-      border: 1px solid var(--border-light);
-      border-radius: var(--radius-full);
-      font-weight: 500;
-      font-size: 0.95rem;
-      padding: 10px 24px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    
-    .cancel-button:hover {
-      background-color: var(--card-hover-light);
-      transform: translateY(-1px);
-    }
-    
-    :host-context(.dark-theme) .cancel-button {
-      color: var(--text-secondary-dark);
-      border-color: var(--border-dark);
-    }
-    
-    :host-context(.dark-theme) .cancel-button:hover {
-      background-color: var(--card-hover-dark);
-      box-shadow: 0 0 10px rgba(30, 41, 59, 0.4);
-    }
-    
-    /* Search field styles - matching header component */
-    .search-field-wrapper {
-      display: flex;
-      align-items: center;
-      background: var(--card-light);
-      border: 1px solid var(--border-light);
-      border-radius: var(--radius-full);
-      padding: 0.5rem 0.875rem;
-      transition: all 0.2s ease;
-      box-shadow: var(--shadow-sm);
-      width: 100%;
+      gap: 1rem;
+      margin-top: 2rem;
     }
 
-    .search-field-wrapper:focus-within {
-      border-color: var(--primary-color);
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-      transform: translateY(-1px);
-    }
-    
-    .search-field-wrapper:hover:not(:focus-within) {
-      border-color: var(--primary-color);
-      box-shadow: var(--shadow-sm);
+    mat-divider {
+      margin: 1.5rem 0;
     }
 
-    :host-context(.dark-theme) .search-field-wrapper {
-      background: var(--card-dark);
-      border-color: var(--border-dark);
+    mat-slide-toggle {
+      display: block;
+      margin: 1rem 0;
     }
 
-    :host-context(.dark-theme) .search-field-wrapper:focus-within {
-      border-color: var(--primary-light);
-      box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
-    }
-    
-    :host-context(.dark-theme) .search-field-wrapper:hover:not(:focus-within) {
-      border-color: var(--primary-light);
-      background-color: rgba(30, 41, 59, 0.8);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-    }
-
-    .search-icon {
-      color: var(--text-tertiary);
-      margin-right: 0.5rem;
-      font-size: 1.25rem;
-      width: 1.25rem;
-      height: 1.25rem;
-      flex-shrink: 0;
-      transition: color 0.2s ease;
-    }
-    
-    :host-context(.dark-theme) .search-field-wrapper:hover .search-icon,
-    :host-context(.dark-theme) .search-field-wrapper:focus-within .search-icon {
-      color: var(--primary-light);
-    }
-    
-    .search-field-wrapper:hover .search-icon,
-    .search-field-wrapper:focus-within .search-icon {
-      color: var(--primary-color);
-    }
-
-    .search-input {
-      flex: 1;
-      border: none;
-      outline: none;
-      background: transparent;
-      font-size: 0.9rem;
-      color: var(--text-primary);
-      padding: 0.4rem 0;
-      font-family: inherit;
-      width: 100%;
-    }
-
-    :host-context(.dark-theme) .search-input {
-      color: var(--text-primary-dark);
-    }
-
-    .search-input::placeholder {
-      color: var(--text-tertiary);
-    }
-
-    :host-context(.dark-theme) .search-input::placeholder {
-      color: var(--text-tertiary-dark);
-    }
-
-    .clear-button {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: transparent;
-      border: none;
-      cursor: pointer;
-      padding: 0;
-      margin-left: 0.5rem;
-      flex-shrink: 0;
-    }
-
-    .clear-button mat-icon {
-      font-size: 1.1rem;
-      width: 1.1rem;
-      height: 1.1rem;
-      color: var(--text-tertiary);
-      transition: color 0.2s ease;
-    }
-
-    .clear-button:hover mat-icon {
-      color: var(--text-primary);
-    }
-
-    :host-context(.dark-theme) .clear-button:hover mat-icon {
-      color: var(--text-primary-dark);
-    }
-    
-    .select-input {
-      width: 100%;
-      padding: 12px 16px;
-      border: 1px solid var(--border-light);
-      border-radius: var(--radius-lg);
-      color: var(--text-primary);
-      font-size: 1rem;
-      outline: none;
-      cursor: pointer;
-      background-color: var(--card-light);
-      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2364748b'><path d='M0 3 L6 9 L12 3 Z'/></svg>");
-      background-repeat: no-repeat;
-      background-position: right 12px center;
-      -webkit-appearance: none;
-      -moz-appearance: none;
-      appearance: none;
-      padding-right: 30px;
-      transition: all 0.2s ease;
-    }
-    
-    .select-input:focus {
-      border-color: var(--primary-color);
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-      transform: translateY(-1px);
-    }
-    
-    .select-input:hover {
-      border-color: var(--primary-color);
-      box-shadow: var(--shadow-sm);
-    }
-    
-    :host-context(.dark-theme) .select-input {
-      background-color: var(--card-dark);
-      border-color: var(--border-dark);
-      color: var(--text-primary-dark);
-      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23f8fafc'><path d='M0 3 L6 9 L12 3 Z'/></svg>");
-    }
-    
-    :host-context(.dark-theme) .select-input:focus {
-      border-color: var(--primary-light);
-      box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
-    }
-    
-    :host-context(.dark-theme) .select-input:hover {
-      border-color: var(--primary-light);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
-    }
-    
-    @media (max-width: 600px) {
-      .settings-card {
-        padding: 24px 16px;
-        border-radius: var(--radius-xl);
-      }
-      
-      .settings-title {
-        font-size: 1.5rem;
-      }
-      
-      .settings-subtitle {
-        font-size: 1rem;
-      }
-      
-      .settings-actions {
-        flex-direction: column-reverse;
-        gap: 12px;
-      }
-      
-      .save-button, .cancel-button {
-        width: 100%;
-      }
-    }
+    .greeting { font-size: 1.2rem; font-weight: 500; margin-bottom: 1rem; color: #2c3e50; }
   `]
 })
 export class SettingsComponent implements OnInit {
   settings: UserSettings = {
-    location: 'Washington, USA',
-    units: 'imperial',
+    location: '',
+    units: 'metric',
     darkMode: false,
     highContrast: false,
+    defaultCity: '',
+    notifications: true,
+    language: 'en'
   };
   isDarkMode$ = this.themeService.isDarkMode$;
+  userName: string | null = null;
 
   constructor(
     private themeService: ThemeService,
     private authService: AuthService,
     private firebaseService: FirebaseService,
+    private weatherService: WeatherService,
+    private cityService: CityService,
     private snackBar: MatSnackBar
   ) {}
 
   async ngOnInit() {
-    // Subscribe to theme changes to update settings
+    // Subscribe to theme changes
     this.isDarkMode$.subscribe(isDark => {
       this.settings.darkMode = isDark;
     });
-    // Load settings from Firestore if authenticated, else from localStorage
-    const user = this.authService.getCurrentUser();
+
+    // Wait for the first non-null user
+    const user = await firstValueFrom(this.authService.user$.pipe(filter(u => !!u)));
     if (user) {
+      this.userName = user.displayName || user.email || null;
       const cloudSettings = await this.firebaseService.getUserSettings(user.uid);
       if (cloudSettings) {
         this.settings = { ...this.settings, ...cloudSettings };
+        this.weatherService.updateSettings(this.settings);
+        if (this.settings.defaultCity) {
+          this.cityService.updateDefaultCity(this.settings.defaultCity);
+        }
       }
     } else {
+      // Load from localStorage if not authenticated
       const local = localStorage.getItem('userSettings');
       if (local) {
         this.settings = { ...this.settings, ...JSON.parse(local) };
+        this.weatherService.updateSettings(this.settings);
+        if (this.settings.defaultCity) {
+          this.cityService.updateDefaultCity(this.settings.defaultCity);
+        }
       }
     }
   }
@@ -708,26 +353,53 @@ export class SettingsComponent implements OnInit {
   }
 
   async saveSettings() {
-    const user = this.authService.getCurrentUser();
-    if (user) {
-      await this.firebaseService.setUserSettings(user.uid, this.settings);
-      this.snackBar.open('Settings saved to your account!', 'Close', { duration: 3000 });
-    } else {
-      localStorage.setItem('userSettings', JSON.stringify(this.settings));
-      this.snackBar.open('Settings saved locally!', 'Close', { duration: 3000 });
+    console.log('saveSettings called');
+    try {
+      const user = await firstValueFrom(this.authService.user$.pipe(filter(u => !!u)));
+      console.log('User in saveSettings:', user);
+      if (user) {
+        try {
+          console.log('Saving to Firebase:', this.settings);
+          await this.firebaseService.setUserSettings(user.uid, this.settings);
+          console.log('Saved to Firebase');
+          this.snackBar.open('Settings saved to your account!', 'Close', { duration: 3000 });
+        } catch (firebaseError) {
+          console.error('Error saving to Firebase:', firebaseError);
+          this.snackBar.open('Error saving to Firebase. Please try again.', 'Close', { duration: 3000 });
+        }
+      } else {
+        try {
+          console.log('Saving to localStorage:', this.settings);
+          localStorage.setItem('userSettings', JSON.stringify(this.settings));
+          this.snackBar.open('Settings saved locally!', 'Close', { duration: 3000 });
+        } catch (localError) {
+          console.error('Error saving to localStorage:', localError);
+          this.snackBar.open('Error saving to localStorage. Please try again.', 'Close', { duration: 3000 });
+        }
+      }
+
+      // Update weather service with new settings
+      this.weatherService.updateSettings(this.settings);
+      // Update city service if default city is set
+      if (this.settings.defaultCity) {
+        this.cityService.updateDefaultCity(this.settings.defaultCity);
+      }
+    } catch (error) {
+      console.error('Error in saveSettings (outer catch):', error);
+      this.snackBar.open('Error saving settings. Please try again.', 'Close', { duration: 3000 });
     }
   }
 
   resetSettings() {
     this.settings = {
-      location: 'Washington, USA',
-      units: 'imperial',
+      location: '',
+      units: 'metric',
       darkMode: false,
       highContrast: false,
+      defaultCity: '',
+      notifications: true,
+      language: 'en'
     };
-  }
-
-  clearLocation() {
-    this.settings.location = '';
+    this.weatherService.updateSettings(this.settings);
   }
 } 
