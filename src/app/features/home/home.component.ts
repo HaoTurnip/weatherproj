@@ -53,102 +53,102 @@ interface WeatherData {
       }
       
       .dark-theme .page-title {
-        color: var(--text-primary-dark) !important;
+        color: var(--text-primary-dark) ;
       }
       
       .dark-theme .location-info {
-        background-color: var(--card-dark) !important;
-        border-color: var(--border-dark) !important;
-        color: var(--text-secondary-dark) !important;
+        background-color: var(--card-dark) ;
+        border-color: var(--border-dark) ;
+        color: var(--text-secondary-dark) ;
       }
       
       .dark-theme .weather-card, 
       .dark-theme .forecast-card {
-        background-color: var(--card-dark) !important;
-        border-color: var(--border-dark) !important;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25) !important;
+        background-color: var(--card-dark) ;
+        border-color: var(--border-dark) ;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25) ;
       }
       
       .dark-theme .detail-item {
-        background-color: var(--card-hover-dark) !important;
+        background-color: var(--card-hover-dark) ;
       }
       
       .dark-theme .detail-item:hover {
-        background-color: rgba(51, 65, 85, 0.6) !important;
+        background-color: rgba(51, 65, 85, 0.6) ;
       }
       
       .dark-theme .detail-item mat-icon {
-        color: var(--primary-light) !important;
+        color: var(--primary-light) ;
       }
       
       .dark-theme .detail-label {
-        color: var(--text-tertiary-dark) !important;
+        color: var(--text-tertiary-dark) ;
       }
       
       .dark-theme .detail-value {
-        color: var(--text-primary-dark) !important;
+        color: var(--text-primary-dark) ;
       }
       
       .dark-theme .forecast-title {
-        color: var(--text-primary-dark) !important;
-        border-color: var(--border-dark) !important;
+        color: var(--text-primary-dark) ;
+        border-color: var(--border-dark) ;
       }
       
       .dark-theme .forecast-title mat-icon {
-        color: var(--primary-light) !important;
+        color: var(--primary-light) ;
       }
       
       .dark-theme .hourly-scroll {
-        scrollbar-color: var(--primary-light) var(--card-dark) !important;
+        scrollbar-color: var(--primary-light) var(--card-dark) ;
       }
       
       .dark-theme .hourly-scroll::-webkit-scrollbar-track {
-        background: var(--card-dark) !important;
+        background: var(--card-dark) ;
       }
       
       .dark-theme .hourly-item {
-        background-color: var(--card-hover-dark) !important;
+        background-color: var(--card-hover-dark) ;
       }
       
       .dark-theme .hourly-item:hover {
-        background-color: rgba(51, 65, 85, 0.6) !important;
+        background-color: rgba(51, 65, 85, 0.6) ;
       }
       
       .dark-theme .hour {
-        color: var(--text-primary-dark) !important;
+        color: var(--text-primary-dark) ;
       }
       
       .dark-theme .hourly-temp {
-        color: var(--primary-light) !important;
+        color: var(--primary-light) ;
       }
       
       .dark-theme .hourly-condition {
-        color: var(--text-secondary-dark) !important;
+        color: var(--text-secondary-dark) ;
       }
       
       .dark-theme .forecast-link {
-        color: var(--primary-light) !important;
+        color: var(--primary-light) ;
       }
       
       .dark-theme .forecast-link:hover {
-        color: var(--primary-color) !important;
+        color: var(--primary-color) ;
       }
       
       .dark-theme .error-container {
-        background-color: var(--card-dark) !important;
-        border: 1px solid var(--border-dark) !important;
+        background-color: var(--card-dark) ;
+        border: 1px solid var(--border-dark) ;
       }
       
       .dark-theme .error-title {
-        color: var(--text-primary-dark) !important;
+        color: var(--text-primary-dark) ;
       }
       
       .dark-theme .error-message {
-        color: var(--text-secondary-dark) !important;
+        color: var(--text-secondary-dark) ;
       }
       
       .dark-theme .loading-text {
-        color: var(--text-secondary-dark) !important;
+        color: var(--text-secondary-dark) ;
       }
     </style>
     <div class="home-container">

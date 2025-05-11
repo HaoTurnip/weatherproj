@@ -480,91 +480,91 @@ body.dark-theme {
 
 /* AccuWeather-inspired dark mode styles for the whole app */
 body.dark-theme, body.dark-theme .home-container, body.dark-theme .forecast-container {
-  background: #181c23 !important;
-  color: #f4f6fb !important;
+  background: #181c2300 ;
+  color: #f4f6fb ;
 }
 
 body.dark-theme .weather-card,
 body.dark-theme .forecast-card,
 body.dark-theme .mat-mdc-card {
-  background: #232a34 !important;
-  color: #f4f6fb !important;
-  border: 1px solid #232a34 !important;
+  background: #232a34 ;
+  color: #f4f6fb ;
+  border: 1px solid #232a34 ;
   box-shadow: 0 6px 24px rgba(30, 64, 175, 0.10);
 }
 
 body.dark-theme .location h1,
 body.dark-theme .forecast-card .day {
-  color: #90caf9 !important;
+  color: #90caf9 ;
 }
 
 body.dark-theme .date-time {
-  color: #b0bec5 !important;
+  color: #b0bec5 ;
 }
 
 body.dark-theme .weather-info p,
 body.dark-theme .details {
-  color: #cfd8dc !important;
+  color: #cfd8dc ;
 }
 
 body.dark-theme .weather-condition {
-  color: #90caf9 !important;
+  color: #90caf9 ;
 }
 
 body.dark-theme .weather-alerts h3 {
-  color: #90caf9 !important;
+  color: #90caf9 ;
 }
 
 body.dark-theme .alert-item {
-  background: #2c3440 !important;
-  border-left: 4px solid #f47c20 !important;
+  background: #2c3440 ;
+  border-left: 4px solid #f47c20 ;
 }
 
 body.dark-theme .alert-content p {
-  color: #cfd8dc !important;
+  color: #cfd8dc ;
 }
 
 body.dark-theme .hourly-forecast {
-  background: #232a34 !important;
-  color: #f4f6fb !important;
+  background: #232a34 ;
+  color: #f4f6fb ;
 }
 
 body.dark-theme .hourly-forecast h2 {
-  color: #90caf9 !important;
+  color: #90caf9 ;
 }
 
 body.dark-theme .hourly-item {
-  background: #2c3440 !important;
-  color: #90caf9 !important;
+  background: #2c3440 ;
+  color: #90caf9 ;
 }
 
 body.dark-theme .hourly-item .hour {
-  color: #b0bec5 !important;
+  color: #b0bec5 ;
 }
 
 /* Light mode card and container colors (AccuWeather style) */
 .weather-card, .forecast-card, .mat-mdc-card {
-  background: #f9fbfd !important;
-  color: #1a237e !important;
+  background: #f9fbfd ;
+  color: #1a237e ;
   border-radius: 18px;
   box-shadow: 0 6px 24px rgba(30, 64, 175, 0.08);
-  border: 1px solid #e3eaf2 !important;
+  border: 1px solid #e3eaf2 ;
 }
 
 .home-container, .forecast-container {
-  background: #f4f6fb !important;
+  background: #f4f6fb ;
 }
 
 .location h1, .forecast-card .day {
-  color: #1a237e !important;
+  color: #1a237e ;
 }
 
 .weather-info p, .details {
-  color: #333 !important;
+  color: #333 ;
 }
 
 .weather-condition {
-  color: #1976d2 !important;
+  color: #1976d2 ;
 }
 
 /* Add more dark-theme rules for other components as needed */
