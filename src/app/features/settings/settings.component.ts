@@ -20,11 +20,8 @@ import { CityService } from '../../services/city.service';
 interface UserSettings {
   location: string;
   units: 'metric' | 'imperial';
-  darkMode: boolean;
-  highContrast: boolean;
   defaultCity?: string;
   notifications: boolean;
-  language: string;
   temperatureUnit: 'celsius' | 'fahrenheit';
 }
 
@@ -83,27 +80,6 @@ interface UserSettings {
 
             <mat-divider></mat-divider>
 
-            <!-- Appearance Settings -->
-            <div class="settings-section">
-              <h3>Appearance</h3>
-              <mat-slide-toggle
-                [(ngModel)]="settings.darkMode"
-                name="darkMode"
-                (change)="onThemeChange()"
-              >
-                Dark Mode
-              </mat-slide-toggle>
-
-              <mat-slide-toggle
-                [(ngModel)]="settings.highContrast"
-                name="highContrast"
-              >
-                High Contrast
-              </mat-slide-toggle>
-            </div>
-
-            <mat-divider></mat-divider>
-
             <!-- Notifications -->
             <div class="settings-section">
               <h3>Notifications</h3>
@@ -111,23 +87,8 @@ interface UserSettings {
                 [(ngModel)]="settings.notifications"
                 name="notifications"
               >
-                Enable Weather Alerts
+                Enable Weather Alerts (<--this doesn't actually send notifications - just use it as a fidget toy?)
               </mat-slide-toggle>
-            </div>
-
-            <mat-divider></mat-divider>
-
-            <!-- Language -->
-            <div class="settings-section">
-              <h3>Language</h3>
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Language</mat-label>
-                <mat-select [(ngModel)]="settings.language" name="language">
-                  <mat-option value="en">English</mat-option>
-                  <mat-option value="es">Español</mat-option>
-                  <mat-option value="fr">Français</mat-option>
-                </mat-select>
-              </mat-form-field>
             </div>
 
             <div class="settings-actions">
@@ -297,11 +258,8 @@ export class SettingsComponent implements OnInit {
   settings: UserSettings = {
     location: '',
     units: 'metric',
-    darkMode: false,
-    highContrast: false,
     defaultCity: '',
     notifications: true,
-    language: 'en',
     temperatureUnit: 'celsius'
   };
   isDarkMode$ = this.themeService.isDarkMode$;
@@ -319,7 +277,7 @@ export class SettingsComponent implements OnInit {
   async ngOnInit() {
     // Subscribe to theme changes
     this.isDarkMode$.subscribe(isDark => {
-      this.settings.darkMode = isDark;
+      // No need to update settings.darkMode since we removed it
     });
 
     // Wait for the first non-null user
@@ -399,11 +357,8 @@ export class SettingsComponent implements OnInit {
     this.settings = {
       location: '',
       units: 'metric',
-      darkMode: false,
-      highContrast: false,
       defaultCity: '',
       notifications: true,
-      language: 'en',
       temperatureUnit: 'celsius'
     };
     this.weatherService.updateSettings(this.settings);
