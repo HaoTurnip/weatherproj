@@ -7,14 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatDividerModule } from '@angular/material/divider';
-
-interface Comment {
-  id: string;
-  userId: string;
-  userName: string;
-  content: string;
-  timestamp: Date;
-}
+import { Comment } from '../../../core/models/alert.model';
 
 @Component({
   selector: 'app-comment-card',
@@ -71,7 +64,7 @@ interface Comment {
             <div class="comment">
               <div class="comment-header">
                 <span class="user-name">{{ comment.userName }}</span>
-                <span class="timestamp">{{ comment.timestamp | date:'medium' }}</span>
+                <span class="timestamp">{{ comment.createdAt | date:'medium' }}</span>
               </div>
               <p class="comment-content">{{ comment.content }}</p>
               @if (comment.userId === currentUserId) {
@@ -121,22 +114,44 @@ interface Comment {
       padding: 16px;
       background: #f8f9fa;
       border-radius: 8px;
+      color: #222;
+      border: 1px solid #e0e0e0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .dark-theme .comment {
+      background: #2a2f3a;
+      color: #f4f6fb;
+      border: 1px solid #333a45;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.18);
     }
 
     .comment-header {
       display: flex;
-      justify-content: space-between;
+      justify-content: flex-start;
+      align-items: center;
       margin-bottom: 8px;
+      gap: 0.5em;
     }
 
     .user-name {
       font-weight: 500;
       color: #1976d2;
     }
+    .dark-theme .user-name {
+      color: #90caf9;
+    }
 
     .timestamp {
+      position: absolute;
+      top: 8px;
+      right: 16px;
       color: #666;
       font-size: 0.9em;
+      white-space: nowrap;
+      background: transparent;
+    }
+    .dark-theme .timestamp {
+      color: #b0bec5;
     }
 
     .comment-content {
@@ -146,7 +161,7 @@ interface Comment {
 
     .delete-button {
       position: absolute;
-      top: 8px;
+      top: 32px;
       right: 8px;
     }
 
@@ -155,12 +170,18 @@ interface Comment {
       color: #666;
       font-style: italic;
     }
+    .dark-theme .no-comments {
+      color: #b0bec5;
+    }
 
     .login-message {
       color: #d32f2f;
       font-size: 0.95em;
       margin-top: 8px;
       font-weight: 500;
+    }
+    .dark-theme .login-message {
+      color: #ff8a65;
     }
   `]
 })

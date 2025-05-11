@@ -28,9 +28,9 @@ export const appConfig: ApplicationConfig = {
       AngularFireAuthModule
     ),
     // Services
-    AuthService,
-    WeatherService,
-    ThemeService,
-    FirebaseService
+    { provide: AuthService, useClass: AuthService },
+    { provide: WeatherService, useClass: WeatherService },
+    { provide: ThemeService, useClass: ThemeService },
+    { provide: FirebaseService, useClass: FirebaseService }
   ]
 };
