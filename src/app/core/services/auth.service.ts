@@ -31,25 +31,25 @@ export class AuthService {
     private router: Router,
     private notificationService: NotificationService
   ) {
-    this.afAuth.authState.pipe(
-      switchMap(user => {
-        if (user) {
-          return this.firestore.doc<User>(`users/${user.uid}`).valueChanges().pipe(
-            map(userData => userData || null)
-          );
-        } else {
-          return from([null]);
-        }
-      })
-    ).subscribe(user => {
-      console.log('AuthService user emitted:', user);
-      this.userSubject.next(user);
+    this.afAuth.authState.subscribe(user => {
+      console.log('authState emitted:', user);
+      if (user) {
+        this.userSubject.next({
+          uid: user.uid,
+          email: user.email || '',
+          displayName: user.displayName || '',
+          photoURL: user.photoURL || ''
+        });
+      } else {
+        this.userSubject.next(null);
+      }
     });
   }
 
   async signIn(email: string, password: string): Promise<User> {
     try {
       const result = await this.afAuth.signInWithEmailAndPassword(email, password);
+      console.log('signIn result:', result);
       if (!result.user) {
         throw new Error('No user returned from sign in');
       }
@@ -72,14 +72,20 @@ export class AuthService {
     try {
       const userCredential = await this.afAuth.createUserWithEmailAndPassword(email, password);
       if (userCredential.user) {
-        await this.createUserProfile(userCredential.user.uid, {
+        const userData = {
           uid: userCredential.user.uid,
           email,
           displayName,
-          photoURL: userCredential.user.photoURL || undefined
-        });
+          photoURL: userCredential.user.photoURL || ''
+        };
+        await this.createUserProfile(userCredential.user.uid, userData);
+        this.userSubject.next(userData);
+        this.notificationService.showSuccess('Account created successfully!');
+        this.router.navigate(['/']);
       }
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Error signing up:', error);
+      this.notificationService.showError(this.getErrorMessage(error.code));
       throw error;
     }
   }
@@ -179,36 +185,6 @@ export class AuthService {
       default:
         return 'An error occurred. Please try again.';
     }
-  }
-
-  login(email: string, password: string): Promise<void> {
-    // Here you would typically make an API call to your backend
-    // For now, we'll just simulate a successful login
-    return new Promise((resolve) => {
-      localStorage.setItem('isLoggedIn', 'true');
-      this.userSubject.next({
-        uid: '',
-        email,
-        displayName: '',
-        photoURL: ''
-      });
-      resolve();
-    });
-  }
-
-  signup(email: string, password: string): Promise<void> {
-    // Here you would typically make an API call to your backend
-    // For now, we'll just simulate a successful signup
-    return new Promise((resolve) => {
-      localStorage.setItem('isLoggedIn', 'true');
-      this.userSubject.next({
-        uid: '',
-        email,
-        displayName: '',
-        photoURL: ''
-      });
-      resolve();
-    });
   }
 
   logout(): void {

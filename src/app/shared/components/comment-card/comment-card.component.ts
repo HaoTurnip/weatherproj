@@ -119,10 +119,10 @@ import { Comment } from '../../../core/models/alert.model';
       box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     }
     .dark-theme .comment {
-      background: #2a2f3a;
+      background: #232a34;
       color: #f4f6fb;
-      border: 1px solid #333a45;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+      border: 1px solid #2d3440;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
     }
 
     .comment-header {
@@ -182,6 +182,18 @@ import { Comment } from '../../../core/models/alert.model';
     }
     .dark-theme .login-message {
       color: #ff8a65;
+    }
+
+    :host-context(.dark-theme) .comment-card {
+      background: #232a34 !important;
+      color: #f4f6fb !important;
+      border: 1px solid #2d3440 !important;
+    }
+    :host-context(.dark-theme) .comment {
+      background: #232a34 !important;
+      color: #f4f6fb !important;
+      border: 1px solid #2d3440 !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25) !important;
     }
   `]
 })
