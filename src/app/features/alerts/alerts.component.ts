@@ -40,7 +40,7 @@ import { Comment } from '../../core/models/alert.model';
       <div class="alerts-header">
         <div class="header-content">
           <h1>Weather Alerts</h1>
-          <p class="subtitle">Stay informed about severe weather conditions in your area</p>
+          <p class="subtitle">Stay informed about severe weather conditions</p>
         </div>
         @if (authService.isLoggedIn()) {
           <button mat-raised-button color="primary" (click)="openNewAlertDialog()" class="create-alert-btn">
@@ -62,7 +62,7 @@ import { Comment } from '../../core/models/alert.model';
         <div class="no-alerts">
           <mat-icon class="no-alerts-icon">notifications_off</mat-icon>
           <h2>No Active Alerts</h2>
-          <p>There are currently no active weather alerts in your area.</p>
+          <p>There are currently no active weather alerts .</p>
           @if (authService.isLoggedIn()) {
             <button mat-raised-button color="primary" (click)="openNewAlertDialog()">
               Create First Alert
@@ -115,7 +115,7 @@ import { Comment } from '../../core/models/alert.model';
                   </div>
                 </div>
 
-                <ng-container *ngIf="alert.id">
+                <ng-container *ngIf="alert.id && showComments[alert.id!]">
                   <ng-container *ngIf="authService.user$ | async as user; else commentCardLoggedOut">
                     <app-comment-card
                       [comments]="comments[alert.id] || []"
@@ -146,9 +146,9 @@ import { Comment } from '../../core/models/alert.model';
                   <mat-icon>thumb_down</mat-icon>
                   Downvote
                 </button>
-                <button mat-button (click)="viewDetails(alert.id!)" [disabled]="!alert.id">
-                  <mat-icon>info_outline</mat-icon>
-                  Details
+                <button mat-button class="comments-btn" (click)="toggleComments(alert.id!)" [disabled]="!alert.id">
+                  <mat-icon>{{ showComments[alert.id!] ? 'comment_off' : 'comment' }}</mat-icon>
+                  {{ showComments[alert.id!] ? 'Hide Comments' : 'Show Comments' }}
                 </button>
                 @if (authService.isLoggedIn() && alert.userId === authService.getCurrentUser()?.uid) {
                   <button mat-button color="warn" (click)="onDeleteAlert(alert.id!)">
@@ -410,6 +410,52 @@ import { Comment } from '../../core/models/alert.model';
       color: #ffb74d;
       border: 1.5px solid #ffb74d;
     }
+
+    /* Comments button specific styles */
+    mat-card-actions button.comments-btn {
+      position: relative;
+      overflow: hidden;
+    }
+    
+    mat-card-actions button.comments-btn::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: rgba(255,255,255,0.1);
+      top: 0;
+      left: -100%;
+      transition: all 0.3s ease;
+    }
+    
+    mat-card-actions button.comments-btn:hover::after {
+      left: 0;
+    }
+
+    /* Comment section transition */
+    app-comment-card {
+      display: block;
+      animation: slideDown 0.3s ease-out;
+      margin-top: 16px;
+      border-top: 1px solid #e0e0e0;
+      padding-top: 16px;
+    }
+
+    :host-context(.dark-theme) app-comment-card {
+      border-top: 1px solid #333a4d;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
     .no-alerts {
       display: flex;
       flex-direction: column;
@@ -520,6 +566,7 @@ export class AlertsComponent implements OnInit, OnDestroy {
   error: string | null = null;
   comments: { [key: string]: Comment[] } = {};
   private commentSubscriptions: { [key: string]: Subscription } = {};
+  showComments: { [key: string]: boolean } = {}; // Track which alerts have expanded comments
 
   constructor(
     public authService: AuthService,
@@ -544,6 +591,13 @@ export class AlertsComponent implements OnInit, OnDestroy {
       this.error = null;
       this.alerts = await this.firebaseService.getAlerts();
       this.filteredAlerts = [...this.alerts];
+
+      // Initialize showComments for all alerts to false
+      this.alerts.forEach(alert => {
+        if (alert.id) {
+          this.showComments[alert.id] = false;
+        }
+      });
 
       // Only load comments if authenticated
       if (this.authService.isLoggedIn()) {
@@ -573,39 +627,60 @@ export class AlertsComponent implements OnInit, OnDestroy {
     }
   }
 
-  onFilterChange(filters: {
-    search: string;
-    type: string;
-    severity: string;
-    sortBy: string;
-  }) {
-    this.filteredAlerts = this.alerts.filter(alert => {
-      const matchesSearch = !filters.search || 
-        alert.title.toLowerCase().includes(filters.search.toLowerCase()) ||
-        alert.description.toLowerCase().includes(filters.search.toLowerCase()) ||
-        alert.location.toLowerCase().includes(filters.search.toLowerCase());
+  onFilterChange(filters: any) {
+    if (!filters) {
+      this.filteredAlerts = [...this.alerts];
+      return;
+    }
 
-      const matchesType = !filters.type || alert.type === filters.type;
-      const matchesSeverity = !filters.severity || alert.severity === filters.severity;
+    let result = [...this.alerts];
 
-      return matchesSearch && matchesType && matchesSeverity;
-    });
+    // Filter by search query (title or description)
+    if (filters.searchQuery) {
+      const query = filters.searchQuery.toLowerCase();
+      result = result.filter(alert => 
+        alert.title.toLowerCase().includes(query) || 
+        alert.description.toLowerCase().includes(query)
+      );
+    }
 
-    // Sort alerts
-    this.filteredAlerts.sort((a, b) => {
+    // Filter by type
+    if (filters.selectedType) {
+      result = result.filter(alert => alert.type === filters.selectedType);
+    }
+
+    // Filter by severity
+    if (filters.selectedSeverity) {
+      result = result.filter(alert => alert.severity === filters.selectedSeverity);
+    }
+
+    // Sort results
+    if (filters.sortBy) {
       switch (filters.sortBy) {
         case 'date-desc':
-          return b.startTime.getTime() - a.startTime.getTime();
+          result.sort((a, b) => {
+            const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+            const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+            return dateB - dateA;
+          });
+          break;
         case 'date-asc':
-          return a.startTime.getTime() - b.startTime.getTime();
+          result.sort((a, b) => {
+            const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+            const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+            return dateA - dateB;
+          });
+          break;
         case 'severity-desc':
-          return this.getSeverityWeight(b.severity) - this.getSeverityWeight(a.severity);
+          result.sort((a, b) => this.getSeverityWeight(b.severity) - this.getSeverityWeight(a.severity));
+          break;
         case 'severity-asc':
-          return this.getSeverityWeight(a.severity) - this.getSeverityWeight(b.severity);
-        default:
-          return 0;
+          result.sort((a, b) => this.getSeverityWeight(a.severity) - this.getSeverityWeight(b.severity));
+          break;
       }
-    });
+    }
+
+    this.filteredAlerts = result;
   }
 
   getSeverityWeight(severity: string): number {
@@ -670,14 +745,6 @@ export class AlertsComponent implements OnInit, OnDestroy {
         duration: 5000
       });
     }
-  }
-
-  viewDetails(alertId: string | undefined) {
-    if (!alertId) {
-      console.error('Cannot view details: Alert ID is undefined');
-      return;
-    }
-    this.router.navigate(['/alerts', alertId]);
   }
 
   getWeatherIcon(type: string): string {
@@ -802,5 +869,9 @@ export class AlertsComponent implements OnInit, OnDestroy {
         }
       }
     });
+  }
+
+  toggleComments(alertId: string) {
+    this.showComments[alertId] = !this.showComments[alertId];
   }
 } 
