@@ -310,7 +310,8 @@ interface WeatherData {
     }
     
     :host-context(.dark-theme) .location-info {
-      background-color: var(--card-dark);
+      background-color: rgba(0, 0, 0, 0
+);
       border-color: var(--border-dark);
       color: var(--text-secondary-dark);
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
