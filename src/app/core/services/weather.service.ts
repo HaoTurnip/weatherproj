@@ -10,20 +10,63 @@ import { environment } from '../../../environments/environment';
 export class WeatherService {
   private userSettings: {
     units: 'metric' | 'imperial';
+    temperatureUnit: 'celsius' | 'fahrenheit';
     defaultCity?: string;
   } = {
     units: 'metric',
+    temperatureUnit: 'celsius',
     defaultCity: ''
   };
 
   constructor(private http: HttpClient) {}
 
-  updateSettings(settings: { units: 'metric' | 'imperial'; defaultCity?: string }) {
-    this.userSettings = { ...this.userSettings, ...settings };
+  getUserSettings() {
+    return { ...this.userSettings }; // Return a copy to prevent direct mutation
+  }
+
+  updateSettings(settings: { units?: 'metric' | 'imperial'; temperatureUnit?: 'celsius' | 'fahrenheit'; defaultCity?: string }) {
+    // Handle both units and temperatureUnit settings
+    const updatedSettings = { ...this.userSettings };
+    
+    // Update units
+    if (settings.units) {
+      updatedSettings.units = settings.units;
+      // Sync temperatureUnit with units if not explicitly provided
+      if (!settings.temperatureUnit) {
+        updatedSettings.temperatureUnit = settings.units === 'metric' ? 'celsius' : 'fahrenheit';
+      }
+    }
+    
+    // Update temperatureUnit
+    if (settings.temperatureUnit) {
+      updatedSettings.temperatureUnit = settings.temperatureUnit;
+      // Sync units with temperatureUnit if not explicitly provided
+      if (!settings.units) {
+        updatedSettings.units = settings.temperatureUnit === 'celsius' ? 'metric' : 'imperial';
+      }
+    }
+    
+    // Update default city
+    if (settings.defaultCity) {
+      updatedSettings.defaultCity = settings.defaultCity;
+    }
+    
+    this.userSettings = updatedSettings;
+    
+    // Save settings to localStorage for persistence
+    try {
+      localStorage.setItem('userSettings', JSON.stringify(updatedSettings));
+      console.log('Settings saved to localStorage:', updatedSettings);
+    } catch (error) {
+      console.error('Error saving settings to localStorage:', error);
+    }
+    
     // If there's a default city, update the current weather
     if (settings.defaultCity) {
       this.getCurrentWeather(settings.defaultCity).subscribe();
     }
+    
+    console.log('Updated weather service settings:', this.userSettings);
   }
 
   getCurrentWeather(location: string | { latitude: number; longitude: number }): Observable<WeatherData> {

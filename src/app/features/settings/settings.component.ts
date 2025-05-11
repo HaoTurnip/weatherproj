@@ -25,6 +25,7 @@ interface UserSettings {
   defaultCity?: string;
   notifications: boolean;
   language: string;
+  temperatureUnit: 'celsius' | 'fahrenheit';
 }
 
 @Component({
@@ -63,7 +64,6 @@ interface UserSettings {
                   [(ngModel)]="settings.defaultCity"
                   name="defaultCity"
                   placeholder="Enter your default city"
-                  required
                 />
                 <mat-icon matSuffix>location_on</mat-icon>
               </mat-form-field>
@@ -301,7 +301,8 @@ export class SettingsComponent implements OnInit {
     highContrast: false,
     defaultCity: '',
     notifications: true,
-    language: 'en'
+    language: 'en',
+    temperatureUnit: 'celsius'
   };
   isDarkMode$ = this.themeService.isDarkMode$;
   userName: string | null = null;
@@ -353,12 +354,18 @@ export class SettingsComponent implements OnInit {
   async saveSettings() {
     console.log('saveSettings called');
     try {
+      // Convert units to proper temperatureUnit format
+      let settingsToSave = { ...this.settings };
+      
+      // Add temperatureUnit based on units
+      settingsToSave.temperatureUnit = settingsToSave.units === 'metric' ? 'celsius' : 'fahrenheit';
+
       const user = await firstValueFrom(this.authService.user$.pipe(filter(u => !!u)));
       console.log('User in saveSettings:', user);
       if (user) {
         try {
-          console.log('Saving to Firebase:', this.settings);
-          await this.firebaseService.setUserSettings(user.uid, this.settings);
+          console.log('Saving to Firebase:', settingsToSave);
+          await this.firebaseService.setUserSettings(user.uid, settingsToSave);
           console.log('Saved to Firebase');
           this.snackBar.open('Settings saved to your account!', 'Close', { duration: 3000 });
         } catch (firebaseError) {
@@ -367,8 +374,8 @@ export class SettingsComponent implements OnInit {
         }
       } else {
         try {
-          console.log('Saving to localStorage:', this.settings);
-          localStorage.setItem('userSettings', JSON.stringify(this.settings));
+          console.log('Saving to localStorage:', settingsToSave);
+          localStorage.setItem('userSettings', JSON.stringify(settingsToSave));
           this.snackBar.open('Settings saved locally!', 'Close', { duration: 3000 });
         } catch (localError) {
           console.error('Error saving to localStorage:', localError);
@@ -377,10 +384,10 @@ export class SettingsComponent implements OnInit {
       }
 
       // Update weather service with new settings
-      this.weatherService.updateSettings(this.settings);
+      this.weatherService.updateSettings(settingsToSave);
       // Update city service if default city is set
-      if (this.settings.defaultCity) {
-        this.cityService.updateDefaultCity(this.settings.defaultCity);
+      if (settingsToSave.defaultCity) {
+        this.cityService.updateDefaultCity(settingsToSave.defaultCity);
       }
     } catch (error) {
       console.error('Error in saveSettings (outer catch):', error);
@@ -396,7 +403,8 @@ export class SettingsComponent implements OnInit {
       highContrast: false,
       defaultCity: '',
       notifications: true,
-      language: 'en'
+      language: 'en',
+      temperatureUnit: 'celsius'
     };
     this.weatherService.updateSettings(this.settings);
   }

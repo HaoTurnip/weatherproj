@@ -189,12 +189,11 @@ interface WeatherData {
                     <span class="condition-badge" [class]="getConditionClass(weatherData.condition)">
                       {{ weatherData.condition }}
                     </span>
-                    <p class="feels-like">Feels like {{ weatherData.temp_c }}°C</p>
+                    <p class="feels-like">Feels like {{ weatherData.temp_c | temperature:temperatureUnit }}</p>
                   </div>
                 </div>
                 <div class="temperature">
-                  <span class="temp-value">{{ weatherData.temp_c | temperature }}</span>
-                  <span class="temp-unit">°C</span>
+                  <span class="temp-value">{{ weatherData.temp_c | temperature: temperatureUnit }}</span>
                 </div>
               </div>
 
@@ -244,7 +243,7 @@ interface WeatherData {
                     <div class="hourly-icon-wrapper">
                       <img [src]="hour.icon" [alt]="hour.condition" class="hourly-icon">
                     </div>
-                    <span class="hourly-temp">{{ hour.temperature | temperature }}</span>
+                    <span class="hourly-temp">{{ hour.temperature | temperature: temperatureUnit }}</span>
                     <span class="hourly-condition">{{ hour.condition }}</span>
                   </div>
                 }
@@ -812,23 +811,46 @@ export class HomeComponent implements OnInit {
   cityName = 'New York';
   currentDate = new Date();
   hourlyForecast: HourlyForecast[] = [];
+  temperatureUnit: 'celsius' | 'fahrenheit' = 'celsius';
 
   constructor(
     private weatherService: WeatherService,
     private cityService: CityService
-  ) {}
+  ) {
+    // Initialize with the current unit from weather service
+    this.temperatureUnit = this.weatherService.getUserSettings().units === 'metric' ? 'celsius' : 'fahrenheit';
+  }
 
   ngOnInit() {
     this.cityService.city$.subscribe(city => {
-      this.cityName = city;
-      this.loadWeatherData();
+      if (city) {
+        this.cityName = city;
+        this.loadWeatherData();
+      } else {
+        // Get default city from settings if available
+        const settings = this.weatherService.getUserSettings();
+        
+        // Always refresh the temperature unit from latest settings
+        this.temperatureUnit = settings.temperatureUnit;
+        
+        if (settings.defaultCity) {
+          this.cityName = settings.defaultCity;
+          this.loadWeatherData();
+        } else {
+          this.loadWeatherData();
+        }
+      }
     });
   }
 
   loadWeatherData() {
     this.loading = true;
     this.error = null;
-
+    
+    // Always get the latest settings before loading data
+    const settings = this.weatherService.getUserSettings();
+    this.temperatureUnit = settings.temperatureUnit;
+    
     this.weatherService.getForecast(this.cityName).subscribe({
       next: (data) => {
         // Get current weather data

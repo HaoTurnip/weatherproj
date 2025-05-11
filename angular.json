@@ -6,10 +6,13 @@
     "weatherproj": {
       "projectType": "application",
       "schematics": {
+
         "@schematics/angular:class": {
           "skipTests": true
         },
         "@schematics/angular:component": {
+          "inlineStyle": true,
+          "inlineTemplate": true,
           "skipTests": true
         },
         "@schematics/angular:directive": {
