@@ -40,6 +40,62 @@ interface UserSettings {
   encapsulation: ViewEncapsulation.None,
   template: `
     <style>
+      /* Global dark mode text styles for the settings page */
+      .dark-theme .settings-container {
+        color: var(--text-primary-dark);
+      }
+      
+      .dark-theme .settings-container .form-label,
+      .dark-theme .settings-container .settings-subtitle,
+      .dark-theme .settings-container .toggle-description {
+        color: var(--text-secondary-dark) !important;
+      }
+      
+      .dark-theme .settings-container .search-input,
+      .dark-theme .settings-container .select-input,
+      .dark-theme .settings-container .settings-title {
+        color: var(--text-primary-dark) !important;
+      }
+      
+      /* Dark mode specific styles for Default Location input */
+      .dark-theme .search-field-wrapper {
+        background-color: var(--card-dark) !important;
+        border-color: var(--border-dark) !important;
+      }
+      
+      .dark-theme .search-icon {
+        color: var(--text-tertiary-dark) !important;
+      }
+      
+      .dark-theme .search-input {
+        background-color: transparent !important;
+        color: var(--text-primary-dark) !important;
+      }
+      
+      .dark-theme .search-field-wrapper:focus-within {
+        border-color: var(--primary-light) !important;
+        box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2) !important;
+      }
+      
+      /* Dark mode specific styles for Units dropdown */
+      .dark-theme .select-input {
+        background-color: var(--card-dark) !important;
+        border-color: var(--border-dark) !important;
+        color: var(--text-primary-dark) !important;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23f8fafc'><path d='M0 3 L6 9 L12 3 Z'/></svg>") !important;
+      }
+      
+      .dark-theme .select-input:focus {
+        border-color: var(--primary-light) !important;
+        box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2) !important;
+      }
+      
+      .dark-theme .select-input option {
+        background-color: var(--background-dark) !important;
+        color: var(--text-primary-dark) !important;
+      }
+      
+      /* Dark mode toggle text styles */
       .dark-theme .settings-toggles .mat-mdc-slide-toggle .mdc-form-field label,
       .dark-theme .settings-toggles .mat-slide-toggle-content {
         color: var(--text-primary-dark) !important;
@@ -48,6 +104,128 @@ interface UserSettings {
       .settings-toggles .mat-mdc-slide-toggle .mdc-form-field label,
       .settings-toggles .mat-slide-toggle-content {
         color: var(--text-primary) !important;
+      }
+
+      /* Additional styles for toggle switches in dark theme */
+      .dark-theme .mat-mdc-slide-toggle .mdc-switch {
+        border-color: var(--primary-light);
+      }
+
+      .dark-theme .mat-mdc-slide-toggle .mdc-switch__handle {
+        background-color: var(--primary-light);
+      }
+
+      /* Improve focus states */
+      .dark-theme .mat-mdc-slide-toggle:focus-within .mdc-switch {
+        box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+      }
+      
+      /* Fix select dropdown arrow in dark mode */
+      .dark-theme .select-input {
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23f8fafc'><path d='M0 3 L6 9 L12 3 Z'/></svg>");
+      }
+      
+      /* Ensure placeholder text is visible in dark mode */
+      .dark-theme .search-input::placeholder {
+        color: var(--text-tertiary-dark) !important;
+      }
+      
+      /* Enhance dark mode styling for entire settings page */
+      .dark-theme .settings-card {
+        background: var(--card-dark);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        border-color: var(--border-dark);
+      }
+      
+      /* Dark mode animations and transitions */
+      .dark-theme .settings-card,
+      .dark-theme .search-field-wrapper,
+      .dark-theme .select-input,
+      .dark-theme .toggle-switch,
+      .dark-theme .save-button,
+      .dark-theme .cancel-button {
+        transition: all 0.3s ease;
+      }
+      
+      /* Card hover effect in dark mode */
+      .dark-theme .settings-card:hover {
+        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.5);
+      }
+
+      /* Fix dark mode form input text colors */
+      .dark-theme .form-group input,
+      .dark-theme .form-group select,
+      .dark-theme .form-group textarea {
+        color: var(--text-primary-dark);
+      }
+
+      /* Specific dark mode styling for units select */
+      .select-input {
+        width: 100%;
+        padding: 12px 16px;
+        border: 1px solid var(--border-light);
+        border-radius: var(--radius-lg);
+        color: var(--text-primary);
+        font-size: 1rem;
+        outline: none;
+        cursor: pointer;
+        background-color: var(--card-light);
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2364748b'><path d='M0 3 L6 9 L12 3 Z'/></svg>");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        padding-right: 30px;
+        transition: all 0.2s ease;
+      }
+      
+      .select-input:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        transform: translateY(-1px);
+      }
+      
+      .select-input:hover {
+        border-color: var(--primary-color);
+        box-shadow: var(--shadow-sm);
+      }
+      
+      :host-context(.dark-theme) .select-input {
+        background-color: var(--card-dark);
+        border-color: var(--border-dark);
+        color: var(--text-primary-dark);
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23f8fafc'><path d='M0 3 L6 9 L12 3 Z'/></svg>");
+      }
+      
+      :host-context(.dark-theme) .select-input:focus {
+        border-color: var(--primary-light);
+        box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+      }
+      
+      :host-context(.dark-theme) .select-input:hover {
+        border-color: var(--primary-light);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+        background-color: rgba(30, 41, 59, 0.8);
+      }
+
+      /* Fix dropdown option colors in dark mode */
+      :host-context(.dark-theme) select option {
+        background-color: var(--background-dark);
+        color: var(--text-primary-dark);
+      }
+      
+      /* Improve form labels in dark mode */
+      .form-label {
+        font-size: 0.95rem;
+        font-weight: 500;
+        color: var(--text-secondary);
+        margin-bottom: 4px;
+        transition: color 0.2s ease;
+      }
+      
+      :host-context(.dark-theme) .form-label {
+        color: var(--text-secondary-dark);
       }
     </style>
     <div class="settings-container">
@@ -203,6 +381,29 @@ interface UserSettings {
       margin-bottom: 16px;
     }
     
+    /* Toggle switch specific styles */
+    .toggle-switch {
+      margin-bottom: 4px;
+    }
+    
+    .toggle-switch.mat-mdc-slide-toggle {
+      --mdc-switch-selected-track-color: var(--primary-color);
+      --mdc-switch-selected-handle-color: var(--primary-color);
+      --mdc-switch-selected-icon-color: white;
+      --mdc-switch-unselected-track-color: rgba(0, 0, 0, 0.15);
+      --mdc-switch-unselected-handle-color: white;
+      --mdc-switch-unselected-icon-color: var(--text-secondary);
+    }
+    
+    :host-context(.dark-theme) .toggle-switch.mat-mdc-slide-toggle {
+      --mdc-switch-selected-track-color: var(--primary-light);
+      --mdc-switch-selected-handle-color: var(--primary-light);
+      --mdc-switch-selected-icon-color: var(--background-dark);
+      --mdc-switch-unselected-track-color: rgba(255, 255, 255, 0.15);
+      --mdc-switch-unselected-handle-color: var(--card-dark);
+      --mdc-switch-unselected-icon-color: var(--text-secondary-dark);
+    }
+    
     .toggle-description {
       font-size: 0.9rem;
       color: var(--text-tertiary);
@@ -241,6 +442,7 @@ interface UserSettings {
     .save-button:hover {
       background-color: var(--primary-dark);
       transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
     }
     
     :host-context(.dark-theme) .save-button {
@@ -250,6 +452,7 @@ interface UserSettings {
     
     :host-context(.dark-theme) .save-button:hover {
       background-color: var(--primary-color);
+      box-shadow: 0 0 15px rgba(96, 165, 250, 0.4);
     }
     
     .cancel-button {
@@ -266,6 +469,7 @@ interface UserSettings {
     
     .cancel-button:hover {
       background-color: var(--card-hover-light);
+      transform: translateY(-1px);
     }
     
     :host-context(.dark-theme) .cancel-button {
@@ -275,6 +479,7 @@ interface UserSettings {
     
     :host-context(.dark-theme) .cancel-button:hover {
       background-color: var(--card-hover-dark);
+      box-shadow: 0 0 10px rgba(30, 41, 59, 0.4);
     }
     
     /* Search field styles - matching header component */
@@ -295,6 +500,11 @@ interface UserSettings {
       box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
       transform: translateY(-1px);
     }
+    
+    .search-field-wrapper:hover:not(:focus-within) {
+      border-color: var(--primary-color);
+      box-shadow: var(--shadow-sm);
+    }
 
     :host-context(.dark-theme) .search-field-wrapper {
       background: var(--card-dark);
@@ -305,6 +515,12 @@ interface UserSettings {
       border-color: var(--primary-light);
       box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
     }
+    
+    :host-context(.dark-theme) .search-field-wrapper:hover:not(:focus-within) {
+      border-color: var(--primary-light);
+      background-color: rgba(30, 41, 59, 0.8);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
 
     .search-icon {
       color: var(--text-tertiary);
@@ -313,6 +529,17 @@ interface UserSettings {
       width: 1.25rem;
       height: 1.25rem;
       flex-shrink: 0;
+      transition: color 0.2s ease;
+    }
+    
+    :host-context(.dark-theme) .search-field-wrapper:hover .search-icon,
+    :host-context(.dark-theme) .search-field-wrapper:focus-within .search-icon {
+      color: var(--primary-light);
+    }
+    
+    .search-field-wrapper:hover .search-icon,
+    .search-field-wrapper:focus-within .search-icon {
+      color: var(--primary-color);
     }
 
     .search-input {
@@ -384,23 +611,35 @@ interface UserSettings {
       -moz-appearance: none;
       appearance: none;
       padding-right: 30px;
+      transition: all 0.2s ease;
     }
     
     .select-input:focus {
       border-color: var(--primary-color);
       box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+      transform: translateY(-1px);
+    }
+    
+    .select-input:hover {
+      border-color: var(--primary-color);
+      box-shadow: var(--shadow-sm);
     }
     
     :host-context(.dark-theme) .select-input {
       background-color: var(--card-dark);
       border-color: var(--border-dark);
       color: var(--text-primary-dark);
-      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2394a3b8'><path d='M0 3 L6 9 L12 3 Z'/></svg>");
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23f8fafc'><path d='M0 3 L6 9 L12 3 Z'/></svg>");
     }
     
     :host-context(.dark-theme) .select-input:focus {
       border-color: var(--primary-light);
       box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+    }
+    
+    :host-context(.dark-theme) .select-input:hover {
+      border-color: var(--primary-light);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
     }
     
     @media (max-width: 600px) {
