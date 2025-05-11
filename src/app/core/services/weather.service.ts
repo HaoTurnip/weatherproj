@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, map, forkJoin, of } from 'rxjs';
+import { Observable, map, forkJoin, of, switchMap } from 'rxjs';
 import { WeatherData, HourlyForecast, DailyForecast } from '../models/weather.model';
 import { ForecastData } from '../models/weather.model';
 
@@ -33,7 +33,7 @@ export class WeatherService {
   }
 
   getHourlyForecast(latitude: number, longitude: number): Observable<HourlyForecast[]> {
-    const url = `${this.baseUrl}/forecast?latitude=${latitude}&longitude=${longitude}&hourly=temperature_2m,weather_code`;
+    const url = `${this.baseUrl}/forecast?latitude=${latitude}&longitude=${longitude}&hourly=temperature_2m,weather_code,relative_humidity_2m,wind_speed_10m,wind_direction_10m,precipitation,uv_index`;
     
     return this.http.get(url).pipe(
       map((response: any) => {
@@ -42,7 +42,12 @@ export class WeatherService {
           time: new Date(time).toLocaleTimeString([], { hour: 'numeric' }),
           temperature: hourly.temperature_2m[index],
           condition: this.getWeatherCondition(hourly.weather_code[index]),
-          icon: this.getWeatherIcon(hourly.weather_code[index])
+          icon: this.getWeatherIcon(hourly.weather_code[index]),
+          humidity: hourly.relative_humidity_2m[index],
+          windSpeed: hourly.wind_speed_10m[index],
+          windDirection: this.getWindDirection(hourly.wind_direction_10m[index]),
+          precipitation: hourly.precipitation[index],
+          uvIndex: hourly.uv_index[index]
         })).slice(0, 24);
       })
     );
@@ -131,31 +136,37 @@ export class WeatherService {
     return directions[index];
   }
 
-  getForecast(cityName: string): Observable<ForecastData> {
-    // Stub: map cityName to coordinates
-    const coords = this.getCoordinatesForCity(cityName);
-    return forkJoin({
-      hourly: this.getHourlyForecast(coords.lat, coords.lon),
-      daily: this.getDailyForecast(coords.lat, coords.lon)
-    }).pipe(
-      map(({ hourly, daily }) => ({
-        cityName,
-        hourly,
-        daily
-      }))
+  private getCoordinatesForCity(cityName: string): Observable<{ lat: number; lon: number }> {
+    const geocodingUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cityName)}&count=1`;
+    
+    return this.http.get(geocodingUrl).pipe(
+      map((response: any) => {
+        if (response.results && response.results.length > 0) {
+          return {
+            lat: response.results[0].latitude,
+            lon: response.results[0].longitude
+          };
+        }
+        throw new Error('City not found');
+      })
     );
   }
 
-  private getCoordinatesForCity(cityName: string): { lat: number; lon: number } {
-    // Replace with real geocoding
-    const cityCoords: { [key: string]: { lat: number; lon: number } } = {
-      'Cairo': { lat: 30.0444, lon: 31.2357 },
-      'London': { lat: 51.5074, lon: -0.1278 },
-      'New York': { lat: 40.7128, lon: -74.0060 },
-      'Paris': { lat: 48.8566, lon: 2.3522 },
-      'Tokyo': { lat: 35.6895, lon: 139.6917 }
-    };
-    return cityCoords[cityName] || cityCoords['Cairo'];
+  getForecast(cityName: string): Observable<ForecastData> {
+    return this.getCoordinatesForCity(cityName).pipe(
+      switchMap(coords => 
+        forkJoin({
+          hourly: this.getHourlyForecast(coords.lat, coords.lon),
+          daily: this.getDailyForecast(coords.lat, coords.lon)
+        }).pipe(
+          map(({ hourly, daily }) => ({
+            cityName,
+            hourly,
+            daily
+          }))
+        )
+      )
+    );
   }
 
   getMapOverlay(overlayType: string): Observable<any> {
