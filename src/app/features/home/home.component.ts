@@ -588,19 +588,29 @@ export class HomeComponent implements OnInit {
 
     this.weatherService.getForecast(this.cityName).subscribe({
       next: (data) => {
-        this.weatherData = {
-          cityName: this.cityName,
-          temp_c: data.hourly[0].temperature,
-          condition: data.hourly[0].condition,
-          icon: data.hourly[0].icon,
-          humidity: data.hourly[0].humidity,
-          wind_kph: data.hourly[0].windSpeed,
-          wind_dir: data.hourly[0].windDirection,
-          precip_mm: data.hourly[0].precipitation,
-          uv: data.hourly[0].uvIndex
-        };
-        this.hourlyForecast = data.hourly;
-        this.loading = false;
+        // Get current weather data
+        this.weatherService.getCurrentWeather(data.latitude, data.longitude).subscribe({
+          next: (currentWeather) => {
+            this.weatherData = {
+              cityName: this.cityName,
+              temp_c: currentWeather.temperature,
+              condition: currentWeather.condition,
+              icon: currentWeather.icon,
+              humidity: currentWeather.humidity,
+              wind_kph: currentWeather.windSpeed,
+              wind_dir: currentWeather.windDirection,
+              precip_mm: currentWeather.precipitation,
+              uv: currentWeather.uvIndex
+            };
+            this.hourlyForecast = data.hourly;
+            this.loading = false;
+          },
+          error: (error) => {
+            console.error('Error loading current weather:', error);
+            this.error = 'Failed to load current weather data. Please try again.';
+            this.loading = false;
+          }
+        });
       },
       error: (error) => {
         console.error('Error loading weather data:', error);
