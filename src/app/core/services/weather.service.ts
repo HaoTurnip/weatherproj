@@ -1,5 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Observable, map, forkJoin, of, switchMap, catchError } from 'rxjs';
+import { WeatherData, HourlyForecast, DailyForecast } from '../models/weather.model';
+import { ForecastData } from '../models/weather.model';
+
 import { Observable, map } from 'rxjs';
 import { WeatherData, HourlyForecast, DailyForecast, ForecastData } from '../models/weather.model';
 import { environment } from '../../../environments/environment';
@@ -99,6 +103,29 @@ export class WeatherService {
     );
   }
 
+  /**
+   * Gets coordinates for a given city name.
+   * This is a public method that can be used directly for the map feature
+   */
+  getCoordinatesForCity(cityName: string): Observable<{ lat: number; lon: number }> {
+    const geocodingUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cityName)}&count=1`;
+    
+    return this.http.get(geocodingUrl).pipe(
+      map((response: any) => {
+        if (response.results && response.results.length > 0) {
+          return {
+            lat: response.results[0].latitude,
+            lon: response.results[0].longitude
+          };
+        }
+        throw new Error('City not found');
+      }),
+      catchError(error => {
+        console.error('Error getting coordinates for city:', error);
+        throw new Error('Unable to find location. Please try a different city name.');
+      })
+      
+      
   getHourlyForecast(latitude: number, longitude: number): Observable<HourlyForecast[]> {
     const params = {
       key: environment.weatherApiKey,
@@ -143,6 +170,7 @@ export class WeatherService {
       )
     );
   }
+
 
   getMapOverlay(type: 'temperature' | 'precipitation' | 'wind' | 'clouds'): Observable<any> {
     const params = {
