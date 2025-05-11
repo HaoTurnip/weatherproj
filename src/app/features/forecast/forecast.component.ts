@@ -8,6 +8,7 @@ import { WeatherService } from '../../core/services/weather.service';
 import { ForecastData } from '../../core/models/weather.model';
 import { SkeletonLoaderComponent } from '../../shared/components/skeleton-loader/skeleton-loader.component';
 import { CityService } from '../../services/city.service';
+import { TemperaturePipe } from '../../shared/pipes/temperature.pipe';
 
 @Component({
   selector: 'app-forecast',
@@ -18,7 +19,8 @@ import { CityService } from '../../services/city.service';
     MatIconModule,
     MatButtonModule,
     MatProgressSpinnerModule,
-    SkeletonLoaderComponent
+    SkeletonLoaderComponent,
+    TemperaturePipe
   ],
   encapsulation: ViewEncapsulation.None,
   template: `
@@ -99,8 +101,8 @@ import { CityService } from '../../services/city.service';
                   <div class="forecast-info">
                     <img [src]="day.icon" [alt]="day.condition">
                     <div class="temperature">
-                      <span class="max">{{ day.high }}°C</span>
-                      <span class="min">{{ day.low }}°C</span>
+                      <span class="max"><span class="temp-label">H</span> {{ day.high | temperature: temperatureUnit }}</span>
+                      <span class="min"><span class="temp-label">L</span> {{ day.low | temperature: temperatureUnit }}</span>
                     </div>
                     <div class="details">
                       <div>Condition: {{ day.condition }}</div>
@@ -205,12 +207,24 @@ import { CityService } from '../../services/city.service';
       color: var(--warning-color);
       letter-spacing: 0.5px;
       line-height: 1;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
 
     .min {
       font-size: 1.4rem;
       color: var(--primary-color);
       font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .temp-label {
+      font-size: 1rem;
+      font-weight: 700;
+      opacity: 0.9;
     }
 
     :host-context(.dark-theme) .max {
@@ -370,8 +384,12 @@ export class ForecastComponent implements OnInit {
   loading = true;
   error: string | null = null;
   cityName = 'New York';
+  temperatureUnit: 'celsius' | 'fahrenheit' = 'celsius';
 
-  constructor(private weatherService: WeatherService, private cityService: CityService) {}
+  constructor(private weatherService: WeatherService, private cityService: CityService) {
+    // Initialize with the current unit from weather service
+    this.temperatureUnit = this.weatherService.getUserSettings().temperatureUnit;
+  }
 
   ngOnInit() {
     this.cityService.city$.subscribe(city => {
@@ -383,6 +401,10 @@ export class ForecastComponent implements OnInit {
   loadForecast() {
     this.loading = true;
     this.error = null;
+    
+    // Always get the latest settings before loading data
+    const settings = this.weatherService.getUserSettings();
+    this.temperatureUnit = settings.temperatureUnit;
 
     this.weatherService.getForecast(this.cityName, 5).subscribe({
       next: (data: ForecastData) => {
