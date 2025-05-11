@@ -57,3 +57,56 @@ Angular CLI does not come with an end-to-end testing framework by default. You c
 ## Additional Resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+
+## Weather Map Feature
+
+The Weather Map feature allows users to view interactive weather maps powered by the [Windy.com](https://www.windy.com) JavaScript API directly integrated within the application.
+
+### Features
+
+- Interactive weather map with full Windy.com functionality
+- View different weather parameters:
+  - Wind (default)
+  - Temperature
+  - Rain & Thunder
+  - Rain Accumulation
+  - Clouds
+  - Humidity
+  - Precipitation Type
+  - Pressure
+- Search for specific locations to view localized weather forecasts
+- Direct map interaction with pan and zoom controls
+- Responsive design that works well on mobile and desktop
+
+### How It Works
+
+1. The component uses the Windy JavaScript API and Leaflet to create an interactive map
+2. The application dynamically loads the Windy API libraries at runtime
+3. User location searches are geocoded to coordinates using the OpenMeteo API
+4. Map state (overlay type, coordinates, zoom level) is synchronized with URL parameters for sharing and navigation
+
+### Implementation
+
+The feature consists of:
+
+1. Windy API Integration - Loads and initializes the Windy JavaScript API with our API key
+2. Map Component - Manages the UI controls and API interactions
+3. Leaflet Integration - Uses the Leaflet mapping library which Windy is built on
+4. WeatherService - Provides geocoding functionality to convert city names to coordinates
+
+### Technical Details
+
+- API Key: The application uses a Windy API key for authentication
+- Dynamic Script Loading: JavaScript libraries are loaded at runtime
+- Zone Management: Angular Zone is used to handle updates from outside the Angular context
+- State Management: Map state is preserved in URL parameters
+- Error Handling: Comprehensive error handling for script loading, initialization, and API errors
+
+### Usage
+
+To use the weather map:
+
+1. Navigate to the Map section from the main navigation menu
+2. Select a map type to view global data for that parameter
+3. Enter a location name in the search field to view weather for that specific area
+4. Interact directly with the map through pan, zoom, and other Windy features

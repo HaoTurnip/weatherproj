@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, map, forkJoin, of, switchMap } from 'rxjs';
+import { Observable, map, forkJoin, of, switchMap, catchError } from 'rxjs';
 import { WeatherData, HourlyForecast, DailyForecast } from '../models/weather.model';
 import { ForecastData } from '../models/weather.model';
 
@@ -136,7 +136,11 @@ export class WeatherService {
     return directions[index];
   }
 
-  private getCoordinatesForCity(cityName: string): Observable<{ lat: number; lon: number }> {
+  /**
+   * Gets coordinates for a given city name.
+   * This is a public method that can be used directly for the map feature
+   */
+  getCoordinatesForCity(cityName: string): Observable<{ lat: number; lon: number }> {
     const geocodingUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cityName)}&count=1`;
     
     return this.http.get(geocodingUrl).pipe(
@@ -148,6 +152,10 @@ export class WeatherService {
           };
         }
         throw new Error('City not found');
+      }),
+      catchError(error => {
+        console.error('Error getting coordinates for city:', error);
+        throw new Error('Unable to find location. Please try a different city name.');
       })
     );
   }
@@ -169,10 +177,5 @@ export class WeatherService {
         )
       )
     );
-  }
-
-  getMapOverlay(overlayType: string): Observable<any> {
-    // Stub: return dummy overlay
-    return of({ overlayType, url: 'https://example.com/overlay.png' });
   }
 } 
