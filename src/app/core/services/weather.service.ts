@@ -1,10 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map, forkJoin, of, switchMap, catchError } from 'rxjs';
-import { WeatherData, HourlyForecast, DailyForecast } from '../models/weather.model';
-import { ForecastData } from '../models/weather.model';
-
-import { Observable, map } from 'rxjs';
 import { WeatherData, HourlyForecast, DailyForecast, ForecastData } from '../models/weather.model';
 import { environment } from '../../../environments/environment';
 
@@ -124,7 +120,8 @@ export class WeatherService {
         console.error('Error getting coordinates for city:', error);
         throw new Error('Unable to find location. Please try a different city name.');
       })
-      
+    );
+  }
       
   getHourlyForecast(latitude: number, longitude: number): Observable<HourlyForecast[]> {
     const params = {
@@ -170,7 +167,6 @@ export class WeatherService {
       )
     );
   }
-
 
   getMapOverlay(type: 'temperature' | 'precipitation' | 'wind' | 'clouds'): Observable<any> {
     const params = {

@@ -44,79 +44,12 @@ interface UserSettings {
     MatSnackBarModule
   ],
   template: `
-
-    <style>
-      /* Global dark mode text styles for the settings page */
-      .dark-theme .settings-container {
-        color: var(--text-primary-dark);
-      }
-      
-      .dark-theme .settings-container .form-label,
-      .dark-theme .settings-container .settings-subtitle,
-      .dark-theme .settings-container .toggle-description {
-        color: var(--text-secondary-dark) ;
-      }
-      
-      .dark-theme .settings-container .search-input,
-      .dark-theme .settings-container .select-input,
-      .dark-theme .settings-container .settings-title {
-        color: var(--text-primary-dark) ;
-      }
-      
-      /* Dark mode specific styles for Default Location input */
-      .dark-theme .search-field-wrapper {
-        background-color: var(--card-dark) ;
-        border-color: var(--border-dark) ;
-      }
-      
-      .dark-theme .search-icon {
-        color: var(--text-tertiary-dark) ;
-      }
-      
-      .dark-theme .search-input {
-        background-color: transparent ;
-        color: var(--text-primary-dark) ;
-      }
-      
-      .dark-theme .search-field-wrapper:focus-within {
-        border-color: var(--primary-light) ;
-        box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2) ;
-      }
-      
-      /* Dark mode specific styles for Units dropdown */
-      .dark-theme .select-input {
-        background-color: var(--card-dark) ;
-        border-color: var(--border-dark) ;
-        color: var(--text-primary-dark) ;
-        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23f8fafc'><path d='M0 3 L6 9 L12 3 Z'/></svg>") ;
-      }
-      
-      .dark-theme .select-input:focus {
-        border-color: var(--primary-light) ;
-        box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2) ;
-      }
-      
-      .dark-theme .select-input option {
-        background-color: var(--background-dark) ;
-        color: var(--text-primary-dark) ;
-      }
-      
-      /* Dark mode toggle text styles */
-      .dark-theme .settings-toggles .mat-mdc-slide-toggle .mdc-form-field label,
-      .dark-theme .settings-toggles .mat-slide-toggle-content {
-        color: var(--text-primary-dark) ;
-      }
-      
-      .settings-toggles .mat-mdc-slide-toggle .mdc-form-field label,
-      .settings-toggles .mat-slide-toggle-content {
-        color: var(--text-primary) ;
-      }
-
-      /* Additional styles for toggle switches in dark theme */
-      .dark-theme .mat-mdc-slide-toggle .mdc-switch {
-        border-color: var(--primary-light);
-      }
-
+    <div class="settings-container">
+      <mat-card class="settings-card">
+        <mat-card-header>
+          <mat-card-title>Settings</mat-card-title>
+          <div class="greeting" *ngIf="userName">Welcome, {{userName}}!</div>
+        </mat-card-header>
 
         <mat-card-content>
           <form (ngSubmit)="saveSettings()" #settingsForm="ngForm">
@@ -135,44 +68,6 @@ interface UserSettings {
                 <mat-icon matSuffix>location_on</mat-icon>
               </mat-form-field>
             </div>
-
-
-      /* Improve focus states */
-      .dark-theme .mat-mdc-slide-toggle:focus-within .mdc-switch {
-        box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
-      }
-      
-      /* Fix select dropdown arrow in dark mode */
-      .dark-theme .select-input {
-        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23f8fafc'><path d='M0 3 L6 9 L12 3 Z'/></svg>");
-      }
-      
-      /* Ensure placeholder text is visible in dark mode */
-      .dark-theme .search-input::placeholder {
-        color: var(--text-tertiary-dark) ;
-      }
-      
-      /* Enhance dark mode styling for entire settings page */
-      .dark-theme .settings-card {
-        background: var(--card-dark);
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-        border-color: var(--border-dark);
-      }
-      
-      /* Dark mode animations and transitions */
-      .dark-theme .settings-card,
-      .dark-theme .search-field-wrapper,
-      .dark-theme .select-input,
-      .dark-theme .toggle-switch,
-      .dark-theme .save-button,
-      .dark-theme .cancel-button {
-        transition: all 0.3s ease;
-      }
-      
-      /* Card hover effect in dark mode */
-      .dark-theme .settings-card:hover {
-        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.5);
-      }
 
             <!-- Units Settings -->
             <div class="settings-section">
@@ -293,6 +188,109 @@ interface UserSettings {
     }
 
     .greeting { font-size: 1.2rem; font-weight: 500; margin-bottom: 1rem; color: #2c3e50; }
+
+    /* Global dark mode text styles for the settings page */
+    .dark-theme .settings-container {
+      color: var(--text-primary-dark);
+    }
+    
+    .dark-theme .settings-container .form-label,
+    .dark-theme .settings-container .settings-subtitle,
+    .dark-theme .settings-container .toggle-description {
+      color: var(--text-secondary-dark);
+    }
+    
+    .dark-theme .settings-container .search-input,
+    .dark-theme .settings-container .select-input,
+    .dark-theme .settings-container .settings-title {
+      color: var(--text-primary-dark);
+    }
+    
+    /* Dark mode specific styles for Default Location input */
+    .dark-theme .search-field-wrapper {
+      background-color: var(--card-dark);
+      border-color: var(--border-dark);
+    }
+    
+    .dark-theme .search-icon {
+      color: var(--text-tertiary-dark);
+    }
+    
+    .dark-theme .search-input {
+      background-color: transparent;
+      color: var(--text-primary-dark);
+    }
+    
+    .dark-theme .search-field-wrapper:focus-within {
+      border-color: var(--primary-light);
+      box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+    }
+    
+    /* Dark mode specific styles for Units dropdown */
+    .dark-theme .select-input {
+      background-color: var(--card-dark);
+      border-color: var(--border-dark);
+      color: var(--text-primary-dark);
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23f8fafc'><path d='M0 3 L6 9 L12 3 Z'/></svg>");
+    }
+    
+    .dark-theme .select-input:focus {
+      border-color: var(--primary-light);
+      box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+    }
+    
+    .dark-theme .select-input option {
+      background-color: var(--background-dark);
+      color: var(--text-primary-dark);
+    }
+    
+    /* Dark mode toggle text styles */
+    .dark-theme .settings-toggles .mat-mdc-slide-toggle .mdc-form-field label,
+    .dark-theme .settings-toggles .mat-slide-toggle-content {
+      color: var(--text-primary-dark);
+    }
+    
+    .settings-toggles .mat-mdc-slide-toggle .mdc-form-field label,
+    .settings-toggles .mat-slide-toggle-content {
+      color: var(--text-primary);
+    }
+
+    /* Additional styles for toggle switches in dark theme */
+    .dark-theme .mat-mdc-slide-toggle .mdc-switch {
+      border-color: var(--primary-light);
+    }
+
+    /* Improve focus states */
+    .dark-theme .mat-mdc-slide-toggle:focus-within .mdc-switch {
+      box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+    }
+    
+    /* Ensure placeholder text is visible in dark mode */
+    .dark-theme .search-input::placeholder {
+      color: var(--text-tertiary-dark);
+    }
+    
+    /* Enhance dark mode styling for entire settings page */
+    .dark-theme .settings-card {
+      background: var(--card-dark);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+      border-color: var(--border-dark);
+    }
+    
+    /* Dark mode animations and transitions */
+    .dark-theme .settings-card,
+    .dark-theme .search-field-wrapper,
+    .dark-theme .select-input,
+    .dark-theme .toggle-switch,
+    .dark-theme .save-button,
+    .dark-theme .cancel-button {
+      transition: all 0.3s ease;
+    }
+    
+    /* Card hover effect in dark mode */
+    .dark-theme .settings-card:hover {
+      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.5);
+    }
   `]
 })
 export class SettingsComponent implements OnInit {
