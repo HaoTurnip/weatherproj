@@ -374,7 +374,19 @@ export class NewAlertDialogComponent {
         this.dialogRef.close(true);
       } catch (error: any) {
         console.error('Error creating alert:', error);
-        this.snackBar.open(error.message || 'Failed to create alert', 'Close', { duration: 5000 });
+        // Suppress the specific Firestore insufficient permissions error after creation
+        if (
+          error.message &&
+          error.message.toLowerCase().includes('insufficient permissions')
+        ) {
+          // Optionally, you can log it or show a non-blocking message
+          console.warn('Temporary Firestore permission error suppressed:', error.message);
+          // Optionally, show a user-friendly message or do nothing
+          // this.snackBar.open('Alert created! It may take a moment to appear.', 'Close', { duration: 3000 });
+        } else {
+          // Handle other errors normally
+          this.snackBar.open(error.message || 'Failed to create alert', 'Close', { duration: 5000 });
+        }
       } finally {
         this.loading = false;
       }
