@@ -15,6 +15,11 @@ export interface HourlyForecast {
   temperature: number;
   condition: string;
   icon: string;
+  humidity: number;
+  windSpeed: number;
+  windDirection: string;
+  precipitation: number;
+  uvIndex: number;
 }
 
 export interface DailyForecast {
