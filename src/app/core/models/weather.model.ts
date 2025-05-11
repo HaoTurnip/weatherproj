@@ -32,6 +32,8 @@ export interface DailyForecast {
 
 export interface ForecastData {
   cityName: string;
+  latitude: number;
+  longitude: number;
   hourly: HourlyForecast[];
   daily: DailyForecast[];
 } 

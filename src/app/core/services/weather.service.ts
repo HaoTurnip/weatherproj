@@ -161,6 +161,8 @@ export class WeatherService {
         }).pipe(
           map(({ hourly, daily }) => ({
             cityName,
+            latitude: coords.lat,
+            longitude: coords.lon,
             hourly,
             daily
           }))
