@@ -55,8 +55,9 @@ import { WeatherAlert } from '../../../core/models/alert.model';
     }
 
     :host-context(.dark-theme) .alert-card {
-      background: #232a34;
-      color: #f4f6fb;
+      background: #1e293b;
+      color: #f8fafc;
+      border-left-color: #60a5fa;
     }
 
     .alert-card.active {
@@ -81,7 +82,7 @@ import { WeatherAlert } from '../../../core/models/alert.model';
     }
 
     :host-context(.dark-theme) mat-card-subtitle {
-      color: #b0bec5;
+      color: #cbd5e1;
     }
 
     .severity-chip {
@@ -120,6 +121,11 @@ import { WeatherAlert } from '../../../core/models/alert.model';
       font-size: 1rem;
       line-height: 1.5;
       margin: 0;
+      color: #475569;
+    }
+
+    :host-context(.dark-theme) .description {
+      color: #cbd5e1;
     }
 
     .alert-details {
@@ -131,7 +137,7 @@ import { WeatherAlert } from '../../../core/models/alert.model';
     }
 
     :host-context(.dark-theme) .alert-details {
-      border-top-color: #333a4d;
+      border-top-color: #334155;
     }
 
     .detail-item {
@@ -139,17 +145,22 @@ import { WeatherAlert } from '../../../core/models/alert.model';
       align-items: center;
       gap: 0.5rem;
       font-size: 0.9rem;
+      color: #64748b;
+    }
+
+    :host-context(.dark-theme) .detail-item {
+      color: #94a3b8;
     }
 
     mat-icon {
       font-size: 1.2rem;
       width: 1.2rem;
       height: 1.2rem;
-      color: #1976d2;
+      color: #3b82f6;
     }
 
     :host-context(.dark-theme) mat-icon {
-      color: #90caf9;
+      color: #60a5fa;
     }
 
     @media (max-width: 600px) {

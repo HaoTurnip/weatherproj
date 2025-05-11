@@ -18,26 +18,40 @@ import { HomeComponent } from './features/home/home.component';
   standalone: true,
   imports: [RouterOutlet, HeaderComponent, FooterComponent],
   template: `
-    <app-header (searchCity)="onSearchCity($event)"></app-header>
-    <div class="main-content">
-      <router-outlet></router-outlet>
+    <div class="app-wrapper">
+      <app-header (searchCity)="onSearchCity($event)"></app-header>
+      <div class="main-content">
+        <router-outlet></router-outlet>
+      </div>
+      <app-footer></app-footer>
     </div>
-    <app-footer></app-footer>
   `,
   styles: [`
     .welcome-message {
       text-align: center;
       padding: 20px;
     }
-    .main-content {
-      margin-top: 64px; /* Adjust if your header is taller */
-      min-height: calc(100vh - 64px);
+    .app-wrapper {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      background-color: var(--background-light);
     }
-    html, body {
-      height: 100%;
-      overflow: auto;
-      margin: 0;
-      padding: 0;
+    :host-context(.dark-theme) .app-wrapper {
+      background-color: var(--background-dark);
+    }
+    .main-content {
+      padding-top: 135px; /* Account for both header (72px) and navbar height (~55px with margins) */
+      margin-top: 0;
+      min-height: calc(100vh - 300px);
+      flex: 1;
+      width: 100%;
+      box-sizing: border-box;
+      overflow-x: hidden; /* Prevent horizontal scrolling */
+    }
+    :host {
+      display: block;
+      min-height: 100vh;
     }
   `]
 })

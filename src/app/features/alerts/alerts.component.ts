@@ -42,7 +42,7 @@ import { CommentCardComponent } from '../../shared/components/comment-card/comme
         </div>
         @if (authService.isLoggedIn()) {
           <button mat-raised-button color="primary" (click)="openNewAlertDialog()" class="create-alert-btn">
-            <mat-icon>add</mat-icon>
+            <mat-icon>add_circle</mat-icon>
             Create Alert
           </button>
         }
@@ -89,27 +89,27 @@ import { CommentCardComponent } from '../../shared/components/comment-card/comme
                 
                 <div class="alert-details">
                   <div class="detail-item">
-                    <mat-icon>location_on</mat-icon>
+                    <mat-icon>place</mat-icon>
                     <span>{{ alert.location }}</span>
                   </div>
                   <div class="detail-item">
-                    <mat-icon>schedule</mat-icon>
+                    <mat-icon>access_time</mat-icon>
                     <span>{{ formatDateRange(alert.startTime, alert.endTime) }}</span>
                   </div>
                 </div>
 
                 <div class="alert-stats">
                   <div class="stat-item">
-                    <mat-icon>arrow_upward</mat-icon>
+                    <mat-icon>thumb_up</mat-icon>
                     <span>{{ alert.upvotes || 0 }}</span>
                   </div>
                   <div class="stat-item">
-                    <mat-icon>arrow_downward</mat-icon>
+                    <mat-icon>thumb_down</mat-icon>
                     <span>{{ alert.downvotes || 0 }}</span>
                   </div>
                   <div class="stat-item">
-                    <mat-icon>comment</mat-icon>
-                    <span>{{ comments[alert.id!]?.length || 0 }}</span>
+                    <mat-icon>chat</mat-icon>
+                    <span>{{ comments[alert.id!].length || 0 }}</span>
                   </div>
                 </div>
 
@@ -125,20 +125,20 @@ import { CommentCardComponent } from '../../shared/components/comment-card/comme
 
               <mat-card-actions>
                 <button mat-button color="primary" (click)="vote(alert.id!, 'up')" [disabled]="!authService.isLoggedIn() || !alert.id">
-                  <mat-icon>arrow_upward</mat-icon>
+                  <mat-icon>thumb_up</mat-icon>
                   Upvote
                 </button>
                 <button mat-button color="warn" (click)="vote(alert.id!, 'down')" [disabled]="!authService.isLoggedIn() || !alert.id">
-                  <mat-icon>arrow_downward</mat-icon>
+                  <mat-icon>thumb_down</mat-icon>
                   Downvote
                 </button>
                 <button mat-button (click)="viewDetails(alert.id!)" [disabled]="!alert.id">
-                  <mat-icon>info</mat-icon>
+                  <mat-icon>info_outline</mat-icon>
                   Details
                 </button>
                 @if (authService.isLoggedIn() && alert.userId === authService.getCurrentUser()?.uid) {
                   <button mat-button color="warn" (click)="onDeleteAlert(alert.id!)">
-                    <mat-icon>delete</mat-icon>
+                    <mat-icon>delete_outline</mat-icon>
                     Delete
                   </button>
                 }
@@ -167,7 +167,7 @@ import { CommentCardComponent } from '../../shared/components/comment-card/comme
       padding-bottom: 16px;
       border-bottom: 1px solid #e0e0e0;
     }
-    .dark-theme .alerts-header {
+    :host-context(.dark-theme) .alerts-header {
       border-bottom: 1px solid #333a4d;
     }
 
@@ -178,8 +178,8 @@ import { CommentCardComponent } from '../../shared/components/comment-card/comme
       font-weight: 700;
       letter-spacing: 0.5px;
     }
-    .dark-theme .header-content h1 {
-      color: #90caf9;
+    :host-context(.dark-theme) .header-content h1 {
+      color: #f8fafc;
     }
 
     .subtitle {
@@ -188,8 +188,8 @@ import { CommentCardComponent } from '../../shared/components/comment-card/comme
       font-size: 1.1rem;
       font-weight: 500;
     }
-    .dark-theme .subtitle {
-      color: #b0bec5;
+    :host-context(.dark-theme) .subtitle {
+      color: #cbd5e1;
     }
 
     .create-alert-btn {
@@ -234,13 +234,13 @@ import { CommentCardComponent } from '../../shared/components/comment-card/comme
     .alert-card:hover {
       box-shadow: 0 8px 24px rgba(30, 64, 175, 0.16);
     }
-    .dark-theme .alert-card {
-      background: #232a34;
-      color: #f4f6fb;
+    :host-context(.dark-theme) .alert-card {
+      background: #1e293b;
+      color: #f8fafc;
       box-shadow: 0 4px 20px rgba(0,0,0,0.25);
     }
-    .dark-theme .alert-card.active {
-      border-left: 5px solid #ffb74d;
+    :host-context(.dark-theme) .alert-card.active {
+      border-left: 5px solid #f59e0b;
     }
 
     .alert-header {
@@ -268,8 +268,8 @@ import { CommentCardComponent } from '../../shared/components/comment-card/comme
       background: #d32f2f !important;
       color: #fff !important;
     }
-    .dark-theme .alert-severity mat-chip[ng-reflect-color="warn"],
-    .dark-theme .alert-severity mat-chip.severity-extreme {
+    :host-context(.dark-theme) .alert-severity mat-chip[ng-reflect-color="warn"],
+    :host-context(.dark-theme) .alert-severity mat-chip.severity-extreme {
       background: #ff5252 !important;
       color: #fff !important;
     }
@@ -277,19 +277,27 @@ import { CommentCardComponent } from '../../shared/components/comment-card/comme
     .alert-severity mat-chip.severity-severe {
       background: #f57c00 !important;
       color: #fff !important;
+      border-radius: 20px !important;
+      padding: 2px 12px !important;
+      font-weight: 600 !important;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
     }
-    .dark-theme .alert-severity mat-chip[ng-reflect-color="accent"],
-    .dark-theme .alert-severity mat-chip.severity-severe {
+    :host-context(.dark-theme) .alert-severity mat-chip[ng-reflect-color="accent"],
+    :host-context(.dark-theme) .alert-severity mat-chip.severity-severe {
       background: #ffb300 !important;
       color: #232a34 !important;
+      border-radius: 20px !important;
+      padding: 2px 12px !important;
+      font-weight: 600 !important;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2) !important;
     }
     .alert-severity mat-chip[ng-reflect-color="primary"],
     .alert-severity mat-chip.severity-moderate {
       background: #1976d2 !important;
       color: #fff !important;
     }
-    .dark-theme .alert-severity mat-chip[ng-reflect-color="primary"],
-    .dark-theme .alert-severity mat-chip.severity-moderate {
+    :host-context(.dark-theme) .alert-severity mat-chip[ng-reflect-color="primary"],
+    :host-context(.dark-theme) .alert-severity mat-chip.severity-moderate {
       background: #90caf9 !important;
       color: #232a34 !important;
     }
@@ -298,45 +306,47 @@ import { CommentCardComponent } from '../../shared/components/comment-card/comme
       background: #388e3c !important;
       color: #fff !important;
     }
-    .dark-theme .alert-severity mat-chip[ng-reflect-color="basic"],
-    .dark-theme .alert-severity mat-chip.severity-minor {
+    :host-context(.dark-theme) .alert-severity mat-chip[ng-reflect-color="basic"],
+    :host-context(.dark-theme) .alert-severity mat-chip.severity-minor {
       background: #81c784 !important;
       color: #232a34 !important;
     }
 
     .alert-title {
-      font-size: 1.4rem;
-      font-weight: 700;
-      margin: 12px 0 4px 0;
-      color: #1a237e;
+      margin: 0 0 8px 0;
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: #1e293b;
     }
-    .dark-theme .alert-title {
-      color: #90caf9;
+    :host-context(.dark-theme) .alert-title {
+      color: #f8fafc;
     }
+
     .alert-description {
-      color: #555;
-      font-size: 1.08rem;
-      margin-bottom: 8px;
-      font-weight: 500;
+      margin: 0 0 16px 0;
+      color: #475569;
+      line-height: 1.5;
     }
-    .dark-theme .alert-description {
-      color: #cfd8dc;
+    :host-context(.dark-theme) .alert-description {
+      color: #cbd5e1;
     }
+
     .alert-details {
       display: flex;
       gap: 18px;
       margin: 10px 0 8px 0;
-      color: #666;
+      color: #64748b;
       font-size: 1.05rem;
       font-weight: 500;
     }
     .alert-details .detail-item {
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 8px;
+      padding: 8px 0;
     }
-    .dark-theme .alert-details {
-      color: #b0bec5;
+    :host-context(.dark-theme) .alert-details {
+      color: #94a3b8;
     }
     .alert-stats {
       display: flex;
@@ -351,7 +361,7 @@ import { CommentCardComponent } from '../../shared/components/comment-card/comme
       align-items: center;
       gap: 4px;
     }
-    .dark-theme .alert-stats {
+    :host-context(.dark-theme) .alert-stats {
       color: #b0bec5;
     }
     mat-card-actions {
@@ -367,32 +377,66 @@ import { CommentCardComponent } from '../../shared/components/comment-card/comme
       padding: 6px 18px;
       box-shadow: 0 2px 8px rgba(30, 64, 175, 0.08);
       transition: background 0.2s, color 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 36px;
     }
     mat-card-actions button mat-icon {
-      font-size: 1.2rem;
-      margin-right: 4px;
+      font-size: 18px;
+      height: 18px;
+      width: 18px;
+      margin-right: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    .dark-theme mat-card-actions button {
+    :host-context(.dark-theme) mat-card-actions button {
       background: #232a34;
       color: #ffb74d;
       border: 1.5px solid #ffb74d;
     }
     .no-alerts {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
       text-align: center;
-      color: #888;
-      margin: 32px 0;
-      font-size: 1.2rem;
+      padding: 48px 24px;
+      background: #fff;
+      border-radius: 18px;
+      margin-top: 24px;
     }
+    :host-context(.dark-theme) .no-alerts {
+      background: #1e293b;
+    }
+
     .no-alerts-icon {
-      font-size: 3rem;
-      color: #b0bec5;
-      margin-bottom: 8px;
+      font-size: 48px;
+      color: #cbd5e1;
+      margin-bottom: 16px;
     }
-    .dark-theme .no-alerts {
-      color: #b0bec5;
+    :host-context(.dark-theme) .no-alerts-icon {
+      color: #64748b;
     }
-    .dark-theme .no-alerts-icon {
-      color: #90caf9;
+
+    .no-alerts h2 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin: 0 0 8px 0;
+      color: #1e293b;
+    }
+    :host-context(.dark-theme) .no-alerts h2 {
+      color: #f8fafc;
+    }
+
+    .no-alerts p {
+      color: #64748b;
+      margin-bottom: 24px;
+      max-width: 500px;
+    }
+    :host-context(.dark-theme) .no-alerts p {
+      color: #94a3b8;
     }
     @media (max-width: 900px) {
       .alerts-header {
@@ -427,6 +471,31 @@ import { CommentCardComponent } from '../../shared/components/comment-card/comme
       .alert-card {
         padding-bottom: 0;
       }
+    }
+
+    /* Global icon styling */
+    mat-icon {
+      font-family: 'Material Icons';
+      font-weight: normal;
+      font-style: normal;
+      font-size: 24px;
+      line-height: 1;
+      letter-spacing: normal;
+      text-transform: none;
+      display: inline-block;
+      white-space: nowrap;
+      word-wrap: normal;
+      direction: ltr;
+      -webkit-font-feature-settings: 'liga';
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .detail-item mat-icon,
+    .stat-item mat-icon,
+    .alert-type mat-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
   `]
 })
@@ -581,14 +650,14 @@ export class AlertsComponent implements OnInit {
 
   getWeatherIcon(type: string): string {
     const icons: { [key: string]: string } = {
-      'Thunderstorm': 'thunderstorm',
-      'Rain': 'water_drop',
+      'Thunderstorm': 'flash_on',
+      'Rain': 'opacity',
       'Snow': 'ac_unit',
       'Fog': 'cloud',
       'Wind': 'air',
       'Heat': 'wb_sunny',
       'Cold': 'ac_unit',
-      'Flood': 'water'
+      'Flood': 'waves'
     };
     return icons[type] || 'warning';
   }

@@ -8,101 +8,288 @@
 /* Global styles */
 :root {
   /* Light theme colors */
-  --primary-blue: #1a73e8;
-  --secondary-blue: #4285f4;
-  --dark-blue: #0d47a1;
-  --light-blue: #e8f0fe;
-  --text-primary: #202124;
-  --text-secondary: #5f6368;
-  --background-light: #ffffff;
+  --primary-color: #3b82f6; /* Blue 500 */
+  --primary-light: #60a5fa; /* Blue 400 */
+  --primary-dark: #2563eb; /* Blue 600 */
+  --secondary-color: #8b5cf6; /* Violet 500 */
+  --accent-color: #ec4899; /* Pink 500 */
+  
+  --success-color: #10b981; /* Emerald 500 */
+  --warning-color: #f59e0b; /* Amber 500 */
+  --error-color: #ef4444; /* Red 500 */
+  --info-color: #06b6d4; /* Cyan 500 */
+  
+  --text-primary: #1e293b; /* Slate 800 */
+  --text-secondary: #475569; /* Slate 600 */
+  --text-tertiary: #64748b; /* Slate 500 */
+  
+  --background-light: #f8fafc; /* Slate 50 */
+  --surface-light: #ffffff;
   --card-light: #ffffff;
-  --border-light: #dadce0;
-  --shadow-light: rgba(60, 64, 67, 0.3);
+  --card-hover-light: #f1f5f9; /* Slate 100 */
+  --border-light: #e2e8f0; /* Slate 200 */
+  --divider-light: #e2e8f0; /* Slate 200 */
   
   /* Dark theme colors */
-  --background-dark: #202124;
-  --card-dark: #2d2d2d;
-  --border-dark: #3c4043;
-  --shadow-dark: rgba(0, 0, 0, 0.3);
+  --background-dark: #0f172a; /* Slate 900 */
+  --surface-dark: #1e293b; /* Slate 800 */
+  --card-dark: #1e293b; /* Slate 800 */
+  --card-hover-dark: #334155; /* Slate 700 */
+  --border-dark: #334155; /* Slate 700 */
+  --divider-dark: #334155; /* Slate 700 */
   
-  /* Common colors */
-  --success: #34a853;
-  --warning: #fbbc05;
-  --error: #ea4335;
-  --info: #4285f4;
+  --text-primary-dark: #f8fafc; /* Slate 50 */
+  --text-secondary-dark: #cbd5e1; /* Slate 300 */
+  --text-tertiary-dark: #94a3b8; /* Slate 400 */
+  
+  /* Weather type colors - Light Mode */
+  --sunny-light: #fbbf24; /* Amber 400 */
+  --cloudy-light: #9ca3af; /* Gray 400 */
+  --rainy-light: #60a5fa; /* Blue 400 */
+  --stormy-light: #6366f1; /* Indigo 500 */
+  --snowy-light: #e5e7eb; /* Gray 200 */
+  
+  /* Weather type colors - Dark Mode */
+  --sunny-dark: #f59e0b; /* Amber 500 */
+  --cloudy-dark: #6b7280; /* Gray 500 */
+  --rainy-dark: #3b82f6; /* Blue 500 */
+  --stormy-dark: #4f46e5; /* Indigo 600 */
+  --snowy-dark: #9ca3af; /* Gray 400 */
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  
+  /* Rounded corners */
+  --radius-sm: 0.125rem;
+  --radius: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  --radius-full: 9999px;
 }
 
 /* Base styles */
 html, body {
   height: 100%;
   margin: 0;
-  font-family: 'Roboto', sans-serif;
-  color: var(--text-primary);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   background-color: var(--background-light);
+  color: var(--text-primary);
   transition: background-color 0.3s ease, color 0.3s ease;
+  line-height: 1.5;
 }
 
 /* Dark theme */
-.dark-theme {
+body.dark-theme {
   background-color: var(--background-dark);
-  color: #ffffff;
+  color: var(--text-primary-dark);
 }
 
-.dark-theme .mat-mdc-card {
-  background-color: var(--card-dark);
-  border: 1px solid var(--border-dark);
-  box-shadow: 0 1px 2px 0 var(--shadow-dark);
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  line-height: 1.2;
+  margin-top: 0;
 }
 
-.dark-theme .mat-mdc-form-field {
-  color: #ffffff;
+h1 {
+  font-size: 2.25rem;
 }
 
-.dark-theme .mat-mdc-form-field-label {
-  color: #9aa0a6;
+h2 {
+  font-size: 1.875rem;
 }
 
-.dark-theme .mat-mdc-form-field-outline {
-  color: var(--border-dark);
+h3 {
+  font-size: 1.5rem;
 }
 
-.dark-theme .mat-mdc-input-element {
-  color: #ffffff;
+h4 {
+  font-size: 1.25rem;
 }
 
-.dark-theme .mat-mdc-button {
-  color: #ffffff;
+h5 {
+  font-size: 1.125rem;
 }
 
-.dark-theme .mat-mdc-raised-button {
-  background-color: var(--primary-blue);
-  color: #ffffff;
+h6 {
+  font-size: 1rem;
 }
 
-.dark-theme .mat-mdc-stroked-button {
-  border-color: var(--border-dark);
-  color: #ffffff;
+p {
+  margin-top: 0;
+  margin-bottom: 1rem;
 }
 
-/* Light theme */
-.light-theme {
-  background-color: var(--background-light);
-  color: var(--text-primary);
-}
-
-.light-theme .mat-mdc-card {
-  background-color: var(--card-light);
-  border: 1px solid var(--border-light);
-  box-shadow: 0 1px 2px 0 var(--shadow-light);
-}
-
-/* App specific styles */
+/* App Container */
 .app-container {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
 
+/* Main Content */
+.main-content {
+  flex: 1;
+  padding: 1.5rem;
+  margin-top: 64px; /* Header height */
+  max-width: 1200px;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  box-sizing: border-box;
+}
+
+/* Custom Material Overrides */
+/* Button */
+.mat-mdc-button, .mat-mdc-raised-button, .mat-mdc-outlined-button {
+  font-weight: 500;
+  border-radius: var(--radius);
+  letter-spacing: 0.01em;
+  transition: all 0.2s ease;
+}
+
+.mat-mdc-raised-button.mat-primary {
+  background-color: var(--primary-color);
+}
+
+.mat-mdc-outlined-button {
+  border-color: var(--border-light);
+}
+
+.dark-theme .mat-mdc-outlined-button {
+  border-color: var(--border-dark);
+  color: var(--text-primary-dark);
+}
+
+/* Input Fields */
+.mat-mdc-form-field {
+  width: 100%;
+}
+
+.mat-mdc-form-field-appearance-outline .mat-mdc-form-field-flex {
+  border-radius: var(--radius-lg);
+}
+
+.mat-mdc-form-field-appearance-outline .mat-mdc-form-field-outline {
+  color: var(--border-light);
+}
+
+.dark-theme .mat-mdc-form-field-appearance-outline .mat-mdc-form-field-outline {
+  color: var(--border-dark);
+}
+
+.mat-mdc-input-element {
+  font-size: 1rem;
+  padding: 0.75rem;
+}
+
+.dark-theme .mat-mdc-input-element {
+  color: var(--text-primary-dark);
+}
+
+/* Weather Cards */
+.weather-card {
+  background-color: var(--card-light);
+  color: var(--text-primary);
+  border-radius: var(--radius-xl);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-md);
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--border-light);
+  transition: all 0.3s ease;
+}
+
+.dark-theme .weather-card {
+  background-color: var(--card-dark);
+  color: var(--text-primary-dark);
+  border-color: var(--border-dark);
+  box-shadow: var(--shadow-md);
+}
+
+.weather-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .main-content {
+    padding: 1rem;
+  }
+}
+
+/* Scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--card-light);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--primary-light);
+  border-radius: var(--radius-full);
+}
+
+.dark-theme ::-webkit-scrollbar-track {
+  background: var(--card-dark);
+}
+
+.dark-theme ::-webkit-scrollbar-thumb {
+  background-color: var(--primary-dark);
+}
+
+/* Adding dark theme variants for Angular Material components */
+body.dark-theme {
+  --mat-card-bg-color: var(--card-dark);
+  --mat-card-fg-color: var(--text-primary-dark);
+  
+  --mat-toolbar-container-background-color: var(--surface-dark);
+  --mat-toolbar-container-text-color: var(--text-primary-dark);
+  
+  --mat-form-field-label-text-color: var(--text-secondary-dark);
+  --mat-form-field-container-text-color: var(--text-primary-dark);
+  
+  --mat-table-background-color: var(--card-dark);
+  --mat-table-header-headline-color: var(--text-secondary-dark);
+  
+  --mat-chip-background-color: var(--surface-dark);
+  --mat-chip-text-color: var(--text-primary-dark);
+}
+
+/* Icon colors */
+.mat-icon {
+  color: var(--primary-color);
+}
+
+.dark-theme .mat-icon {
+  color: var(--primary-light);
+}
+
+/* Weather info styles */
+.weather-info p {
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-secondary);
+}
+
+.dark-theme .weather-info p {
+  color: var(--text-secondary-dark);
+}
+
+/* App specific styles */
 .header {
   background-color: var(--background-light);
   border-bottom: 1px solid var(--border-light);
@@ -136,23 +323,7 @@ html, body {
   max-width: 600px;
 }
 
-.main-content {
-  flex: 1;
-  padding: 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
-  width: 100%;
-}
-
 /* Weather card styles */
-.weather-card {
-  background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
-  color: white;
-  border-radius: 12px;
-  padding: 24px;
-  margin-bottom: 24px;
-}
-
 .weather-header {
   display: flex;
   justify-content: space-between;
@@ -305,37 +476,6 @@ html, body {
 
 .temp-range .low {
   color: var(--text-secondary);
-}
-
-/* Responsive styles */
-@media (max-width: 768px) {
-  .header-content {
-    flex-wrap: wrap;
-  }
-  
-  .search-field {
-    order: 3;
-    max-width: none;
-    width: 100%;
-  }
-  
-  .main-content {
-    padding: 1rem;
-  }
-  
-  .weather-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  
-  .temperature {
-    text-align: left;
-    margin-top: 16px;
-  }
-  
-  .daily-grid {
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  }
 }
 
 /* AccuWeather-inspired dark mode styles for the whole app */

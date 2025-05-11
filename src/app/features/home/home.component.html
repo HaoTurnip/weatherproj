@@ -1,72 +1,134 @@
 <div class="home-container">
   <!-- Loading State -->
   <div *ngIf="loading" class="loading-container">
-    <mat-spinner diameter="50"></mat-spinner>
-    <p>Loading weather data...</p>
+    <div class="loading-spinner">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p class="loading-text">Loading weather data...</p>
+    </div>
   </div>
 
   <!-- Error State -->
   <div *ngIf="error" class="error-container">
     <mat-icon class="error-icon">error_outline</mat-icon>
-    <h2>Error Loading Weather Data</h2>
-    <p>{{ error }}</p>
-    <button mat-raised-button color="primary" (click)="loadWeatherData()">
+    <h2 class="error-title">Error Loading Weather Data</h2>
+    <p class="error-message">{{ error }}</p>
+    <button mat-raised-button color="primary" class="retry-button" (click)="loadWeatherData()">
       Try Again
     </button>
   </div>
 
   <!-- Weather Content -->
-  <div *ngIf="!loading && !error" class="weather-layout">
-    <!-- Current Weather Card (left) -->
-    <div class="weather-card">
-      <div class="weather-header">
-        <div class="location">
-          <h1>{{ currentWeather?.cityName }}</h1>
-          <div class="date-time">{{ currentDate | date:'EEEE, MMMM d, y' }}</div>
-        </div>
-        <div class="temperature">
-          <span class="temp-value">{{ currentWeather?.temp_c }}°</span>
-          <span class="temp-unit">C</span>
-        </div>
+  <div *ngIf="!loading && !error" class="weather-content">
+    <div class="page-header">
+      <h1 class="page-title">Current Weather</h1>
+      <div class="location-info">
+        <mat-icon>location_on</mat-icon>
+        <span>{{ currentWeather?.cityName }}</span>
       </div>
-      <div class="weather-details">
-        <div class="weather-icon">
-          <img [src]="currentWeather?.icon" [alt]="currentWeather?.condition">
-        </div>
-        <div class="weather-info">
-          <p class="weather-condition">{{ currentWeather?.condition }}</p>
-          <p class="feels-like">Humidity: {{ currentWeather?.humidity }}%</p>
-          <p class="wind">Wind: {{ currentWeather?.wind_kph }} km/h {{ currentWeather?.wind_dir }}</p>
-          <p class="precipitation">Precipitation: {{ currentWeather?.precip_mm }} mm</p>
-          <p class="uv-index">UV Index: {{ currentWeather?.uv }}</p>
-        </div>
-      </div>
-      <!-- Weather Alerts -->
-      <div *ngIf="activeAlerts.length > 0" class="weather-alerts">
-        <mat-divider></mat-divider>
-        <h3>Active Weather Alerts</h3>
-        <div class="alert-list">
-          <div *ngFor="let alert of activeAlerts" class="alert-item">
-            <mat-icon class="alert-icon">warning</mat-icon>
-            <div class="alert-content">
-              <h4>{{ alert.title }}</h4>
-              <p>{{ alert.description }}</p>
-              <small>{{ alert.type }} - {{ alert.severity }}</small>
+    </div>
+    
+    <div class="weather-grid">
+      <!-- Current Weather Card -->
+      <div class="grid-item current-weather">
+        <div class="weather-card">
+          <div class="weather-header">
+            <div class="weather-condition-wrapper">
+              <img [src]="currentWeather?.icon" [alt]="currentWeather?.condition" class="condition-icon">
+              <div class="condition-info">
+                <div class="condition-badge" [ngClass]="getConditionClass(currentWeather?.condition)">
+                  {{ currentWeather?.condition }}
+                </div>
+                <p class="feels-like">Feels like {{ currentWeather?.feelsLike || currentWeather?.temp_c }}°C</p>
+              </div>
+            </div>
+            <div class="temperature">
+              <span class="temp-value">{{ currentWeather?.temp_c }}</span>
+              <span class="temp-unit">°C</span>
+            </div>
+          </div>
+          
+          <div class="weather-details">
+            <div class="detail-item">
+              <mat-icon>water_drop</mat-icon>
+              <div class="detail-info">
+                <span class="detail-label">Humidity</span>
+                <span class="detail-value">{{ currentWeather?.humidity }}%</span>
+              </div>
+            </div>
+            
+            <div class="detail-item">
+              <mat-icon>air</mat-icon>
+              <div class="detail-info">
+                <span class="detail-label">Wind</span>
+                <span class="detail-value">{{ currentWeather?.wind_kph }} km/h {{ currentWeather?.wind_dir }}</span>
+              </div>
+            </div>
+            
+            <div class="detail-item">
+              <mat-icon>opacity</mat-icon>
+              <div class="detail-info">
+                <span class="detail-label">Precipitation</span>
+                <span class="detail-value">{{ currentWeather?.precip_mm }} mm</span>
+              </div>
+            </div>
+            
+            <div class="detail-item">
+              <mat-icon>wb_sunny</mat-icon>
+              <div class="detail-info">
+                <span class="detail-label">UV Index</span>
+                <span class="detail-value">{{ currentWeather?.uv }}</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Weather Alerts -->
+          <div *ngIf="activeAlerts.length > 0" class="weather-alerts">
+            <h3 class="alerts-title">
+              <mat-icon>warning</mat-icon>
+              Active Weather Alerts
+            </h3>
+            <div class="alert-list">
+              <div *ngFor="let alert of activeAlerts" class="alert-item" [ngClass]="'severity-' + alert.severity.toLowerCase()">
+                <div class="alert-header">
+                  <mat-icon class="alert-icon">warning</mat-icon>
+                  <h4 class="alert-title">{{ alert.title }}</h4>
+                </div>
+                <div class="alert-content">
+                  <p class="alert-description">{{ alert.description }}</p>
+                  <div class="alert-meta">
+                    <span class="alert-type">{{ alert.type }}</span>
+                    <span class="alert-severity">{{ alert.severity }}</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-    <!-- Hourly Forecast (right) -->
-    <div class="hourly-forecast">
-      <h2>Hourly Forecast</h2>
-      <div class="hourly-list">
-        <div *ngFor="let hour of hourlyForecast" class="hourly-item">
-          <div class="hour">{{ hour.time }}</div>
-          <div class="weather-icon">
-            <img [src]="hour.icon" [alt]="hour.condition">
+      
+      <!-- Hourly Forecast -->
+      <div class="grid-item hourly-forecast">
+        <div class="forecast-card">
+          <h2 class="forecast-title">
+            <mat-icon>schedule</mat-icon>
+            Hourly Forecast
+          </h2>
+          <div class="hourly-scroll">
+            <div *ngFor="let hour of hourlyForecast" class="hourly-item">
+              <div class="hour">{{ hour.time }}</div>
+              <div class="hourly-icon-wrapper">
+                <img [src]="hour.icon" [alt]="hour.condition" class="hourly-icon">
+              </div>
+              <div class="hourly-temp">{{ hour.temperature }}°</div>
+              <div class="hourly-condition">{{ hour.condition }}</div>
+            </div>
           </div>
-          <div class="temp">{{ hour.temp_c }}°C</div>
+          <div class="forecast-action">
+            <a routerLink="/forecast" class="forecast-link">
+              View 7-Day Forecast
+              <mat-icon>arrow_forward</mat-icon>
+            </a>
+          </div>
         </div>
       </div>
     </div>
