@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -24,7 +24,92 @@ type MapOverlayType = 'temperature' | 'precipitation' | 'wind' | 'clouds';
     MatButtonToggleModule,
     SkeletonLoaderComponent
   ],
+  encapsulation: ViewEncapsulation.None,
   template: `
+    <style>
+      /* Global styles for map component in dark mode */
+      .dark-theme .map-container {
+        color: var(--text-primary-dark);
+      }
+      
+      .dark-theme .map-card {
+        background-color: var(--card-dark) ;
+        border: 1px solid var(--border-dark) ;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25) ;
+      }
+      
+      .dark-theme .map-card:hover {
+        box-shadow: 0 8px 28px rgba(0, 0, 0, 0.3) ;
+      }
+      
+      .dark-theme .map-card .mat-mdc-card-title {
+        color: var(--text-primary-dark) ;
+      }
+      
+      .dark-theme .map-card .mat-mdc-card-subtitle {
+        color: var(--text-secondary-dark) ;
+      }
+      
+      /* Button toggle group styling for dark mode */
+      .dark-theme .mat-button-toggle-group {
+        background-color: #1e293b !important;
+        border: 1px solid #334155 !important;
+        box-shadow: none !important;
+        padding: 2px !important;
+        border-radius: 50px !important;
+        gap: 0 !important;
+        display: flex !important;
+      }
+      
+      .dark-theme .mat-button-toggle {
+        background-color: transparent !important;
+        color: #94a3b8 !important;
+        border: none !important;
+        border-radius: 50px !important;
+        transition: all 0.2s ease !important;
+        overflow: hidden !important;
+        padding: 0 !important;
+        margin: 0 2px !important;
+      }
+      
+      .dark-theme .mat-button-toggle:not(.mat-button-toggle-checked):hover {
+        background-color: #334155 !important;
+        color: #e2e8f0 !important;
+      }
+      
+      .dark-theme .mat-button-toggle-checked {
+        background-color: #3b82f6 !important;
+        color: #ffffff !important;
+        font-weight: 500 !important;
+      }
+      
+      .dark-theme .mat-button-toggle-button {
+        color: inherit !important;
+        padding: 6px 16px !important;
+      }
+      
+      .dark-theme .mat-button-toggle-focus-overlay {
+        background-color: transparent !important;
+      }
+      
+      /* Map image styles */
+      .dark-theme .map-image {
+        background-color: var(--card-dark) ;
+        border: 1px solid var(--border-dark) ;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) ;
+      }
+      
+      /* Error container styles */
+      .dark-theme .error-container {
+        background-color: var(--card-dark) ;
+        color: var(--text-primary-dark) ;
+        border: 1px solid var(--border-dark) ;
+      }
+      
+      .dark-theme .error-icon {
+        color: var(--error-light) ;
+      }
+    </style>
     <div class="map-container">
       @if (loading) {
         <div class="skeleton-container">
@@ -70,21 +155,48 @@ type MapOverlayType = 'temperature' | 'precipitation' | 'wind' | 'clouds';
     }
 
     .map-card {
-      background: #fff;
-      border-radius: 18px;
-      box-shadow: 0 4px 20px rgba(30, 64, 175, 0.10);
+      background: var(--card-light);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-md);
       margin-bottom: 24px;
-      transition: background 0.3s, color 0.3s, box-shadow 0.3s;
-      color: #222;
-      font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
+      transition: all 0.3s ease;
+      color: var(--text-primary);
+      font-family: 'Inter', 'Roboto', 'Segoe UI', Arial, sans-serif;
+      border: 1px solid var(--border-light);
     }
+    
     .map-card:hover {
-      box-shadow: 0 8px 24px rgba(30, 64, 175, 0.16);
+      box-shadow: var(--shadow-lg);
+      transform: translateY(-3px);
     }
-    .dark-theme .map-card {
-      background: #232a34;
-      color: #f4f6fb;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+    
+    :host-context(.dark-theme) .map-card {
+      background: var(--card-dark);
+      color: var(--text-primary-dark);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+      border-color: var(--border-dark);
+    }
+    
+    :host-context(.dark-theme) .map-card:hover {
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.3);
+    }
+    
+    .map-card .mat-mdc-card-title {
+      color: var(--text-primary);
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+    
+    .map-card .mat-mdc-card-subtitle {
+      color: var(--text-secondary);
+    }
+    
+    :host-context(.dark-theme) .map-card .mat-mdc-card-title {
+      color: var(--text-primary-dark);
+    }
+    
+    :host-context(.dark-theme) .map-card .mat-mdc-card-subtitle {
+      color: var(--text-secondary-dark);
     }
 
     .map-controls {
@@ -93,82 +205,117 @@ type MapOverlayType = 'temperature' | 'precipitation' | 'wind' | 'clouds';
       justify-content: center;
       align-items: center;
     }
+    
     .mat-button-toggle-group {
-      background: #f4f6fb;
-      border-radius: 999px;
-      box-shadow: 0 2px 8px rgba(30, 64, 175, 0.08);
-      padding: 4px 8px;
-      gap: 4px;
-      font-weight: 500;
+      background-color: #f1f5f9;
+      border-radius: 50px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      padding: 2px;
+      gap: 0;
+      display: flex;
     }
-    .mat-button-toggle-checked {
-      background: #1976d2 !important;
-      color: #fff !important;
-      border-radius: 999px !important;
-      font-weight: 700;
-    }
+    
     .mat-button-toggle {
-      border-radius: 999px !important;
-      font-size: 1rem;
+      border-radius: 50px !important;
+      font-size: 14px;
       font-weight: 500;
-      color: #1976d2;
-      transition: background 0.2s, color 0.2s;
+      color: #64748b;
+      transition: all 0.2s ease;
+      border: none;
+      background-color: transparent;
+      padding: 0;
+      margin: 0 2px;
+      overflow: hidden;
     }
+    
+    .mat-button-toggle-checked {
+      background-color: #3b82f6 !important;
+      color: white !important;
+      font-weight: 500;
+    }
+    
+    .mat-button-toggle .mat-button-toggle-button {
+      padding: 6px 16px;
+    }
+    
     .mat-button-toggle:not(.mat-button-toggle-checked):hover {
-      background: #e3eafc;
-      color: #1976d2;
+      background-color: #e2e8f0;
+      color: #1e293b;
     }
-    .dark-theme .mat-button-toggle-group {
-      background: #232a34;
-      box-shadow: 0 2px 8px rgba(30, 64, 175, 0.18);
+    
+    :host-context(.dark-theme) .mat-button-toggle-group {
+      background-color: #1e293b;
+      border-color: #334155;
     }
-    .dark-theme .mat-button-toggle {
-      color: #90caf9;
+    
+    :host-context(.dark-theme) .mat-button-toggle {
+      color: #94a3b8;
     }
-    .dark-theme .mat-button-toggle-checked {
-      background: #90caf9 !important;
-      color: #232a34 !important;
+    
+    :host-context(.dark-theme) .mat-button-toggle-checked {
+      background-color: #3b82f6 !important;
+      color: #ffffff !important;
+    }
+    
+    :host-context(.dark-theme) .mat-button-toggle:not(.mat-button-toggle-checked):hover {
+      background-color: #334155;
+      color: #e2e8f0;
     }
 
     .map-image {
       width: 100%;
       height: 600px;
-      background: #f5f5f5;
-      border-radius: 16px;
+      background: var(--card-hover-light);
+      border-radius: var(--radius-lg);
       overflow: hidden;
-      box-shadow: 0 2px 8px rgba(30, 64, 175, 0.08);
+      box-shadow: var(--shadow-sm);
       margin-bottom: 8px;
-      transition: background 0.3s;
+      transition: all 0.3s ease;
+      border: 1px solid var(--border-light);
     }
-    .dark-theme .map-image {
-      background: #232a34;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+    
+    :host-context(.dark-theme) .map-image {
+      background: var(--card-dark);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+      border-color: var(--border-dark);
     }
+    
     .map-image img {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      border-radius: 16px;
+      border-radius: var(--radius-lg);
     }
 
     .error-container {
       text-align: center;
       padding: 48px;
-      background: #f5f5f5;
-      border-radius: 12px;
-      color: #222;
+      background: var(--card-light);
+      border-radius: var(--radius-lg);
+      color: var(--text-primary);
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--border-light);
     }
-    .dark-theme .error-container {
-      background: #232a34;
-      color: #f4f6fb;
+    
+    :host-context(.dark-theme) .error-container {
+      background: var(--card-dark);
+      color: var(--text-primary-dark);
+      border-color: var(--border-dark);
     }
+    
     .error-icon {
       font-size: 48px;
       width: 48px;
       height: 48px;
-      color: #f44336;
+      color: var(--error-color);
       margin-bottom: 16px;
     }
+    
+    :host-context(.dark-theme) .error-icon {
+      color: var(--error-light);
+    }
+    
     @media (max-width: 768px) {
       .map-image {
         height: 400px;

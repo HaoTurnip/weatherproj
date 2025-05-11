@@ -340,14 +340,14 @@ import { Observable } from 'rxjs';
 
     /* User menu styles */
     ::ng-deep .user-menu {
-      padding: 0 !important;
-      overflow: hidden !important;
-      border-radius: var(--radius-lg) !important;
-      margin-top: 8px !important;
+      padding: 0 ;
+      overflow: hidden ;
+      border-radius: var(--radius-lg) ;
+      margin-top: 8px ;
     }
 
     ::ng-deep .user-menu .mat-mdc-menu-content {
-      padding: 0 !important;
+      padding: 0 ;
     }
 
     ::ng-deep .user-menu .menu-header {

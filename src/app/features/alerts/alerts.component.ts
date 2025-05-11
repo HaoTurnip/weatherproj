@@ -279,51 +279,51 @@ import { Comment } from '../../core/models/alert.model';
     }
     .alert-severity mat-chip[ng-reflect-color="warn"],
     .alert-severity mat-chip.severity-extreme {
-      background: #d32f2f !important;
-      color: #fff !important;
+      background: #d32f2f ;
+      color: #fff ;
     }
     :host-context(.dark-theme) .alert-severity mat-chip[ng-reflect-color="warn"],
     :host-context(.dark-theme) .alert-severity mat-chip.severity-extreme {
-      background: #ff5252 !important;
-      color: #fff !important;
+      background: #ff5252 ;
+      color: #fff ;
     }
     .alert-severity mat-chip[ng-reflect-color="accent"],
     .alert-severity mat-chip.severity-severe {
-      background: #f57c00 !important;
-      color: #fff !important;
-      border-radius: 20px !important;
-      padding: 2px 12px !important;
-      font-weight: 600 !important;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+      background: #f57c00 ;
+      color: #fff ;
+      border-radius: 20px ;
+      padding: 2px 12px ;
+      font-weight: 600 ;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) ;
     }
     :host-context(.dark-theme) .alert-severity mat-chip[ng-reflect-color="accent"],
     :host-context(.dark-theme) .alert-severity mat-chip.severity-severe {
-      background: #ffb300 !important;
-      color: #232a34 !important;
-      border-radius: 20px !important;
-      padding: 2px 12px !important;
-      font-weight: 600 !important;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2) !important;
+      background: #ffb300 ;
+      color: #232a34 ;
+      border-radius: 20px ;
+      padding: 2px 12px ;
+      font-weight: 600 ;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2) ;
     }
     .alert-severity mat-chip[ng-reflect-color="primary"],
     .alert-severity mat-chip.severity-moderate {
-      background: #1976d2 !important;
-      color: #fff !important;
+      background: #1976d2 ;
+      color: #fff ;
     }
     :host-context(.dark-theme) .alert-severity mat-chip[ng-reflect-color="primary"],
     :host-context(.dark-theme) .alert-severity mat-chip.severity-moderate {
-      background: #90caf9 !important;
-      color: #232a34 !important;
+      background: #90caf9 ;
+      color: #232a34 ;
     }
     .alert-severity mat-chip[ng-reflect-color="basic"],
     .alert-severity mat-chip.severity-minor {
-      background: #388e3c !important;
-      color: #fff !important;
+      background: #388e3c ;
+      color: #fff ;
     }
     :host-context(.dark-theme) .alert-severity mat-chip[ng-reflect-color="basic"],
     :host-context(.dark-theme) .alert-severity mat-chip.severity-minor {
-      background: #81c784 !important;
-      color: #232a34 !important;
+      background: #81c784 ;
+      color: #232a34 ;
     }
 
     .alert-title {
