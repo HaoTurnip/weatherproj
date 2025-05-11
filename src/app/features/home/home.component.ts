@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -44,7 +44,113 @@ interface WeatherData {
     TemperaturePipe,
     WeatherConditionPipe
   ],
+  encapsulation: ViewEncapsulation.None,
   template: `
+    <style>
+      /* Global dark mode styles for home component */
+      .dark-theme .home-container {
+        color: var(--text-primary-dark);
+      }
+      
+      .dark-theme .page-title {
+        color: var(--text-primary-dark) !important;
+      }
+      
+      .dark-theme .location-info {
+        background-color: var(--card-dark) !important;
+        border-color: var(--border-dark) !important;
+        color: var(--text-secondary-dark) !important;
+      }
+      
+      .dark-theme .weather-card, 
+      .dark-theme .forecast-card {
+        background-color: var(--card-dark) !important;
+        border-color: var(--border-dark) !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25) !important;
+      }
+      
+      .dark-theme .detail-item {
+        background-color: var(--card-hover-dark) !important;
+      }
+      
+      .dark-theme .detail-item:hover {
+        background-color: rgba(51, 65, 85, 0.6) !important;
+      }
+      
+      .dark-theme .detail-item mat-icon {
+        color: var(--primary-light) !important;
+      }
+      
+      .dark-theme .detail-label {
+        color: var(--text-tertiary-dark) !important;
+      }
+      
+      .dark-theme .detail-value {
+        color: var(--text-primary-dark) !important;
+      }
+      
+      .dark-theme .forecast-title {
+        color: var(--text-primary-dark) !important;
+        border-color: var(--border-dark) !important;
+      }
+      
+      .dark-theme .forecast-title mat-icon {
+        color: var(--primary-light) !important;
+      }
+      
+      .dark-theme .hourly-scroll {
+        scrollbar-color: var(--primary-light) var(--card-dark) !important;
+      }
+      
+      .dark-theme .hourly-scroll::-webkit-scrollbar-track {
+        background: var(--card-dark) !important;
+      }
+      
+      .dark-theme .hourly-item {
+        background-color: var(--card-hover-dark) !important;
+      }
+      
+      .dark-theme .hourly-item:hover {
+        background-color: rgba(51, 65, 85, 0.6) !important;
+      }
+      
+      .dark-theme .hour {
+        color: var(--text-primary-dark) !important;
+      }
+      
+      .dark-theme .hourly-temp {
+        color: var(--primary-light) !important;
+      }
+      
+      .dark-theme .hourly-condition {
+        color: var(--text-secondary-dark) !important;
+      }
+      
+      .dark-theme .forecast-link {
+        color: var(--primary-light) !important;
+      }
+      
+      .dark-theme .forecast-link:hover {
+        color: var(--primary-color) !important;
+      }
+      
+      .dark-theme .error-container {
+        background-color: var(--card-dark) !important;
+        border: 1px solid var(--border-dark) !important;
+      }
+      
+      .dark-theme .error-title {
+        color: var(--text-primary-dark) !important;
+      }
+      
+      .dark-theme .error-message {
+        color: var(--text-secondary-dark) !important;
+      }
+      
+      .dark-theme .loading-text {
+        color: var(--text-secondary-dark) !important;
+      }
+    </style>
     <div class="home-container">
       @if (loading) {
         <div class="loading-container">
@@ -174,12 +280,20 @@ interface WeatherData {
       padding-bottom: 0.75rem;
       border-bottom: 1px solid var(--border-light);
     }
+    
+    :host-context(.dark-theme) .page-header {
+      border-bottom: 1px solid var(--border-dark);
+    }
 
     .page-title {
       font-size: 1.75rem;
       font-weight: 700;
       color: var(--text-primary);
       margin: 0;
+    }
+    
+    :host-context(.dark-theme) .page-title {
+      color: var(--text-primary-dark);
     }
 
     .location-info {
@@ -193,6 +307,21 @@ interface WeatherData {
       box-shadow: var(--shadow-sm);
       font-weight: 500;
       color: var(--text-secondary);
+    }
+    
+    :host-context(.dark-theme) .location-info {
+      background-color: var(--card-dark);
+      border-color: var(--border-dark);
+      color: var(--text-secondary-dark);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+    
+    .location-info mat-icon {
+      color: var(--primary-color);
+    }
+    
+    :host-context(.dark-theme) .location-info mat-icon {
+      color: var(--primary-light);
     }
 
     .weather-grid {
@@ -228,10 +357,22 @@ interface WeatherData {
       height: 100%;
       transition: all 0.3s ease;
     }
+    
+    :host-context(.dark-theme) .weather-card, 
+    :host-context(.dark-theme) .forecast-card {
+      background-color: var(--card-dark);
+      border-color: var(--border-dark);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    }
 
     .weather-card:hover, .forecast-card:hover {
       transform: translateY(-5px);
       box-shadow: var(--shadow-lg);
+    }
+    
+    :host-context(.dark-theme) .weather-card:hover, 
+    :host-context(.dark-theme) .forecast-card:hover {
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
     }
 
     .weather-header {
@@ -315,12 +456,24 @@ interface WeatherData {
     .detail-item:hover {
       background-color: rgba(241, 245, 249, 0.9);
     }
+    
+    :host-context(.dark-theme) .detail-item {
+      background-color: var(--card-hover-dark);
+    }
+    
+    :host-context(.dark-theme) .detail-item:hover {
+      background-color: rgba(51, 65, 85, 0.6);
+    }
 
     .detail-item mat-icon {
       color: var(--primary-color);
       font-size: 1.5rem;
       width: 1.5rem;
       height: 1.5rem;
+    }
+    
+    :host-context(.dark-theme) .detail-item mat-icon {
+      color: var(--primary-light);
     }
 
     .detail-info {
@@ -333,11 +486,19 @@ interface WeatherData {
       color: var(--text-tertiary);
       margin-bottom: 0.25rem;
     }
+    
+    :host-context(.dark-theme) .detail-label {
+      color: var(--text-tertiary-dark);
+    }
 
     .detail-value {
       font-size: 1rem;
       font-weight: 600;
       color: var(--text-primary);
+    }
+    
+    :host-context(.dark-theme) .detail-value {
+      color: var(--text-primary-dark);
     }
 
     .forecast-card {
@@ -356,9 +517,18 @@ interface WeatherData {
       color: var(--text-primary);
       border-bottom: 1px solid var(--border-light);
     }
+    
+    :host-context(.dark-theme) .forecast-title {
+      color: var(--text-primary-dark);
+      border-bottom: 1px solid var(--border-dark);
+    }
 
     .forecast-title mat-icon {
       color: var(--primary-color);
+    }
+    
+    :host-context(.dark-theme) .forecast-title mat-icon {
+      color: var(--primary-light);
     }
 
     .hourly-scroll {
@@ -372,6 +542,10 @@ interface WeatherData {
       scrollbar-width: thin;
       scrollbar-color: var(--primary-light) var(--card-light);
     }
+    
+    :host-context(.dark-theme) .hourly-scroll {
+      scrollbar-color: var(--primary-light) var(--card-dark);
+    }
 
     .hourly-scroll::-webkit-scrollbar {
       width: 6px;
@@ -380,6 +554,10 @@ interface WeatherData {
     .hourly-scroll::-webkit-scrollbar-track {
       background: var(--card-light);
       border-radius: var(--radius-full);
+    }
+    
+    :host-context(.dark-theme) .hourly-scroll::-webkit-scrollbar-track {
+      background: var(--card-dark);
     }
 
     .hourly-scroll::-webkit-scrollbar-thumb {
@@ -400,11 +578,23 @@ interface WeatherData {
       background-color: rgba(241, 245, 249, 0.9);
       transform: translateX(4px);
     }
+    
+    :host-context(.dark-theme) .hourly-item {
+      background-color: var(--card-hover-dark);
+    }
+    
+    :host-context(.dark-theme) .hourly-item:hover {
+      background-color: rgba(51, 65, 85, 0.6);
+    }
 
     .hour {
       width: 60px;
       font-weight: 600;
       color: var(--text-primary);
+    }
+    
+    :host-context(.dark-theme) .hour {
+      color: var(--text-primary-dark);
     }
 
     .hourly-icon-wrapper {
@@ -425,12 +615,20 @@ interface WeatherData {
       font-weight: 600;
       color: var(--primary-color);
     }
+    
+    :host-context(.dark-theme) .hourly-temp {
+      color: var(--primary-light);
+    }
 
     .hourly-condition {
       flex: 1;
       font-size: 0.9rem;
       color: var(--text-secondary);
       margin-left: 0.5rem;
+    }
+    
+    :host-context(.dark-theme) .hourly-condition {
+      color: var(--text-secondary-dark);
     }
 
     .forecast-action {
@@ -454,6 +652,14 @@ interface WeatherData {
       color: var(--primary-dark);
       transform: translateX(4px);
     }
+    
+    :host-context(.dark-theme) .forecast-link {
+      color: var(--primary-light);
+    }
+    
+    :host-context(.dark-theme) .forecast-link:hover {
+      color: var(--primary-color);
+    }
 
     .loading-container {
       display: flex;
@@ -473,6 +679,10 @@ interface WeatherData {
       color: var(--text-secondary);
       font-size: 1rem;
     }
+    
+    :host-context(.dark-theme) .loading-text {
+      color: var(--text-secondary-dark);
+    }
 
     .error-container {
       display: flex;
@@ -485,6 +695,13 @@ interface WeatherData {
       border-radius: var(--radius-xl);
       box-shadow: var(--shadow-md);
       margin: 2rem 0;
+      border: 1px solid var(--border-light);
+    }
+    
+    :host-context(.dark-theme) .error-container {
+      background-color: var(--card-dark);
+      border-color: var(--border-dark);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
     }
 
     .error-icon {
@@ -494,6 +711,10 @@ interface WeatherData {
       color: var(--error-color);
       margin-bottom: 1rem;
     }
+    
+    :host-context(.dark-theme) .error-icon {
+      color: var(--error-light);
+    }
 
     .error-title {
       font-size: 1.5rem;
@@ -501,10 +722,18 @@ interface WeatherData {
       color: var(--text-primary);
       margin: 0 0 0.75rem 0;
     }
+    
+    :host-context(.dark-theme) .error-title {
+      color: var(--text-primary-dark);
+    }
 
     .error-message {
       color: var(--text-secondary);
       margin-bottom: 1.5rem;
+    }
+    
+    :host-context(.dark-theme) .error-message {
+      color: var(--text-secondary-dark);
     }
 
     .retry-button {
@@ -521,6 +750,17 @@ interface WeatherData {
     .retry-button:hover {
       background-color: var(--primary-dark);
       transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    
+    :host-context(.dark-theme) .retry-button {
+      background-color: var(--primary-light);
+      color: var(--background-dark);
+    }
+    
+    :host-context(.dark-theme) .retry-button:hover {
+      background-color: var(--primary-color);
+      box-shadow: 0 4px 12px rgba(96, 165, 250, 0.4);
     }
 
     @media (max-width: 992px) {
