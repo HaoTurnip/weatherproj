@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -20,7 +20,58 @@ import { CityService } from '../../services/city.service';
     MatProgressSpinnerModule,
     SkeletonLoaderComponent
   ],
+  encapsulation: ViewEncapsulation.None,
   template: `
+    <style>
+      /* Global styles for forecast in dark mode */
+      .dark-theme .forecast-container {
+        color: var(--text-primary-dark);
+      }
+      
+      .dark-theme .forecast-card {
+        background-color: var(--card-dark) !important;
+        border: 1px solid var(--border-dark) !important;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25) !important;
+      }
+      
+      .dark-theme .forecast-card:hover {
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35) !important;
+        transform: translateY(-8px);
+      }
+      
+      .dark-theme .forecast-card .mat-mdc-card-title {
+        color: var(--text-primary-dark) !important;
+      }
+      
+      .dark-theme .forecast-card .mat-mdc-card-subtitle {
+        color: var(--text-secondary-dark) !important;
+      }
+      
+      .dark-theme .forecast-container .error-container {
+        background-color: var(--card-dark) !important;
+        border: 1px solid var(--border-dark) !important;
+        color: var(--text-primary-dark) !important;
+      }
+      
+      .dark-theme .forecast-container .error-container h2 {
+        color: var(--text-primary-dark) !important;
+      }
+      
+      .dark-theme .forecast-container .error-container p {
+        color: var(--text-secondary-dark) !important;
+      }
+      
+      /* Fix for the condition text in dark mode */
+      .dark-theme .details div {
+        background-color: rgba(51, 65, 85, 0.6) !important;
+        color: var(--text-primary-dark) !important;
+        border: 1px solid var(--border-dark) !important;
+      }
+      
+      .dark-theme .details div:hover {
+        background-color: rgba(51, 65, 85, 0.8) !important;
+      }
+    </style>
     <div class="forecast-container">
       @if (loading) {
         <div class="skeleton-container">
@@ -78,105 +129,218 @@ import { CityService } from '../../services/city.service';
     }
 
     .forecast-card {
-      background: #fff;
-      border-radius: 18px;
-      box-shadow: 0 4px 20px rgba(30, 64, 175, 0.10);
-      transition: transform 0.2s, box-shadow 0.3s, background 0.3s, color 0.3s;
-      color: #222;
-      font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
+      background: var(--card-light);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-md);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      color: var(--text-primary);
+      font-family: 'Inter', 'Roboto', 'Segoe UI', Arial, sans-serif;
+      border: 1px solid var(--border-light);
+      overflow: hidden;
     }
 
     .forecast-card:hover {
       transform: translateY(-6px);
-      box-shadow: 0 8px 24px rgba(30, 64, 175, 0.16);
+      box-shadow: var(--shadow-lg);
     }
 
-    .dark-theme .forecast-card {
-      background: #232a34;
-      color: #f4f6fb;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+    :host-context(.dark-theme) .forecast-card {
+      background: var(--card-dark);
+      color: var(--text-primary-dark);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+      border-color: var(--border-dark);
+    }
+
+    :host-context(.dark-theme) .forecast-card:hover {
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.3);
+    }
+
+    .forecast-card .mat-mdc-card-header {
+      padding: 16px 16px 0;
+    }
+
+    .forecast-card .mat-mdc-card-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: var(--text-primary);
+    }
+
+    :host-context(.dark-theme) .forecast-card .mat-mdc-card-title {
+      color: var(--text-primary-dark);
     }
 
     .forecast-info {
       text-align: center;
-      padding: 20px 8px 8px 8px;
+      padding: 20px 16px 16px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 10px;
+      gap: 16px;
     }
 
     .forecast-info img {
-      width: 64px;
-      height: 64px;
-      margin: 12px 0 8px 0;
+      width: 80px;
+      height: 80px;
+      margin: 0;
+      filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+      transition: transform 0.3s ease;
+    }
+
+    .forecast-card:hover .forecast-info img {
+      transform: scale(1.1);
     }
 
     .temperature {
       display: flex;
       justify-content: center;
-      gap: 18px;
-      margin: 10px 0 8px 0;
+      gap: 24px;
+      margin: 8px 0;
+      align-items: baseline;
     }
 
     .max {
-      font-size: 2rem;
+      font-size: 2.2rem;
       font-weight: 700;
-      color: #e67e22;
+      color: var(--warning-color);
       letter-spacing: 0.5px;
+      line-height: 1;
     }
 
     .min {
-      font-size: 1.3rem;
-      color: #1976d2;
-      font-weight: 600;
-      align-self: flex-end;
+      font-size: 1.4rem;
+      color: var(--primary-color);
+      font-weight: 500;
     }
 
-    .dark-theme .max {
-      color: #ffb74d;
+    :host-context(.dark-theme) .max {
+      color: var(--warning-light);
     }
-    .dark-theme .min {
-      color: #90caf9;
+    
+    :host-context(.dark-theme) .min {
+      color: var(--primary-light);
     }
 
     .details {
       display: flex;
       flex-direction: column;
-      gap: 6px;
-      color: #666;
-      font-size: 1.05rem;
-      margin-top: 4px;
+      gap: 8px;
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+      margin-top: 8px;
+      width: 100%;
     }
-    .dark-theme .details {
-      color: #cfd8dc;
+    
+    :host-context(.dark-theme) .details {
+      color: var(--text-secondary-dark);
     }
 
     .details div {
       display: flex;
       align-items: center;
-      gap: 0.5em;
+      justify-content: center;
+      gap: 0.5rem;
       font-weight: 500;
+      padding: 8px;
+      border-radius: var(--radius-md);
+      background-color: var(--card-hover-light);
+      transition: background-color 0.2s ease;
+      color: var(--text-primary);
+      border: 1px solid var(--border-light);
+    }
+    
+    :host-context(.dark-theme) .details div {
+      background-color: rgba(51, 65, 85, 0.6);
+      color: var(--text-primary-dark);
+      border-color: var(--border-dark);
+    }
+    
+    .details div:hover {
+      background-color: rgba(59, 130, 246, 0.1);
+    }
+    
+    :host-context(.dark-theme) .details div:hover {
+      background-color: rgba(51, 65, 85, 0.8);
     }
 
     .error-container {
       text-align: center;
       padding: 48px;
-      background: #f5f5f5;
-      border-radius: 12px;
-      color: #222;
+      background: var(--card-light);
+      border-radius: var(--radius-xl);
+      color: var(--text-primary);
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--border-light);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
     }
-    .dark-theme .error-container {
-      background: #232a34;
-      color: #f4f6fb;
+    
+    :host-context(.dark-theme) .error-container {
+      background: var(--card-dark);
+      color: var(--text-primary-dark);
+      border-color: var(--border-dark);
+    }
+
+    .error-container h2 {
+      font-size: 1.75rem;
+      font-weight: 600;
+      margin: 0;
+      color: var(--text-primary);
+    }
+    
+    :host-context(.dark-theme) .error-container h2 {
+      color: var(--text-primary-dark);
+    }
+    
+    .error-container p {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      margin: 0 0 16px;
+    }
+    
+    :host-context(.dark-theme) .error-container p {
+      color: var(--text-secondary-dark);
     }
 
     .error-icon {
       font-size: 48px;
       width: 48px;
       height: 48px;
-      color: #f44336;
-      margin-bottom: 16px;
+      color: var(--error-color);
+      margin-bottom: 8px;
+    }
+    
+    :host-context(.dark-theme) .error-icon {
+      color: var(--error-light);
+    }
+    
+    .error-container button {
+      background-color: var(--primary-color);
+      color: white;
+      transition: all 0.2s ease;
+    }
+    
+    .error-container button:hover {
+      background-color: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    
+    :host-context(.dark-theme) .error-container button {
+      background-color: var(--primary-light);
+      color: var(--background-dark);
+    }
+    
+    :host-context(.dark-theme) .error-container button:hover {
+      background-color: var(--primary-color);
+      box-shadow: 0 0 15px rgba(96, 165, 250, 0.4);
+    }
+
+    .skeleton-container {
+      width: 100%;
+      padding: 24px;
     }
 
     @media (max-width: 768px) {
@@ -184,7 +348,19 @@ import { CityService } from '../../services/city.service';
         grid-template-columns: 1fr;
       }
       .forecast-container {
-        padding: 12px;
+        padding: 16px;
+      }
+      
+      .forecast-card .mat-mdc-card-title {
+        font-size: 1.3rem;
+      }
+      
+      .max {
+        font-size: 1.8rem;
+      }
+      
+      .min {
+        font-size: 1.2rem;
       }
     }
   `]
