@@ -29,21 +29,27 @@ import { MatSnackBar } from '@angular/material/snack-bar';
     RouterLink
   ],
   template: `
-    <div class="flex justify-center items-center min-h-screen" [class.bg-gray-100]="!(isDarkMode$ | async)" [class.bg-gray-900]="isDarkMode$ | async">
-      <mat-card class="login-card" [class.dark]="isDarkMode$ | async">
+    <div class="auth-container">
+      <mat-card class="login-card">
         <mat-card-header>
           <mat-card-title class="text-2xl font-bold mb-6">Welcome Back</mat-card-title>
         </mat-card-header>
         <mat-card-content>
           <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
-            <mat-form-field appearance="outline">
-              <mat-label>Email</mat-label>
-              <input matInput type="email" formControlName="email" required>
-            </mat-form-field>
-            <mat-form-field appearance="outline">
-              <mat-label>Password</mat-label>
-              <input matInput type="password" formControlName="password" required>
-            </mat-form-field>
+            <div class="search-field-wrapper">
+              <span class="search-icon">
+                <mat-icon>email</mat-icon>
+              </span>
+              <input matInput class="search-input" type="email" formControlName="email" placeholder="Email" required>
+            </div>
+            
+            <div class="search-field-wrapper">
+              <span class="search-icon">
+                <mat-icon>lock</mat-icon>
+              </span>
+              <input matInput class="search-input" type="password" formControlName="password" placeholder="Password" required>
+            </div>
+            
             <button mat-raised-button color="primary" type="submit" class="w-full" [disabled]="!form.valid">
               Sign in
             </button>
@@ -75,69 +81,146 @@ import { MatSnackBar } from '@angular/material/snack-bar';
     </div>
   `,
   styles: [`
+    :host {
+      display: block;
+      height: 100%;
+    }
+
+    .auth-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background-color: var(--bg-light,rgba(241, 245, 249, 0));
+      padding: 1rem;
+    }
+
+    :host-context(.dark-theme) .auth-container {
+      background-color: var(--bg-dark, #0f172a);
+    }
+
     .login-card {
-      background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
-      color: white;
+      background: white;
+      color: var(--text-primary);
       border-radius: 12px;
       padding: 24px;
       width: 100%;
       max-width: 400px;
       transition: all 0.3s ease;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 
-    .login-card.dark {
-      background: linear-gradient(135deg, var(--dark-blue), var(--primary-blue));
+    :host-context(.dark-theme) .login-card {
+      background: var(--card-dark, #1e293b);
+      color: white;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
     }
 
-    .login-card .mat-mdc-form-field {
+    /* Custom Search/Input Styles */
+    .search-field-wrapper {
+      display: flex;
+      align-items: center;
+      background: var(--card-light, #f8fafc);
+      border: 1px solid var(--border-light, #e2e8f0);
+      border-radius: var(--radius-full, 9999px);
+      padding: 0.5rem 0.875rem;
+      transition: all 0.2s ease;
+      box-shadow: var(--shadow-sm, 0 1px 2px rgba(0, 0, 0, 0.05));
+      margin: 0.75rem 0;
+      width: 100%;
+    }
+
+    .search-field-wrapper:focus-within {
+      border-color: var(--primary-color, #3b82f6);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+      transform: translateY(-1px);
+    }
+
+    :host-context(.dark-theme) .search-field-wrapper {
+      background: var(--card-dark, #1e293b);
+      border-color: var(--border-dark, #334155);
+    }
+
+    .search-icon {
+      color: var(--text-tertiary, #64748b);
+      margin-right: 0.5rem;
+      font-size: 1.25rem;
+      width: 1.25rem;
+      height: 1.25rem;
+      flex-shrink: 0;
+    }
+
+    :host-context(.dark-theme) .search-icon {
+      color: var(--text-tertiary-dark, #94a3b8);
+    }
+
+    .search-input {
+      flex: 1;
+      border: none;
+      outline: none;
+      background: transparent;
+      font-size: 0.9rem;
+      color: var(--text-primary, #334155);
+      padding: 0.4rem 0;
+      font-family: inherit;
+      width: 100%;
+    }
+
+    :host-context(.dark-theme) .search-input {
+      color: var(--text-primary-dark, #f8fafc);
+    }
+
+    .search-input::placeholder {
+      color: var(--text-tertiary, #64748b);
+    }
+
+    :host-context(.dark-theme) .search-input::placeholder {
+      color: var(--text-tertiary-dark, #94a3b8);
+    }
+
+    /* Button styling */
+    button[mat-raised-button] {
+      background-color: var(--primary-color, #3b82f6);
       color: white;
     }
 
-    .login-card .mat-mdc-form-field-label {
-      color: rgba(255, 255, 255, 0.8);
+    :host-context(.dark-theme) button[mat-raised-button] {
+      background-color: var(--primary-light, #60a5fa);
     }
 
-    .login-card .mat-mdc-form-field-outline {
-      color: rgba(255, 255, 255, 0.3);
+    button[mat-stroked-button] {
+      border-color: var(--primary-color, #3b82f6);
+      color: var(--primary-color, #3b82f6);
     }
 
-    .login-card .mat-mdc-input-element {
-      color: white;
+    :host-context(.dark-theme) button[mat-stroked-button] {
+      border-color: var(--primary-light, #60a5fa);
+      color: var(--primary-light, #60a5fa);
     }
 
-    .login-card .mat-mdc-button {
-      color: white;
+    button[mat-button] {
+      color: var(--primary-color, #3b82f6);
     }
 
-    .login-card .mat-mdc-raised-button {
-      background-color: white;
-      color: var(--primary-blue);
+    :host-context(.dark-theme) button[mat-button] {
+      color: var(--primary-light, #60a5fa);
     }
 
-    .login-card .mat-mdc-raised-button:hover {
-      background-color: rgba(255, 255, 255, 0.9);
+    .text-primary {
+      color: var(--primary-color, #3b82f6);
     }
 
-    .login-card .mat-mdc-stroked-button {
-      border-color: white;
-      color: white;
-    }
-
-    .login-card .mat-mdc-stroked-button:hover {
-      background-color: rgba(255, 255, 255, 0.1);
-    }
-
-    .login-card .text-primary {
-      color: white;
-      text-decoration: underline;
-    }
-
-    .login-card .text-primary:hover {
-      color: rgba(255, 255, 255, 0.8);
+    :host-context(.dark-theme) .text-primary {
+      color: var(--primary-light, #60a5fa);
     }
 
     .text-red-500 {
       color: #ef4444;
+    }
+
+    mat-divider {
+      margin: 1.5rem 0;
+      opacity: 0.2;
     }
   `]
 })

@@ -589,8 +589,11 @@ export class AlertsComponent implements OnInit, OnDestroy {
     try {
       this.loading = true;
       this.error = null;
-      this.alerts = await this.firebaseService.getAlerts();
-      this.filteredAlerts = [...this.alerts];
+      
+      // Wait for alerts to be loaded
+      const alerts = await this.firebaseService.getAlerts();
+      this.alerts = alerts;
+      this.filteredAlerts = [...alerts];
 
       // Initialize showComments for all alerts to false
       this.alerts.forEach(alert => {
@@ -609,8 +612,16 @@ export class AlertsComponent implements OnInit, OnDestroy {
         for (const alert of this.alerts) {
           if (alert.id) {
             this.commentSubscriptions[alert.id] = this.firebaseService.getComments(alert.id)
-              .subscribe(comments => {
-                this.comments[alert.id!] = comments;
+              .subscribe({
+                next: (comments) => {
+                  this.comments[alert.id!] = comments;
+                },
+                error: (error) => {
+                  console.error(`Error loading comments for alert ${alert.id}:`, error);
+                  this.snackBar.open('Failed to load comments', 'Close', {
+                    duration: 5000
+                  });
+                }
               });
           }
         }
@@ -619,7 +630,8 @@ export class AlertsComponent implements OnInit, OnDestroy {
       }
     } catch (error) {
       console.error('Error loading alerts:', error);
-      this.snackBar.open('Failed to load alerts. Please try again.', 'Close', {
+      this.error = 'Failed to load alerts. Please try again.';
+      this.snackBar.open(this.error, 'Close', {
         duration: 5000
       });
     } finally {
@@ -711,7 +723,8 @@ export class AlertsComponent implements OnInit, OnDestroy {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this.loadAlerts();
+        // Hard reload the page to show new alerts immediately
+        window.location.reload();
       }
     });
   }
