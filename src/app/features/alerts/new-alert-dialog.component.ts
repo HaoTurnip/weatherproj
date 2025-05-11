@@ -14,6 +14,7 @@ import { FirebaseService } from '../../core/services/firebase.service';
 import { AuthService } from '../../core/services/auth.service';
 import { Router } from '@angular/router';
 import { Alert } from '../../core/models/alert.model';
+import { take } from 'rxjs/operators';
 
 @Component({
   selector: 'app-new-alert-dialog',
@@ -225,7 +226,9 @@ export class NewAlertDialogComponent {
     if (this.form.valid) {
       try {
         this.loading = true;
-        const currentUser = this.authService.getCurrentUser();
+        
+        // Wait for authentication state to be ready
+        const currentUser = await this.authService.user$.pipe(take(1)).toPromise();
         
         if (!currentUser) {
           this.snackBar.open('Please sign in to create alerts', 'Sign In', {
@@ -245,39 +248,31 @@ export class NewAlertDialogComponent {
         const formValue = this.form.value;
         
         // Validate dates
-        if (formValue.startTime > formValue.endTime) {
+        const startTime = new Date(formValue.startTime);
+        const endTime = new Date(formValue.endTime);
+        
+        if (startTime > endTime) {
           throw new Error('End time must be after start time');
         }
 
-        // Create alert object with proper date handling
-        const alertData = {
-          ...formValue,
-          userId: currentUser.uid,
-          startTime: new Date(formValue.startTime),
-          endTime: new Date(formValue.endTime)
+        const alert: Omit<Alert, 'id'> = {
+          title: formValue.title,
+          description: formValue.description,
+          type: formValue.type,
+          severity: formValue.severity,
+          location: formValue.location,
+          startTime: startTime,
+          endTime: endTime,
+          userId: currentUser.uid
         };
 
-        console.log('Creating alert with data:', alertData);
-        await this.firebaseService.addAlert(alertData);
-
-        // Close the dialog first
+        console.log('Creating alert with data:', alert);
+        await this.firebaseService.addAlert(alert);
+        this.snackBar.open('Alert created successfully!', 'Close', { duration: 3000 });
         this.dialogRef.close(true);
-        
-        // Then show the success message
-        this.snackBar.open('Alert created successfully!', 'Close', {
-          duration: 3000,
-          horizontalPosition: 'center',
-          verticalPosition: 'top',
-          panelClass: ['success-snackbar']
-        });
       } catch (error: any) {
         console.error('Error creating alert:', error);
-        this.snackBar.open(error.message || 'Failed to create alert. Please try again.', 'Close', {
-          duration: 5000,
-          horizontalPosition: 'center',
-          verticalPosition: 'top',
-          panelClass: ['error-snackbar']
-        });
+        this.snackBar.open(error.message || 'Failed to create alert', 'Close', { duration: 5000 });
       } finally {
         this.loading = false;
       }

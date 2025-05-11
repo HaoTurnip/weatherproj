@@ -14,6 +14,7 @@ import { TemperaturePipe } from '../../shared/pipes/temperature.pipe';
 import { WeatherConditionPipe } from '../../shared/pipes/weather-condition.pipe';
 import { RouterModule } from '@angular/router';
 import { CityService } from '../../services/city.service';
+import { Hour12Pipe } from '../../shared/pipes/hour12.pipe';
 
 interface WeatherData {
   cityName: string;
@@ -42,7 +43,8 @@ interface WeatherData {
     RouterModule,
     SkeletonLoaderComponent,
     TemperaturePipe,
-    WeatherConditionPipe
+    WeatherConditionPipe,
+    Hour12Pipe
   ],
   template: `
     <div class="home-container">
@@ -132,7 +134,7 @@ interface WeatherData {
               <div class="hourly-scroll">
                 @for (hour of hourlyForecast; track hour.time) {
                   <div class="hourly-item">
-                    <span class="hour">{{ hour.time }}</span>
+                    <span class="hour">{{ hour.time | hour12 }}</span>
                     <div class="hourly-icon-wrapper">
                       <img [src]="hour.icon" [alt]="hour.condition" class="hourly-icon">
                     </div>
@@ -589,7 +591,7 @@ export class HomeComponent implements OnInit {
     this.weatherService.getForecast(this.cityName).subscribe({
       next: (data) => {
         // Get current weather data
-        this.weatherService.getCurrentWeather(data.latitude, data.longitude).subscribe({
+        this.weatherService.getCurrentWeather({ latitude: data.latitude, longitude: data.longitude }).subscribe({
           next: (currentWeather) => {
             this.weatherData = {
               cityName: this.cityName,

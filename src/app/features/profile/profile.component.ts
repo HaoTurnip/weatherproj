@@ -245,14 +245,27 @@ export class ProfileComponent implements OnInit {
       
       if (currentUser) {
         this.user = currentUser;
-        this.userAlerts = await this.firebaseService.getUserAlerts(currentUser.uid);
-        this.userActivity = await this.firebaseService.getUserActivity(currentUser.uid);
+        this.userAlerts = (await this.firebaseService.getUserAlerts(currentUser.uid)).map(alert => ({
+          ...alert,
+          startTime: this.isFirestoreTimestamp(alert.startTime) ? alert.startTime.toDate() : alert.startTime,
+          endTime: this.isFirestoreTimestamp(alert.endTime) ? alert.endTime.toDate() : alert.endTime,
+          createdAt: this.isFirestoreTimestamp(alert.createdAt) ? alert.createdAt.toDate() : alert.createdAt,
+          updatedAt: this.isFirestoreTimestamp(alert.updatedAt) ? alert.updatedAt.toDate() : alert.updatedAt
+        }));
+        this.userActivity = (await this.firebaseService.getUserActivity(currentUser.uid)).map(activity => ({
+          ...activity,
+          timestamp: this.isFirestoreTimestamp(activity.timestamp) ? activity.timestamp.toDate() : activity.timestamp
+        }));
       }
     } catch (error) {
       console.error('Error loading user data:', error);
     } finally {
       this.loading = false;
     }
+  }
+
+  isFirestoreTimestamp(obj: any): obj is { toDate: () => Date } {
+    return obj && typeof obj === 'object' && typeof obj.toDate === 'function';
   }
 
   getSeverityColor(severity: string): string {

@@ -208,7 +208,7 @@ export class ForecastComponent implements OnInit {
     this.loading = true;
     this.error = null;
 
-    this.weatherService.getForecast(this.cityName).subscribe({
+    this.weatherService.getForecast(this.cityName, 5).subscribe({
       next: (data: ForecastData) => {
         this.forecast = data;
         this.loading = false;

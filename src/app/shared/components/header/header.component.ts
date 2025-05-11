@@ -12,6 +12,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { AuthService } from '../../../core/services/auth.service';
 import { NavBarComponent } from '../nav-bar/nav-bar.component';
 import { CityService } from '../../../services/city.service';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-header',
@@ -61,42 +62,59 @@ import { CityService } from '../../../services/city.service';
         </div>
 
         <div class="header-right">
-          <button type="button" class="theme-toggle" (click)="toggleTheme()" aria-label="Toggle theme">
-            <mat-icon class="toggle-icon">{{ isDarkTheme ? 'light_mode' : 'dark_mode' }}</mat-icon>
-          </button>
-          <button type="button" class="user-button" [matMenuTriggerFor]="userMenu" aria-label="User menu">
-            <mat-icon class="user-icon">account_circle</mat-icon>
-          </button>
+          <ng-container *ngIf="user$ | async as user; else loggedOut">
+            <button type="button" class="theme-toggle" (click)="toggleTheme()" aria-label="Toggle theme">
+              <mat-icon class="toggle-icon">{{ isDarkTheme ? 'light_mode' : 'dark_mode' }}</mat-icon>
+            </button>
+            <button type="button" class="user-button" [matMenuTriggerFor]="userMenu" aria-label="User menu">
+              <mat-icon class="user-icon">account_circle</mat-icon>
+            </button>
+            <mat-menu #userMenu="matMenu" class="user-menu">
+              <div class="menu-header">
+                <mat-icon class="user-avatar">account_circle</mat-icon>
+                <div class="user-info">
+                  <div class="user-name">{{ user.displayName || 'User Name' }}</div>
+                  <div class="user-email">{{ user.email }}</div>
+                </div>
+              </div>
+              <mat-divider></mat-divider>
+              <button mat-menu-item routerLink="/settings">
+                <mat-icon>settings</mat-icon>
+                <span>Settings</span>
+              </button>
+              <button mat-menu-item routerLink="/profile">
+                <mat-icon>person</mat-icon>
+                <span>Profile</span>
+              </button>
+              <mat-divider></mat-divider>
+              <button mat-menu-item (click)="authService.signOut()">
+                <mat-icon>logout</mat-icon>
+                <span>Logout</span>
+              </button>
+            </mat-menu>
+          </ng-container>
+          <ng-template #loggedOut>
+            <button type="button" class="theme-toggle" (click)="toggleTheme()" aria-label="Toggle theme">
+              <mat-icon class="toggle-icon">{{ isDarkTheme ? 'light_mode' : 'dark_mode' }}</mat-icon>
+            </button>
+            <button mat-button color="primary" routerLink="/login">Login</button>
+            <button mat-button color="accent" routerLink="/signup">Sign Up</button>
+          </ng-template>
         </div>
       </mat-toolbar>
     </div>
     
     <app-nav-bar></app-nav-bar>
 
-    <!-- User Menu -->
-    <mat-menu #userMenu="matMenu" class="user-menu">
-      <div class="menu-header">
-        <mat-icon class="user-avatar">account_circle</mat-icon>
-        <div class="user-info">
-          <div class="user-name">User Name</div>
-          <div class="user-email">user&#64;example.com</div>
-        </div>
+    <ng-template #loggedOut>
+      <div class="header-right">
+        <button type="button" class="theme-toggle" (click)="toggleTheme()" aria-label="Toggle theme">
+          <mat-icon class="toggle-icon">{{ isDarkTheme ? 'light_mode' : 'dark_mode' }}</mat-icon>
+        </button>
+        <button mat-button color="primary" routerLink="/login">Login</button>
+        <button mat-button color="accent" routerLink="/signup">Sign Up</button>
       </div>
-      <mat-divider></mat-divider>
-      <button mat-menu-item routerLink="/settings">
-        <mat-icon>settings</mat-icon>
-        <span>Settings</span>
-      </button>
-      <button mat-menu-item routerLink="/profile">
-        <mat-icon>person</mat-icon>
-        <span>Profile</span>
-      </button>
-      <mat-divider></mat-divider>
-      <button mat-menu-item (click)="authService.signOut()">
-        <mat-icon>logout</mat-icon>
-        <span>Logout</span>
-      </button>
-    </mat-menu>
+    </ng-template>
   `,
   styles: [`
     .header-wrapper {
@@ -395,10 +413,11 @@ export class HeaderComponent {
   @Output() searchCity = new EventEmitter<string>();
   searchQuery = '';
   isDarkTheme = false;
+  user$: Observable<any>;
 
   constructor(public authService: AuthService, private cityService: CityService) {
-    // Check if dark theme is enabled
     this.isDarkTheme = document.body.classList.contains('dark-theme');
+    this.user$ = this.authService.user$;
   }
 
   onSearch() {
