@@ -36,7 +36,7 @@ import { Observable } from 'rxjs';
       <mat-toolbar class="header">
         <div class="header-left">
           <a routerLink="/" class="logo">
-            <img src="assets/logo.svg" alt="Weather App Logo" class="logo-img">
+            <img src="assets/logo.png" alt="Weather App Logo" class="logo-img">
             <span class="app-name">WeatherPro</span>
           </a>
         </div>
@@ -161,12 +161,12 @@ import { Observable } from 'rxjs';
     }
 
     .logo-img {
-      height: 32px;
-      margin-right: 0.75rem;
+      height: 80px;
+      margin-right: 0.25rem;
     }
 
     .app-name {
-      font-size: 1.25rem;
+      font-size: 2rem;
       font-weight: 700;
       letter-spacing: 0.5px;
       background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
