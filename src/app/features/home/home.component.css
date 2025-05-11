@@ -407,9 +407,9 @@ body, .home-container {
 }
 
 .alert-time {
-  margin-top: 0.5rem !important;
-  font-size: 0.8rem !important;
-  color: #888 !important;
+  margin-top: 0.5rem ;
+  font-size: 0.8rem ;
+  color: #888 ;
 }
 
 /* Dark Theme */

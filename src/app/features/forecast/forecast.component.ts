@@ -29,47 +29,47 @@ import { CityService } from '../../services/city.service';
       }
       
       .dark-theme .forecast-card {
-        background-color: var(--card-dark) !important;
-        border: 1px solid var(--border-dark) !important;
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25) !important;
+        background-color: var(--card-dark) ;
+        border: 1px solid var(--border-dark) ;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25) ;
       }
       
       .dark-theme .forecast-card:hover {
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35) !important;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35) ;
         transform: translateY(-8px);
       }
       
       .dark-theme .forecast-card .mat-mdc-card-title {
-        color: var(--text-primary-dark) !important;
+        color: var(--text-primary-dark) ;
       }
       
       .dark-theme .forecast-card .mat-mdc-card-subtitle {
-        color: var(--text-secondary-dark) !important;
+        color: var(--text-secondary-dark) ;
       }
       
       .dark-theme .forecast-container .error-container {
-        background-color: var(--card-dark) !important;
-        border: 1px solid var(--border-dark) !important;
-        color: var(--text-primary-dark) !important;
+        background-color: var(--card-dark) ;
+        border: 1px solid var(--border-dark) ;
+        color: var(--text-primary-dark) ;
       }
       
       .dark-theme .forecast-container .error-container h2 {
-        color: var(--text-primary-dark) !important;
+        color: var(--text-primary-dark) ;
       }
       
       .dark-theme .forecast-container .error-container p {
-        color: var(--text-secondary-dark) !important;
+        color: var(--text-secondary-dark) ;
       }
       
       /* Fix for the condition text in dark mode */
       .dark-theme .details div {
-        background-color: rgba(51, 65, 85, 0.6) !important;
-        color: var(--text-primary-dark) !important;
-        border: 1px solid var(--border-dark) !important;
+        background-color: rgba(51, 65, 85, 0.6) ;
+        color: var(--text-primary-dark) ;
+        border: 1px solid var(--border-dark) ;
       }
       
       .dark-theme .details div:hover {
-        background-color: rgba(51, 65, 85, 0.8) !important;
+        background-color: rgba(51, 65, 85, 0.8) ;
       }
     </style>
     <div class="forecast-container">
