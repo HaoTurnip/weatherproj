@@ -12,6 +12,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { AuthService } from '../../../core/services/auth.service';
 import { NavBarComponent } from '../nav-bar/nav-bar.component';
 import { CityService } from '../../../services/city.service';
+import { WeatherService } from '../../../core/services/weather.service';
 import { Observable } from 'rxjs';
 
 @Component({
@@ -415,7 +416,7 @@ export class HeaderComponent {
   isDarkTheme = false;
   user$: Observable<any>;
 
-  constructor(public authService: AuthService, private cityService: CityService) {
+  constructor(public authService: AuthService, private cityService: CityService, private weatherService: WeatherService) {
     this.isDarkTheme = document.body.classList.contains('dark-theme');
     this.user$ = this.authService.user$;
   }
@@ -424,6 +425,13 @@ export class HeaderComponent {
     if (this.searchQuery.trim()) {
       this.cityService.setCity(this.searchQuery.trim());
       this.searchCity.emit(this.searchQuery.trim());
+    } else {
+      // If search is empty, use the default city from user settings
+      const userSettings = this.weatherService.getUserSettings();
+      if (userSettings && userSettings.defaultCity) {
+        this.cityService.setCity(userSettings.defaultCity);
+        this.searchCity.emit(userSettings.defaultCity);
+      }
     }
   }
 
