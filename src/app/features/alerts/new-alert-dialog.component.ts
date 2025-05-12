@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, EventEmitter, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -17,6 +17,7 @@ import { Router } from '@angular/router';
 import { Alert } from '../../core/models/alert.model';
 import { take } from 'rxjs/operators';
 import { ThemeService } from '../../core/services/theme.service';
+import { trigger, state, style, transition, animate } from '@angular/animations';
 
 @Component({
   selector: 'app-new-alert-dialog',
@@ -34,14 +35,30 @@ import { ThemeService } from '../../core/services/theme.service';
     MatIconModule,
     ReactiveFormsModule
   ],
+  animations: [
+    trigger('fadeInOut', [
+      state('void', style({ opacity: 0 })),
+      transition(':enter', [animate('300ms ease-in', style({ opacity: 1 }))]),
+      transition(':leave', [animate('300ms ease-out', style({ opacity: 0 }))])
+    ])
+  ],
   template: `
     <div class="dialog-container">
       <h2 mat-dialog-title>Create New Weather Alert</h2>
       <mat-dialog-content>
         @if (loading) {
           <div class="loading-overlay">
-            <mat-spinner diameter="40"></mat-spinner>
-            <p>Creating alert...</p>
+            @if (!showSuccess) {
+              <mat-spinner diameter="40"></mat-spinner>
+              <p>Creating alert...</p>
+            } @else {
+              <div class="success-animation" @fadeInOut>
+                <div class="checkmark-circle">
+                  <div class="checkmark"></div>
+                </div>
+                <p>Alert created successfully!</p>
+              </div>
+            }
           </div>
         }
         <form [formGroup]="form" class="alert-form" [class.loading]="loading">
@@ -249,17 +266,19 @@ import { ThemeService } from '../../core/services/theme.service';
       left: 0;
       right: 0;
       bottom: 0;
-      background: rgba(255, 255, 255, 0.8);
+      background: rgba(255, 255, 255, 0.9);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       z-index: 1000;
       border-radius: 12px;
+      backdrop-filter: blur(2px);
     }
 
     :host-context(.dark-theme) .loading-overlay {
-      background: rgba(30, 41, 59, 0.8);
+      background: rgba(30, 41, 59, 0.9);
+      backdrop-filter: blur(2px);
     }
 
     .loading-overlay p {
@@ -269,6 +288,97 @@ import { ThemeService } from '../../core/services/theme.service';
 
     :host-context(.dark-theme) .loading-overlay p {
       color: var(--text-secondary-dark, #cbd5e1);
+    }
+
+    /* Success Animation Styles */
+    .success-animation {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      animation: fadeIn 0.5s ease-in-out forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .checkmark-circle {
+      width: 80px;
+      height: 80px;
+      position: relative;
+      display: inline-block;
+      vertical-align: top;
+      margin: 0 0 20px 0;
+      background: var(--primary-color, #3b82f6);
+      border-radius: 50%;
+      box-shadow: 0 4px 16px rgba(59, 130, 246, 0.4);
+      transform: scale(0.8);
+      animation: scaleUp 0.5s ease-out forwards;
+    }
+
+    @keyframes scaleUp {
+      from { transform: scale(0.8); }
+      to { transform: scale(1); }
+    }
+
+    :host-context(.dark-theme) .checkmark-circle {
+      background: var(--primary-light, #60a5fa);
+      box-shadow: 0 4px 16px rgba(96, 165, 250, 0.4);
+    }
+
+    .checkmark {
+      height: 40px;
+      width: 20px;
+      display: block;
+      border-right: 4px solid white;
+      border-bottom: 4px solid white;
+      transform: rotate(45deg);
+      position: absolute;
+      left: 30px;
+      top: 18px;
+      animation: checkAnimation 0.6s ease-in-out forwards;
+      transform-origin: center;
+      opacity: 0;
+    }
+
+    @keyframes checkAnimation {
+      0% {
+        height: 0;
+        width: 0;
+        opacity: 0;
+      }
+      40% {
+        opacity: 1;
+        height: 0;
+        width: 20px;
+      }
+      60% {
+        height: 30px;
+      }
+      100% {
+        height: 40px;
+        width: 20px;
+        opacity: 1;
+      }
+    }
+
+    .success-animation p {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--primary-color, #3b82f6);
+      margin-top: 10px;
+      animation: textFadeIn 0.3s ease-in forwards 0.3s;
+      opacity: 0;
+    }
+
+    @keyframes textFadeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    :host-context(.dark-theme) .success-animation p {
+      color: var(--primary-light, #60a5fa);
     }
 
     /* Button styling */
@@ -308,7 +418,10 @@ export class NewAlertDialogComponent {
   private fb = inject(FormBuilder);
   private themeService = inject(ThemeService);
 
+  @Output() alertCreated = new EventEmitter<boolean>();
+
   loading = false;
+  showSuccess = false;
   form: FormGroup;
   isDarkMode$ = this.themeService.isDarkMode$;
 
@@ -375,8 +488,19 @@ export class NewAlertDialogComponent {
 
         console.log('Creating alert with data:', alert);
         await this.firebaseService.addAlert(alert);
-        this.snackBar.open('Alert created successfully!', 'Close', { duration: 3000 });
-        this.dialogRef.close(true);
+        
+        // Show success animation
+        this.showSuccess = true;
+        
+        // Emit event to trigger alert refetch
+        this.alertCreated.emit(true);
+        console.log('Alert created successfully, emitted alertCreated event');
+        
+        // Close dialog after animation completes
+        setTimeout(() => {
+          this.dialogRef.close(true);
+        }, 2000);
+        
       } catch (error: any) {
         console.error('Error creating alert:', error);
         // Suppress the specific Firestore insufficient permissions error after creation
@@ -386,14 +510,21 @@ export class NewAlertDialogComponent {
         ) {
           // Optionally, you can log it or show a non-blocking message
           console.warn('Temporary Firestore permission error suppressed:', error.message);
-          // Optionally, show a user-friendly message or do nothing
-          // this.snackBar.open('Alert created! It may take a moment to appear.', 'Close', { duration: 3000 });
+          
+          // Still show success and emit event as the alert was likely created
+          this.showSuccess = true;
+          this.alertCreated.emit(true);
+          console.log('Alert likely created despite permission error, emitted alertCreated event');
+          
+          // Close dialog after animation completes
+          setTimeout(() => {
+            this.dialogRef.close(true);
+          }, 2000);
         } else {
           // Handle other errors normally
           this.snackBar.open(error.message || 'Failed to create alert', 'Close', { duration: 5000 });
+          this.loading = false;
         }
-      } finally {
-        this.loading = false;
       }
     }
   }

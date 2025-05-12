@@ -721,10 +721,18 @@ export class AlertsComponent implements OnInit, OnDestroy {
       maxWidth: '90vw'
     });
 
+    // Get component instance to listen for the alertCreated event
+    const componentInstance = dialogRef.componentInstance as NewAlertDialogComponent;
+    
+    // Listen for alertCreated event to refresh alerts
+    componentInstance.alertCreated.subscribe(() => {
+      console.log('Alert created, refreshing alerts list');
+      this.loadAlerts();
+    });
+
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        // Hard reload the page to show new alerts immediately
-        window.location.reload();
+        this.loadAlerts();
       }
     });
   }
