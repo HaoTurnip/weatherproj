@@ -324,6 +324,11 @@ export class NewAlertDialogComponent {
     });
   }
 
+  isAlertOwner(alert: Alert): boolean {
+    const currentUser = this.authService.getCurrentUser();
+    return !!currentUser && alert.userId === currentUser.uid;
+  }
+
   async onSubmit() {
     if (this.form.valid) {
       try {
