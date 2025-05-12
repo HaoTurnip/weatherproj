@@ -126,17 +126,6 @@ import { SkeletonLoaderComponent } from '../../shared/components/skeleton-loader
 
     .profile-card {
       margin-bottom: 24px;
-      background: var(--card-light, #f8fafc);
-      border: 1px solid var(--border-light, #e2e8f0);
-      box-shadow: var(--shadow-sm, 0 1px 2px rgba(0, 0, 0, 0.05));
-      transition: all 0.3s ease;
-    }
-
-    :host-context(.dark-theme) .profile-card {
-      background: var(--card-dark, #1e293b);
-      color: var(--text-primary-dark, #f8fafc);
-      border-color: var(--border-dark, #334155);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
     }
 
     .profile-header {
@@ -153,17 +142,9 @@ import { SkeletonLoaderComponent } from '../../shared/components/skeleton-loader
       color: #333;
     }
 
-    :host-context(.dark-theme) .user-info h1 {
-      color: #f8fafc;
-    }
-
     .email {
       color: #666;
       margin: 4px 0 0;
-    }
-
-    :host-context(.dark-theme) .email {
-      color: #b0bec5;
     }
 
     .alerts-list, .activity-list {
@@ -175,18 +156,6 @@ import { SkeletonLoaderComponent } from '../../shared/components/skeleton-loader
 
     .alert-card {
       margin-bottom: 16px;
-      background: var(--card-light, #f8fafc);
-      border: 1px solid var(--border-light, #e2e8f0);
-      border-radius: 8px;
-      box-shadow: var(--shadow-sm, 0 1px 2px rgba(0, 0, 0, 0.05));
-      transition: all 0.3s ease;
-    }
-
-    :host-context(.dark-theme) .alert-card {
-      background: #232a34;
-      color: #f4f6fb;
-      border: 1px solid #2d3440;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
     }
 
     .alert-meta {
@@ -203,10 +172,6 @@ import { SkeletonLoaderComponent } from '../../shared/components/skeleton-loader
       font-size: 14px;
     }
 
-    :host-context(.dark-theme) .location {
-      color: #b0bec5;
-    }
-
     .location mat-icon {
       font-size: 16px;
       margin-right: 4px;
@@ -214,18 +179,6 @@ import { SkeletonLoaderComponent } from '../../shared/components/skeleton-loader
 
     .activity-card {
       margin-bottom: 16px;
-      background: var(--card-light, #f8fafc);
-      border: 1px solid var(--border-light, #e2e8f0);
-      border-radius: 8px;
-      box-shadow: var(--shadow-sm, 0 1px 2px rgba(0, 0, 0, 0.05));
-      transition: all 0.3s ease;
-    }
-    
-    :host-context(.dark-theme) .activity-card {
-      background: #232a34;
-      color: #f4f6fb;
-      border: 1px solid #2d3440;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
     }
 
     .activity-header {
@@ -239,19 +192,11 @@ import { SkeletonLoaderComponent } from '../../shared/components/skeleton-loader
       font-weight: 500;
       color: #1976d2;
     }
-    
-    :host-context(.dark-theme) .activity-type {
-      color: #90caf9;
-    }
 
     .activity-time {
       color: #666;
       font-size: 14px;
       margin-left: auto;
-    }
-    
-    :host-context(.dark-theme) .activity-time {
-      color: #b0bec5;
     }
 
     .no-alerts, .no-activity {
@@ -259,121 +204,6 @@ import { SkeletonLoaderComponent } from '../../shared/components/skeleton-loader
       color: #666;
       font-style: italic;
       padding: 32px;
-    }
-    
-    :host-context(.dark-theme) .no-alerts,
-    :host-context(.dark-theme) .no-activity {
-      color: #b0bec5;
-    }
-
-    /* Custom Search/Input Styles */
-    .search-field-wrapper {
-      display: flex;
-      align-items: center;
-      background: var(--card-light, #f8fafc);
-      border: 1px solid var(--border-light, #e2e8f0);
-      border-radius: var(--radius-full, 9999px);
-      padding: 0.5rem 0.875rem;
-      transition: all 0.2s ease;
-      box-shadow: var(--shadow-sm, 0 1px 2px rgba(0, 0, 0, 0.05));
-      margin: 0.75rem 0;
-      width: 100%;
-    }
-
-    .search-field-wrapper:focus-within {
-      border-color: var(--primary-color, #3b82f6);
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-      transform: translateY(-1px);
-    }
-
-    :host-context(.dark-theme) .search-field-wrapper {
-      background: var(--card-dark, #1e293b);
-      border-color: var(--border-dark, #334155);
-    }
-
-    :host-context(.dark-theme) .search-field-wrapper:focus-within {
-      border-color: var(--primary-light, #60a5fa);
-      box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
-    }
-
-    .search-icon {
-      color: var(--text-tertiary, #64748b);
-      margin-right: 0.5rem;
-      font-size: 1.25rem;
-      width: 1.25rem;
-      height: 1.25rem;
-      flex-shrink: 0;
-    }
-
-    :host-context(.dark-theme) .search-icon {
-      color: var(--text-tertiary-dark, #94a3b8);
-    }
-
-    .search-input {
-      flex: 1;
-      border: none;
-      outline: none;
-      background: transparent;
-      font-size: 0.9rem;
-      color: var(--text-primary, #334155);
-      padding: 0.4rem 0;
-      font-family: inherit;
-      width: 100%;
-    }
-
-    :host-context(.dark-theme) .search-input {
-      color: var(--text-primary-dark, #f8fafc);
-    }
-
-    .search-input::placeholder {
-      color: var(--text-tertiary, #64748b);
-    }
-
-    :host-context(.dark-theme) .search-input::placeholder {
-      color: var(--text-tertiary-dark, #94a3b8);
-    }
-
-    /* Custom Chip styling */
-    :host-context(.dark-theme) .mat-mdc-chip {
-      background-color: rgba(255, 255, 255, 0.1);
-    }
-
-    :host-context(.dark-theme) .mat-mdc-chip.mat-primary {
-      background-color: rgba(25, 118, 210, 0.5);
-    }
-
-    :host-context(.dark-theme) .mat-mdc-chip.mat-accent {
-      background-color: rgba(255, 64, 129, 0.5);
-    }
-
-    :host-context(.dark-theme) .mat-mdc-chip.mat-warn {
-      background-color: rgba(244, 67, 54, 0.5);
-    }
-
-    /* Button styling */
-    button[mat-raised-button][color="primary"] {
-      background-color: var(--primary-color, #3b82f6);
-    }
-
-    :host-context(.dark-theme) button[mat-raised-button][color="primary"] {
-      background-color: var(--primary-light, #60a5fa);
-    }
-
-    :host-context(.dark-theme) button[mat-button][color="primary"] {
-      color: var(--primary-light, #60a5fa);
-    }
-
-    :host-context(.dark-theme) button[mat-button][color="warn"] {
-      color: #ff8a65;
-    }
-
-    /* Tab styling */
-    :host-context(.dark-theme) .mat-mdc-tab-header {
-      background-color: rgba(30, 41, 59, 0.8);
-    }
-
-    :host-context(.dark-theme) .mat-mdc-tab-label-content {
-      color: #f8fafc;
     }
 
     @media (max-width: 600px) {

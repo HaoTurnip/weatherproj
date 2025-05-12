@@ -9,7 +9,6 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatIconModule } from '@angular/material/icon';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { FirebaseService } from '../../core/services/firebase.service';
 import { AuthService } from '../../core/services/auth.service';
@@ -18,6 +17,7 @@ import { Alert } from '../../core/models/alert.model';
 import { take } from 'rxjs/operators';
 import { ThemeService } from '../../core/services/theme.service';
 import { trigger, state, style, transition, animate } from '@angular/animations';
+
 
 @Component({
   selector: 'app-new-alert-dialog',
@@ -32,7 +32,6 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
     MatDatepickerModule,
     MatNativeDateModule,
     MatProgressSpinnerModule,
-    MatIconModule,
     ReactiveFormsModule
   ],
   animations: [
@@ -62,75 +61,59 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
           </div>
         }
         <form [formGroup]="form" class="alert-form" [class.loading]="loading">
-          <div class="search-field-wrapper">
-            <span class="search-icon">
-              <mat-icon>title</mat-icon>
-            </span>
-            <input class="search-input" formControlName="title" placeholder="Title" required>
-          </div>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Title</mat-label>
+            <input matInput formControlName="title" required>
+          </mat-form-field>
 
-          <div class="search-field-wrapper textarea-wrapper">
-            <span class="search-icon">
-              <mat-icon>description</mat-icon>
-            </span>
-            <textarea class="search-input" formControlName="description" placeholder="Description" required rows="4"></textarea>
-          </div>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Description</mat-label>
+            <textarea matInput formControlName="description" required rows="4"></textarea>
+          </mat-form-field>
 
-          <div class="search-field-wrapper">
-            <span class="search-icon">
-              <mat-icon>wb_sunny</mat-icon>
-            </span>
-            <select class="search-input select-input" formControlName="type" required>
-              <option value="" disabled selected>Select Weather Type</option>
-              <option value="Thunderstorm">Thunderstorm</option>
-              <option value="Rain">Rain</option>
-              <option value="Snow">Snow</option>
-              <option value="Fog">Fog</option>
-              <option value="Wind">Wind</option>
-              <option value="Heat">Heat</option>
-              <option value="Cold">Cold</option>
-              <option value="Flood">Flood</option>
-            </select>
-          </div>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Weather Type</mat-label>
+            <mat-select formControlName="type" required>
+              <mat-option value="Thunderstorm">Thunderstorm</mat-option>
+              <mat-option value="Rain">Rain</mat-option>
+              <mat-option value="Snow">Snow</mat-option>
+              <mat-option value="Fog">Fog</mat-option>
+              <mat-option value="Wind">Wind</mat-option>
+              <mat-option value="Heat">Heat</mat-option>
+              <mat-option value="Cold">Cold</mat-option>
+              <mat-option value="Flood">Flood</mat-option>
+            </mat-select>
+          </mat-form-field>
 
-          <div class="search-field-wrapper">
-            <span class="search-icon">
-              <mat-icon>warning</mat-icon>
-            </span>
-            <select class="search-input select-input" formControlName="severity" required>
-              <option value="" disabled>Select Severity</option>
-              <option value="extreme">Extreme</option>
-              <option value="severe">Severe</option>
-              <option value="moderate">Moderate</option>
-              <option value="minor">Minor</option>
-            </select>
-          </div>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Severity</mat-label>
+            <mat-select formControlName="severity" required>
+              <mat-option value="extreme">Extreme</mat-option>
+              <mat-option value="severe">Severe</mat-option>
+              <mat-option value="moderate">Moderate</mat-option>
+              <mat-option value="minor">Minor</mat-option>
+            </mat-select>
+          </mat-form-field>
 
-          <div class="search-field-wrapper">
-            <span class="search-icon">
-              <mat-icon>location_on</mat-icon>
-            </span>
-            <input class="search-input" formControlName="location" placeholder="Location" required>
-          </div>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Location</mat-label>
+            <input matInput formControlName="location" required>
+          </mat-form-field>
 
           <div class="date-range">
-            <div class="search-field-wrapper">
-              <span class="search-icon">
-                <mat-icon>event</mat-icon>
-              </span>
-              <input class="search-input" [matDatepicker]="startPicker" formControlName="startTime" placeholder="Start Time" required>
+            <mat-form-field appearance="outline">
+              <mat-label>Start Time</mat-label>
+              <input matInput [matDatepicker]="startPicker" formControlName="startTime" required>
               <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
               <mat-datepicker #startPicker></mat-datepicker>
-            </div>
+            </mat-form-field>
 
-            <div class="search-field-wrapper">
-              <span class="search-icon">
-                <mat-icon>event</mat-icon>
-              </span>
-              <input class="search-input" [matDatepicker]="endPicker" formControlName="endTime" placeholder="End Time" required>
+            <mat-form-field appearance="outline">
+              <mat-label>End Time</mat-label>
+              <input matInput [matDatepicker]="endPicker" formControlName="endTime" required>
               <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
               <mat-datepicker #endPicker></mat-datepicker>
-            </div>
+            </mat-form-field>
           </div>
         </form>
       </mat-dialog-content>
@@ -147,21 +130,12 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
       padding: 20px;
       max-width: 600px;
       position: relative;
-      background-color: white;
-      color: var(--text-primary);
-      border-radius: 12px;
-      transition: all 0.3s ease;
-    }
-
-    :host-context(.dark-theme) .dialog-container {
-      background-color: var(--card-dark, #1e293b);
-      color: white;
     }
 
     .alert-form {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 20px;
     }
 
     .alert-form.loading {
@@ -169,95 +143,59 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
       pointer-events: none;
     }
 
-    /* Custom Search/Input Styles */
-    .search-field-wrapper {
-      display: flex;
-      align-items: center;
-      background: var(--card-light, #f8fafc);
-      border: 1px solid var(--border-light, #e2e8f0);
-      border-radius: var(--radius-full, 9999px);
-      padding: 0.5rem 0.875rem;
-      transition: all 0.2s ease;
-      box-shadow: var(--shadow-sm, 0 1px 2px rgba(0, 0, 0, 0.05));
-      margin: 0.75rem 0;
+    .full-width {
       width: 100%;
     }
 
-    .textarea-wrapper {
-      border-radius: 20px;
-      align-items: start;
+    mat-form-field.full-width {
+      border-radius: 12px;
+      background: #f8f9fa;
+      box-shadow: 0 1px 4px rgba(60,60,60,0.04);
+      padding: 2px 8px 2px 8px;
+      margin-bottom: 0;
     }
 
-    .search-field-wrapper:focus-within {
-      border-color: var(--primary-color, #3b82f6);
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-      transform: translateY(-1px);
-    }
-
-    :host-context(.dark-theme) .search-field-wrapper {
-      background: var(--card-dark, #1e293b);
-      border-color: var(--border-dark, #334155);
-    }
-
-    .search-icon {
-      color: var(--text-tertiary, #64748b);
-      margin-right: 0.5rem;
-      font-size: 1.25rem;
-      width: 1.25rem;
-      height: 1.25rem;
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    :host-context(.dark-theme) .search-icon {
-      color: var(--text-tertiary-dark, #94a3b8);
-    }
-
-    .search-input {
-      flex: 1;
-      border: none;
-      outline: none;
-      background: transparent;
-      font-size: 0.9rem;
-      color: var(--text-primary, #334155);
-      padding: 0.4rem 0;
-      font-family: inherit;
-      width: 100%;
-    }
-
-    :host-context(.dark-theme) .search-input {
-      color: var(--text-primary-dark, #f8fafc);
-    }
-
-    .search-input::placeholder {
-      color: var(--text-tertiary, #64748b);
-    }
-
-    :host-context(.dark-theme) .search-input::placeholder {
-      color: var(--text-tertiary-dark, #94a3b8);
-    }
-
-    textarea.search-input {
+    mat-form-field.full-width textarea {
       min-height: 100px;
+      border-radius: 8px;
+      background: #fff;
       resize: vertical;
-      padding-top: 8px;
     }
 
-    .select-input {
-      appearance: none;
-      -webkit-appearance: none;
-      -moz-appearance: none;
-      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-      background-repeat: no-repeat;
-      background-position: right 1rem center;
-      background-size: 1em;
+    mat-form-field.full-width input,
+    mat-form-field.full-width textarea {
+      font-size: 1.05rem;
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    mat-form-field.full-width.mat-form-field-appearance-outline .mat-form-field-outline {
+      border-radius: 12px;
+      border-width: 2px;
+      border-color: #bdbdbd;
+    }
+
+    mat-form-field.full-width.mat-form-field-appearance-outline.mat-focused .mat-form-field-outline {
+      border-color: #1976d2;
+      box-shadow: 0 0 0 2px #1976d220;
+    }
+
+    mat-select {
+      border-radius: 8px;
+      background: #fff;
     }
 
     .date-range {
       display: flex;
       gap: 16px;
+    }
+    .date-range mat-form-field {
+      flex: 1;
+      border-radius: 12px;
+      background: #f8f9fa;
+      box-shadow: 0 1px 4px rgba(60,60,60,0.04);
+      padding: 2px 8px 2px 8px;
     }
 
     .loading-overlay {
@@ -279,6 +217,7 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
     :host-context(.dark-theme) .loading-overlay {
       background: rgba(30, 41, 59, 0.9);
       backdrop-filter: blur(2px);
+
     }
 
     .loading-overlay p {
@@ -406,6 +345,9 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
 
     :host-context(.dark-theme) h2 {
       color: var(--text-primary-dark, #f8fafc);
+
+      color: #666;
+
     }
   `]
 })
@@ -416,14 +358,12 @@ export class NewAlertDialogComponent {
   private snackBar = inject(MatSnackBar);
   private router = inject(Router);
   private fb = inject(FormBuilder);
-  private themeService = inject(ThemeService);
 
   @Output() alertCreated = new EventEmitter<boolean>();
 
   loading = false;
   showSuccess = false;
   form: FormGroup;
-  isDarkMode$ = this.themeService.isDarkMode$;
 
   constructor() {
     this.form = this.fb.group({
@@ -525,6 +465,7 @@ export class NewAlertDialogComponent {
           this.snackBar.open(error.message || 'Failed to create alert', 'Close', { duration: 5000 });
           this.loading = false;
         }
+
       }
     }
   }

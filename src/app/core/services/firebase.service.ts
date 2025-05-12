@@ -66,15 +66,15 @@ export class FirebaseService {
         endTime: firebase.firestore.Timestamp.fromDate(new Date(alert.endTime)),
         upvotes: 0,
         downvotes: 0,
+        comments: [],
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
       };
 
       console.log('Alert data to be saved:', alertData);
       
-      // Add the alert document and wait for it to complete
+      // Add the alert document
       const docRef = await this.firestore.collection('alerts').add(alertData);
-      
       console.log('Alert added successfully with ID:', docRef.id);
 
       // Add user activity for alert creation
