@@ -103,11 +103,11 @@ import { Comment } from '../../core/models/alert.model';
                 <div class="alert-stats">
                   <div class="stat-item">
                     <mat-icon>thumb_up</mat-icon>
-                    <span>{{ votes[alert.id || '']?.upvotes || 0 }}</span>
+                    <span>{{ (votes[alert.id || ''] ? votes[alert.id || ''].upvotes : 0) || 0 }}</span>
                   </div>
                   <div class="stat-item">
                     <mat-icon>thumb_down</mat-icon>
-                    <span>{{ votes[alert.id || '']?.downvotes || 0 }}</span>
+                    <span>{{ (votes[alert.id || ''] ? votes[alert.id || ''].downvotes : 0) || 0 }}</span>
                   </div>
                   <div class="stat-item">
                     <mat-icon>chat</mat-icon>
@@ -140,15 +140,17 @@ import { Comment } from '../../core/models/alert.model';
               <mat-card-actions>
                 <button mat-button color="primary"
                         (click)="vote(alert.id!, 'up')"
-                        [disabled]="!authService.isLoggedIn() || !alert.id || (votes[alert.id || '']?.userVote === 'up') || ((authService.getCurrentUser()?.uid ?? '') && alert.userId === (authService.getCurrentUser()?.uid ?? ''))"
-                        [ngClass]="{'voted': votes[alert.id || '']?.userVote === 'up'}">
+                        [disabled]="!authService.isLoggedIn() || !alert.id || (votes[alert.id || ''] && votes[alert.id || ''].userVote === 'up') || ((authService.getCurrentUser()?.uid ?? '') && alert.userId === (authService.getCurrentUser()?.uid ?? ''))"
+                        [ngClass]="{'voted': votes[alert.id || ''] && votes[alert.id || ''].userVote === 'up'}"
+                        [matTooltip]="((authService.getCurrentUser()?.uid ?? '') && alert.userId === (authService.getCurrentUser()?.uid ?? '')) ? 'You cannot vote on your own alert' : (votes[alert.id || ''] && votes[alert.id || ''].userVote === 'up') ? 'You already upvoted this alert' : 'Upvote this alert'">
                   <mat-icon>thumb_up</mat-icon>
                   Upvote
                 </button>
                 <button mat-button color="warn"
                         (click)="vote(alert.id!, 'down')"
-                        [disabled]="!authService.isLoggedIn() || !alert.id || (votes[alert.id || '']?.userVote === 'down') || ((authService.getCurrentUser()?.uid ?? '') && alert.userId === (authService.getCurrentUser()?.uid ?? ''))"
-                        [ngClass]="{'voted': votes[alert.id || '']?.userVote === 'down'}">
+                        [disabled]="!authService.isLoggedIn() || !alert.id || (votes[alert.id || ''] && votes[alert.id || ''].userVote === 'down') || ((authService.getCurrentUser()?.uid ?? '') && alert.userId === (authService.getCurrentUser()?.uid ?? ''))"
+                        [ngClass]="{'voted': votes[alert.id || ''] && votes[alert.id || ''].userVote === 'down'}"
+                        [matTooltip]="((authService.getCurrentUser()?.uid ?? '') && alert.userId === (authService.getCurrentUser()?.uid ?? '')) ? 'You cannot vote on your own alert' : (votes[alert.id || ''] && votes[alert.id || ''].userVote === 'down') ? 'You already downvoted this alert' : 'Downvote this alert'">
                   <mat-icon>thumb_down</mat-icon>
                   Downvote
                 </button>
@@ -402,6 +404,22 @@ import { Comment } from '../../core/models/alert.model';
       justify-content: center;
       min-height: 36px;
     }
+    
+    mat-card-actions button:disabled {
+      opacity: 0.5 !important;
+      background-color: #e0e0e0 !important;
+      color: #9e9e9e !important;
+      cursor: not-allowed !important;
+      box-shadow: none !important;
+    }
+    
+    :host-context(.dark-theme) mat-card-actions button:disabled {
+      opacity: 0.5 !important;
+      background-color: #424242 !important;
+      color: #757575 !important;
+      box-shadow: none !important;
+    }
+    
     mat-card-actions button mat-icon {
       font-size: 18px;
       height: 18px;
@@ -630,6 +648,12 @@ export class AlertsComponent implements OnInit, OnDestroy {
         this.alerts.forEach(alert => {
           if (alert.id) {
             this.showComments[alert.id] = false;
+            
+            // Initialize votes with defaults to prevent undefined errors
+            if (!this.votes[alert.id]) {
+              this.votes[alert.id] = { upvotes: 0, downvotes: 0, userVote: null };
+            }
+            
             // Subscribe to votes for each alert
             if (this.voteSubscriptions[alert.id]) {
               this.voteSubscriptions[alert.id].unsubscribe();

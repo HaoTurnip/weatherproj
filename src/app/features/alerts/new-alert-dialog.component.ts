@@ -188,6 +188,10 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
       align-items: start;
     }
 
+    
+  
+
+
     .search-field-wrapper:focus-within {
       border-color: var(--primary-color, #3b82f6);
       box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
@@ -214,6 +218,8 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
     :host-context(.dark-theme) .search-icon {
       color: var(--text-tertiary-dark, #94a3b8);
     }
+
+    
 
     .search-input {
       flex: 1;
@@ -253,6 +259,17 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
       background-repeat: no-repeat;
       background-position: right 1rem center;
       background-size: 1em;
+    }
+
+    /* Make select options black in dark mode (they're shown outside the themed container) */
+    .select-input option {
+      color: #000;
+      background-color: #fff;
+    }
+
+    :host-context(.dark-theme) .select-input option {
+      color: #000;
+      background-color: #fff;
     }
 
     .date-range {
