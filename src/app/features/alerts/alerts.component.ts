@@ -565,8 +565,14 @@ import { Comment } from '../../core/models/alert.model';
     }
 
     .voted {
-      background-color: #e67e22;
+      background-color: var(--primary-color, #e67e22);
+      color: var(--background-light, #fff);
+    }
+    :host-context(.dark-theme) .voted {
+      background-color: #ff9800;
       color: #fff;
+      box-shadow: 0 0 0 2px #ff9800, 0 2px 8px rgba(0,0,0,0.2);
+      border: none;
     }
   `]
 })
