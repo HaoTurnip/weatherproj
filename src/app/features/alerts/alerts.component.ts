@@ -713,23 +713,22 @@ export class AlertsComponent implements OnInit, OnDestroy {
 
     let result = [...this.alerts];
 
-    // Filter by search query (title or description)
-    if (filters.searchQuery) {
-      const query = filters.searchQuery.toLowerCase();
+    // Filter by search query (location)
+    if (filters.search) {
+      const query = filters.search.toLowerCase();
       result = result.filter(alert => 
-        alert.title.toLowerCase().includes(query) || 
-        alert.description.toLowerCase().includes(query)
+        alert.location.toLowerCase().includes(query)
       );
     }
 
     // Filter by type
-    if (filters.selectedType) {
-      result = result.filter(alert => alert.type === filters.selectedType);
+    if (filters.type) {
+      result = result.filter(alert => alert.type === filters.type);
     }
 
     // Filter by severity
-    if (filters.selectedSeverity) {
-      result = result.filter(alert => alert.severity === filters.selectedSeverity);
+    if (filters.severity) {
+      result = result.filter(alert => alert.severity === filters.severity);
     }
 
     // Sort results
@@ -755,10 +754,25 @@ export class AlertsComponent implements OnInit, OnDestroy {
         case 'severity-asc':
           result.sort((a, b) => this.getSeverityWeight(a.severity) - this.getSeverityWeight(b.severity));
           break;
+        case 'upvotes-desc':
+          result.sort((a, b) => {
+            const upvotesA = a.id && this.votes[a.id] ? this.votes[a.id].upvotes : 0;
+            const upvotesB = b.id && this.votes[b.id] ? this.votes[b.id].upvotes : 0;
+            return upvotesB - upvotesA;
+          });
+          break;
+        case 'upvotes-asc':
+          result.sort((a, b) => {
+            const upvotesA = a.id && this.votes[a.id] ? this.votes[a.id].upvotes : 0;
+            const upvotesB = b.id && this.votes[b.id] ? this.votes[b.id].upvotes : 0;
+            return upvotesA - upvotesB;
+          });
+          break;
       }
     }
 
     this.filteredAlerts = result;
+    console.log('Applied filters:', filters, 'Results:', result.length);
   }
 
   getSeverityWeight(severity: string): number {

@@ -16,12 +16,12 @@ import { MatButtonModule } from '@angular/material/button';
   template: `
     <div class="filter-container">
       <div class="search-field">
-        <mat-icon>search</mat-icon>
+        <mat-icon>location_on</mat-icon>
         <input 
           type="text" 
           [(ngModel)]="searchQuery" 
           (input)="onFilterChange()" 
-          placeholder="Search"
+          placeholder="Search by location"
           class="filter-input"
         >
       </div>
@@ -59,6 +59,8 @@ import { MatButtonModule } from '@angular/material/button';
           <option value="date-asc">Oldest First</option>
           <option value="severity-desc">Most Severe</option>
           <option value="severity-asc">Least Severe</option>
+          <option value="upvotes-desc">Most Upvotes</option>
+          <option value="upvotes-asc">Least Upvotes</option>
         </select>
       </div>
 
