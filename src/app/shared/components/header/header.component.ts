@@ -162,11 +162,11 @@ import { Observable } from 'rxjs';
 
     .logo-img {
       height: 80px;
-      margin-right: 0.75rem;
+      margin-right: 0.25rem;
     }
 
     .app-name {
-      font-size: rem;
+      font-size: 2rem;
       font-weight: 700;
       letter-spacing: 0.5px;
       background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
@@ -356,7 +356,6 @@ import { Observable } from 'rxjs';
       align-items: center;
       padding: 1rem;
       background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-      min-width: 240px;
     }
 
     ::ng-deep .user-menu .user-avatar {
@@ -369,24 +368,16 @@ import { Observable } from 'rxjs';
 
     ::ng-deep .user-menu .user-info {
       color: white;
-      max-width: 180px;
-      overflow: hidden;
     }
 
     ::ng-deep .user-menu .user-name {
       font-weight: 600;
       font-size: 1rem;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
     }
 
     ::ng-deep .user-menu .user-email {
       font-size: 0.85rem;
       opacity: 0.8;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
     }
 
     ::ng-deep .user-menu .mat-mdc-menu-item {

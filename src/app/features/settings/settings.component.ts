@@ -1,16 +1,19 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
-import { MatDividerModule } from '@angular/material/divider';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 import { FormsModule } from '@angular/forms';
 import { ThemeService } from '../../core/services/theme.service';
 import { Observable, firstValueFrom, filter } from 'rxjs';
+import { MatDividerModule } from '@angular/material/divider';
 import { AuthService } from '../../core/services/auth.service';
 import { FirebaseService } from '../../core/services/firebase.service';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatIconModule } from '@angular/material/icon';
 import { WeatherService } from '../../core/services/weather.service';
 import { CityService } from '../../services/city.service';
 
@@ -28,6 +31,9 @@ interface UserSettings {
   imports: [
     CommonModule,
     MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
     MatSlideToggleModule,
     MatButtonModule,
     FormsModule,
@@ -48,35 +54,28 @@ interface UserSettings {
             <!-- Location Settings -->
             <div class="settings-section">
               <h3>Location Settings</h3>
-              <div class="search-field-wrapper">
-                <span class="search-icon">
-                  <mat-icon>location_on</mat-icon>
-                </span>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Default Location</mat-label>
                 <input
-                  class="search-input"
+                  matInput
                   [(ngModel)]="settings.defaultCity"
                   name="defaultCity"
                   placeholder="Enter your default city"
                 />
-              </div>
+                <mat-icon matSuffix>location_on</mat-icon>
+              </mat-form-field>
             </div>
 
             <!-- Units Settings -->
             <div class="settings-section">
               <h3>Units</h3>
-              <div class="search-field-wrapper">
-                <span class="search-icon">
-                  <mat-icon>thermostat</mat-icon>
-                </span>
-                <select 
-                  class="search-input" 
-                  [(ngModel)]="settings.units" 
-                  name="units"
-                >
-                  <option value="metric">Celsius (°C)</option>
-                  <option value="imperial">Fahrenheit (°F)</option>
-                </select>
-              </div>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Temperature Unit</mat-label>
+                <mat-select [(ngModel)]="settings.units" name="units">
+                  <mat-option value="metric">Celsius (°C)</mat-option>
+                  <mat-option value="imperial">Fahrenheit (°F)</mat-option>
+                </mat-select>
+              </mat-form-field>
             </div>
 
             <mat-divider></mat-divider>
@@ -88,7 +87,7 @@ interface UserSettings {
                 [(ngModel)]="settings.notifications"
                 name="notifications"
               >
-                <span class="toggle-description">Enable Weather Alerts (<--this doesn't actually send notifications - just use it as a fidget toy?)</span>
+                Enable Weather Alerts (<--this doesn't actually send notifications - just use it as a fidget toy?)
               </mat-slide-toggle>
             </div>
 
@@ -105,7 +104,6 @@ interface UserSettings {
                 mat-button
                 type="button"
                 (click)="resetSettings()"
-                class="reset-button"
               >
                 Reset to Default
               </button>
@@ -128,7 +126,7 @@ interface UserSettings {
 
     .settings-section h3 {
       margin-bottom: 1rem;
-      color: #7c8bba;
+      color: #333;
     }
 
     .full-width {
@@ -150,146 +148,69 @@ interface UserSettings {
       margin: 1rem 0;
     }
 
-    .greeting {
-      font-size: 1.2rem;
-      font-weight: 500;
-      margin-bottom: 1rem;
-      margin-left: 1rem;
-      color: #7c8bba;
-    }
-
-    /* Custom Search/Input Styles */
-    .search-container {
-      flex: 0 1 350px;
-      margin: 0 auto;
-      padding: 0;
-      display: flex;
-      justify-content: center;
-      position: absolute;
-      left: 50%;
-      transform: translateX(-54%);
-    }
-
-    .search-field-wrapper {
-      display: flex;
-      align-items: center;
-      background: var(--card-light);
-      border: 1px solid var(--border-light);
-      border-radius: var(--radius-full);
-      padding: 0.5rem 0.875rem;
-      transition: all 0.2s ease;
-      box-shadow: var(--shadow-sm);
-      margin: 0.75rem 0;
-      width: 100%;
-    }
-
-    .search-field-wrapper:focus-within {
-      border-color: var(--primary-color);
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-      transform: translateY(-1px);
-    }
-
-    :host-context(.dark-theme) .search-field-wrapper {
-      background: var(--card-dark);
-      border-color: var(--border-dark);
-    }
-
-    :host-context(.dark-theme) .search-input {
-      color: rgb(124, 139, 186);
-    }
-
-    :host-context(.dark-theme) .search-field-wrapper:focus-within {
-      border-color: var(--primary-light);
-      box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
-    }
-
-    :host-context(.dark-theme) .toggle-description   {
-      color: rgba(248, 250, 252, 0.8);
-    }
-
-    :host-context(.dark-theme) .reset-button   {
-      color: rgba(248, 250, 252, 0.8);
-      background-color: rgba(26, 28, 30, 0.8);
-    }
-
-    :host-context(.dark-theme) .reset-button:hover {
-      background-color: rgb(0, 0, 0);
-    }
-    
-
-    .search-icon {
-      color: var(--text-tertiary);
-      margin-right: 0.5rem;
-      font-size: 1.25rem;
-      width: 1.25rem;
-      height: 1.25rem;
-      flex-shrink: 0;
-    }
-
-    .search-input {
-      flex: 1;
-      border: none;
-      outline: none;
-      background: transparent;
-      font-size: 0.9rem;
-      color: var(--text-primary);
-      padding: 0.4rem 0;
-      font-family: inherit;
-      width: 100%;
-    }
-
-    /* Custom Select Styling */
-    select.search-input {
-      appearance: none;
-      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2364748b'><path d='M0 3 L6 9 L12 3 Z'/></svg>");
-      background-repeat: no-repeat;
-      background-position: right 0.7rem center;
-      background-size: 0.8rem;
-      padding-right: 2rem;
-    }
+    .greeting { font-size: 1.2rem; font-weight: 500; margin-bottom: 1rem; color: #2c3e50; }
 
     /* Global dark mode text styles for the settings page */
     .dark-theme .settings-container {
       color: var(--text-primary-dark);
     }
-
+    
     .dark-theme .settings-container .form-label,
     .dark-theme .settings-container .settings-subtitle,
     .dark-theme .settings-container .toggle-description {
       color: var(--text-secondary-dark);
     }
-
+    
     .dark-theme .settings-container .search-input,
     .dark-theme .settings-container .select-input,
     .dark-theme .settings-container .settings-title {
       color: var(--text-primary-dark);
     }
-
+    
     /* Dark mode specific styles for Default Location input */
     .dark-theme .search-field-wrapper {
       background-color: var(--card-dark);
       border-color: var(--border-dark);
     }
-
+    
     .dark-theme .search-icon {
       color: var(--text-tertiary-dark);
     }
-
+    
     .dark-theme .search-input {
       background-color: transparent;
-      color: rgb(124, 139, 186);
+      color: var(--text-primary-dark);
     }
-
-    .dark-theme select.search-input {
+    
+    .dark-theme .search-field-wrapper:focus-within {
+      border-color: var(--primary-light);
+      box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+    }
+    
+    /* Dark mode specific styles for Units dropdown */
+    .dark-theme .select-input {
+      background-color: var(--card-dark);
+      border-color: var(--border-dark);
+      color: var(--text-primary-dark);
       background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23f8fafc'><path d='M0 3 L6 9 L12 3 Z'/></svg>");
     }
-
+    
+    .dark-theme .select-input:focus {
+      border-color: var(--primary-light);
+      box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+    }
+    
+    .dark-theme .select-input option {
+      background-color: var(--background-dark);
+      color: var(--text-primary-dark);
+    }
+    
     /* Dark mode toggle text styles */
     .dark-theme .settings-toggles .mat-mdc-slide-toggle .mdc-form-field label,
     .dark-theme .settings-toggles .mat-slide-toggle-content {
       color: var(--text-primary-dark);
     }
-
+    
     .settings-toggles .mat-mdc-slide-toggle .mdc-form-field label,
     .settings-toggles .mat-slide-toggle-content {
       color: var(--text-primary);
@@ -304,28 +225,29 @@ interface UserSettings {
     .dark-theme .mat-mdc-slide-toggle:focus-within .mdc-switch {
       box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
     }
-
+    
     /* Ensure placeholder text is visible in dark mode */
     .dark-theme .search-input::placeholder {
-      color: #7c8bba;
+      color: var(--text-tertiary-dark);
     }
-
+    
     /* Enhance dark mode styling for entire settings page */
     .dark-theme .settings-card {
       background: var(--card-dark);
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
       border-color: var(--border-dark);
     }
-
+    
     /* Dark mode animations and transitions */
     .dark-theme .settings-card,
     .dark-theme .search-field-wrapper,
+    .dark-theme .select-input,
     .dark-theme .toggle-switch,
     .dark-theme .save-button,
     .dark-theme .cancel-button {
       transition: all 0.3s ease;
     }
-
+    
     /* Card hover effect in dark mode */
     .dark-theme .settings-card:hover {
       box-shadow: 0 6px 25px rgba(0, 0, 0, 0.5);
@@ -392,7 +314,7 @@ export class SettingsComponent implements OnInit {
     try {
       // Convert units to proper temperatureUnit format
       let settingsToSave = { ...this.settings };
-
+      
       // Add temperatureUnit based on units
       settingsToSave.temperatureUnit = settingsToSave.units === 'metric' ? 'celsius' : 'fahrenheit';
 
@@ -441,4 +363,4 @@ export class SettingsComponent implements OnInit {
     };
     this.weatherService.updateSettings(this.settings);
   }
-}
+} 
