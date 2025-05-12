@@ -178,33 +178,16 @@ export class FirebaseService {
   }
 
   async voteOnAlert(alertId: string, voteType: 'up' | 'down'): Promise<void> {
-    try {
-      console.log('Voting on alert:', alertId, voteType);
-      const alertRef = this.firestore.collection('alerts').doc(alertId);
-      const alertSnap = await alertRef.get().toPromise();
-      
-      if (!alertSnap?.exists) {
-        throw new Error('Alert not found');
-      }
-
-      const updateData: { [key: string]: any } = {
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      };
-
-      if (voteType === 'up') {
-        updateData['upvotes'] = firebase.firestore.FieldValue.increment(1);
-      } else {
-        updateData['downvotes'] = firebase.firestore.FieldValue.increment(1);
-      }
-
-      await alertRef.update(updateData);
-      console.log('Vote recorded successfully');
-    } catch (error) {
-      console.error('Error voting on alert:', error);
-      if (error instanceof Error) {
-        throw new Error(`Failed to vote on alert: ${error.message}`);
-      }
-      throw new Error('Failed to vote on alert: Unknown error');
+    const user = this.firestore.firestore.app.auth().currentUser;
+    if (!user) throw new Error('Not authenticated');
+    const voteRef = this.firestore.collection('alerts').doc(alertId).collection('votes').doc(user.uid);
+    const voteDoc = await voteRef.get().toPromise();
+    if (voteDoc && voteDoc.exists) {
+      const voteData = voteDoc.data();
+      if (voteData && voteData['type'] === voteType) return; // Already voted this way
+      await voteRef.update({ type: voteType });
+    } else {
+      await voteRef.set({ type: voteType });
     }
   }
 
@@ -518,5 +501,42 @@ export class FirebaseService {
       console.error('Error saving user settings:', error);
       throw new Error('Failed to save user settings');
     }
+  }
+
+  getAlertsRealtime(): Observable<Alert[]> {
+    return this.firestore.collection<Alert>('alerts', ref => ref.orderBy('createdAt', 'desc'))
+      .snapshotChanges()
+      .pipe(
+        map(actions => actions.map(a => {
+          const data = a.payload.doc.data() as any;
+          const id = a.payload.doc.id;
+          return {
+            id,
+            ...data,
+            startTime: data.startTime?.toDate() || new Date(),
+            endTime: data.endTime?.toDate() || new Date(),
+            createdAt: data.createdAt?.toDate() || new Date(),
+            updatedAt: data.updatedAt?.toDate() || new Date()
+          } as Alert;
+        }))
+      );
+  }
+
+  getVotes(alertId: string): Observable<{ upvotes: number, downvotes: number, userVote: 'up' | 'down' | null }> {
+    return this.firestore.collection('alerts').doc(alertId).collection('votes').snapshotChanges().pipe(
+      map(actions => {
+        let upvotes = 0;
+        let downvotes = 0;
+        let userVote: 'up' | 'down' | null = null;
+        const user = this.firestore.firestore.app.auth().currentUser;
+        actions.forEach(a => {
+          const data = a.payload.doc.data() as any;
+          if (data.type === 'up') upvotes++;
+          if (data.type === 'down') downvotes++;
+          if (user && a.payload.doc.id === user.uid) userVote = data.type;
+        });
+        return { upvotes, downvotes, userVote };
+      })
+    );
   }
 } 

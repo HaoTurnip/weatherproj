@@ -103,22 +103,22 @@ import { Comment } from '../../core/models/alert.model';
                 <div class="alert-stats">
                   <div class="stat-item">
                     <mat-icon>thumb_up</mat-icon>
-                    <span>{{ alert.upvotes || 0 }}</span>
+                    <span>{{ votes[alert.id || '']?.upvotes || 0 }}</span>
                   </div>
                   <div class="stat-item">
                     <mat-icon>thumb_down</mat-icon>
-                    <span>{{ alert.downvotes || 0 }}</span>
+                    <span>{{ votes[alert.id || '']?.downvotes || 0 }}</span>
                   </div>
                   <div class="stat-item">
                     <mat-icon>chat</mat-icon>
-                    <span>{{ comments[alert.id!] ? comments[alert.id!].length : 0 }}</span>
+                    <span>{{ comments[alert.id || ''] ? comments[alert.id!].length : 0 }}</span>
                   </div>
                 </div>
 
                 <ng-container *ngIf="alert.id && showComments[alert.id!]">
                   <ng-container *ngIf="authService.user$ | async as user; else commentCardLoggedOut">
                     <app-comment-card
-                      [comments]="comments[alert.id] || []"
+                      [comments]="comments[alert.id || ''] || []"
                       [currentUserId]="user.uid"
                       [isAuthenticated]="!!user"
                       (addComment)="onAddComment(alert.id!, $event)"
@@ -127,7 +127,7 @@ import { Comment } from '../../core/models/alert.model';
                   </ng-container>
                   <ng-template #commentCardLoggedOut>
                     <app-comment-card
-                      [comments]="comments[alert.id] || []"
+                      [comments]="comments[alert.id || ''] || []"
                       [currentUserId]="''"
                       [isAuthenticated]="false"
                       (addComment)="onAddComment(alert.id!, $event)"
@@ -138,11 +138,17 @@ import { Comment } from '../../core/models/alert.model';
               </mat-card-content>
 
               <mat-card-actions>
-                <button mat-button color="primary" (click)="vote(alert.id!, 'up')" [disabled]="!authService.isLoggedIn() || !alert.id">
+                <button mat-button color="primary"
+                        (click)="vote(alert.id!, 'up')"
+                        [disabled]="!authService.isLoggedIn() || !alert.id || (votes[alert.id || '']?.userVote === 'up') || ((authService.getCurrentUser()?.uid ?? '') && alert.userId === (authService.getCurrentUser()?.uid ?? ''))"
+                        [ngClass]="{'voted': votes[alert.id || '']?.userVote === 'up'}">
                   <mat-icon>thumb_up</mat-icon>
                   Upvote
                 </button>
-                <button mat-button color="warn" (click)="vote(alert.id!, 'down')" [disabled]="!authService.isLoggedIn() || !alert.id">
+                <button mat-button color="warn"
+                        (click)="vote(alert.id!, 'down')"
+                        [disabled]="!authService.isLoggedIn() || !alert.id || (votes[alert.id || '']?.userVote === 'down') || ((authService.getCurrentUser()?.uid ?? '') && alert.userId === (authService.getCurrentUser()?.uid ?? ''))"
+                        [ngClass]="{'voted': votes[alert.id || '']?.userVote === 'down'}">
                   <mat-icon>thumb_down</mat-icon>
                   Downvote
                 </button>
@@ -557,6 +563,11 @@ import { Comment } from '../../core/models/alert.model';
       align-items: center;
       justify-content: center;
     }
+
+    .voted {
+      background-color: #e67e22;
+      color: #fff;
+    }
   `]
 })
 export class AlertsComponent implements OnInit, OnDestroy {
@@ -567,6 +578,9 @@ export class AlertsComponent implements OnInit, OnDestroy {
   comments: { [key: string]: Comment[] } = {};
   private commentSubscriptions: { [key: string]: Subscription } = {};
   showComments: { [key: string]: boolean } = {}; // Track which alerts have expanded comments
+  private alertsSubscription: Subscription | undefined;
+  votes: { [alertId: string]: { upvotes: number, downvotes: number, userVote: 'up' | 'down' | null } } = {};
+  private voteSubscriptions: { [alertId: string]: Subscription } = {};
 
   constructor(
     public authService: AuthService,
@@ -577,65 +591,63 @@ export class AlertsComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    this.loadAlerts();
+    this.loading = true;
+    this.alertsSubscription = this.firebaseService.getAlertsRealtime().subscribe({
+      next: (alerts) => {
+        this.alerts = alerts;
+        this.filteredAlerts = [...alerts];
+        this.loading = false;
+        this.alerts.forEach(alert => {
+          if (alert.id) {
+            this.showComments[alert.id] = false;
+            // Subscribe to votes for each alert
+            if (this.voteSubscriptions[alert.id]) {
+              this.voteSubscriptions[alert.id].unsubscribe();
+            }
+            this.voteSubscriptions[alert.id] = this.firebaseService.getVotes(alert.id).subscribe(voteData => {
+              this.votes[alert.id!] = voteData;
+            });
+          }
+        });
+        // Only load comments if authenticated
+        if (this.authService.isLoggedIn()) {
+          Object.values(this.commentSubscriptions).forEach(sub => sub.unsubscribe());
+          this.commentSubscriptions = {};
+          for (const alert of this.alerts) {
+            if (alert.id) {
+              this.commentSubscriptions[alert.id] = this.firebaseService.getComments(alert.id)
+                .subscribe({
+                  next: (comments) => {
+                    this.comments[alert.id!] = comments;
+                  },
+                  error: (error) => {
+                    console.error(`Error loading comments for alert ${alert.id}:`, error);
+                    this.snackBar.open('Failed to load comments', 'Close', {
+                      duration: 5000
+                    });
+                  }
+                });
+            }
+          }
+        } else {
+          this.comments = {}; // Clear comments if not authenticated
+        }
+      },
+      error: (error) => {
+        this.loading = false;
+        this.error = 'Failed to load alerts. Please try again.';
+        this.snackBar.open(this.error, 'Close', {
+          duration: 5000
+        });
+      }
+    });
   }
 
   ngOnDestroy() {
-    // Clean up all comment subscriptions
     Object.values(this.commentSubscriptions).forEach(sub => sub.unsubscribe());
-  }
-
-  async loadAlerts() {
-    try {
-      this.loading = true;
-      this.error = null;
-      
-      // Wait for alerts to be loaded
-      const alerts = await this.firebaseService.getAlerts();
-      this.alerts = alerts;
-      this.filteredAlerts = [...alerts];
-
-      // Initialize showComments for all alerts to false
-      this.alerts.forEach(alert => {
-        if (alert.id) {
-          this.showComments[alert.id] = false;
-        }
-      });
-
-      // Only load comments if authenticated
-      if (this.authService.isLoggedIn()) {
-        // Clean up existing subscriptions
-        Object.values(this.commentSubscriptions).forEach(sub => sub.unsubscribe());
-        this.commentSubscriptions = {};
-
-        // Set up real-time listeners for each alert's comments
-        for (const alert of this.alerts) {
-          if (alert.id) {
-            this.commentSubscriptions[alert.id] = this.firebaseService.getComments(alert.id)
-              .subscribe({
-                next: (comments) => {
-                  this.comments[alert.id!] = comments;
-                },
-                error: (error) => {
-                  console.error(`Error loading comments for alert ${alert.id}:`, error);
-                  this.snackBar.open('Failed to load comments', 'Close', {
-                    duration: 5000
-                  });
-                }
-              });
-          }
-        }
-      } else {
-        this.comments = {}; // Clear comments if not authenticated
-      }
-    } catch (error) {
-      console.error('Error loading alerts:', error);
-      this.error = 'Failed to load alerts. Please try again.';
-      this.snackBar.open(this.error, 'Close', {
-        duration: 5000
-      });
-    } finally {
-      this.loading = false;
+    Object.values(this.voteSubscriptions).forEach(sub => sub.unsubscribe());
+    if (this.alertsSubscription) {
+      this.alertsSubscription.unsubscribe();
     }
   }
 
@@ -720,13 +732,7 @@ export class AlertsComponent implements OnInit, OnDestroy {
       width: '600px',
       maxWidth: '90vw'
     });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        // Hard reload the page to show new alerts immediately
-        window.location.reload();
-      }
-    });
+    dialogRef.afterClosed().subscribe();
   }
 
   async vote(alertId: string | undefined, voteType: 'up' | 'down') {
@@ -734,7 +740,8 @@ export class AlertsComponent implements OnInit, OnDestroy {
       console.error('Cannot vote: Alert ID is undefined');
       return;
     }
-
+    const alert = this.alerts.find(a => a.id === alertId);
+    const currentUser = this.authService.getCurrentUser();
     if (!this.authService.isLoggedIn()) {
       this.snackBar.open('Please sign in to vote', 'Sign In', {
         duration: 5000
@@ -748,10 +755,12 @@ export class AlertsComponent implements OnInit, OnDestroy {
       });
       return;
     }
-
+    if (alert && currentUser && alert.userId === currentUser.uid) {
+      this.snackBar.open('You cannot vote on your own alert.', 'Close', { duration: 4000 });
+      return;
+    }
     try {
       await this.firebaseService.voteOnAlert(alertId, voteType);
-      this.loadAlerts();
     } catch (error) {
       console.error('Error voting on alert:', error);
       this.snackBar.open('Failed to vote on alert', 'Close', {
