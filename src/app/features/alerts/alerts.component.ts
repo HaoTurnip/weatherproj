@@ -733,6 +733,21 @@ export class AlertsComponent implements OnInit, OnDestroy {
       maxWidth: '90vw'
     });
     dialogRef.afterClosed().subscribe();
+
+    // Get component instance to listen for the alertCreated event
+    const componentInstance = dialogRef.componentInstance as NewAlertDialogComponent;
+    
+    // Listen for alertCreated event to refresh alerts
+    componentInstance.alertCreated.subscribe(() => {
+      console.log('Alert created, refreshing alerts list');
+      this.loadAlerts();
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.loadAlerts();
+      }
+    });
   }
 
   async vote(alertId: string | undefined, voteType: 'up' | 'down') {
@@ -895,10 +910,5 @@ export class AlertsComponent implements OnInit, OnDestroy {
 
   toggleComments(alertId: string) {
     this.showComments[alertId] = !this.showComments[alertId];
-  }
-
-  isAlertOwner(alert: Alert): boolean {
-    const currentUser = this.authService.getCurrentUser();
-    return !!currentUser && alert.userId === currentUser.uid;
   }
 } 
