@@ -887,4 +887,9 @@ export class AlertsComponent implements OnInit, OnDestroy {
   toggleComments(alertId: string) {
     this.showComments[alertId] = !this.showComments[alertId];
   }
+
+  isAlertOwner(alert: Alert): boolean {
+    const currentUser = this.authService.getCurrentUser();
+    return !!currentUser && alert.userId === currentUser.uid;
+  }
 } 
