@@ -19,9 +19,25 @@ service cloud.firestore {
     match /alerts/{alertId} {
       allow read: if true;  // Anyone can read alerts
       allow create: if isAuthenticated();  // Only authenticated users can create alerts
+
+      // Allow update if:
+      // - The owner is updating anything
+      // - Any authenticated user is only updating upvotes/downvotes
       allow update: if isAuthenticated() && (
-        request.auth.uid == resource.data.userId || request.auth.uid == request.resource.data.userId
-      );  // Only the creator can update their alerts
+        request.auth.uid == resource.data.userId ||
+        (
+          request.resource.data.keys().hasOnly(['upvotes', 'downvotes', 'updatedAt']) &&
+          (!('userId' in resource.data) || getAfter().data.userId == resource.data.userId) &&
+          (!('title' in resource.data) || getAfter().data.title == resource.data.title) &&
+          (!('description' in resource.data) || getAfter().data.description == resource.data.description) &&
+          (!('type' in resource.data) || getAfter().data.type == resource.data.type) &&
+          (!('severity' in resource.data) || getAfter().data.severity == resource.data.severity) &&
+          (!('location' in resource.data) || getAfter().data.location == resource.data.location) &&
+          (!('startTime' in resource.data) || getAfter().data.startTime == resource.data.startTime) &&
+          (!('endTime' in resource.data) || getAfter().data.endTime == resource.data.endTime)
+        )
+      );
+
       allow delete: if isAuthenticated() && request.auth.uid == resource.data.userId;  // Only the creator can delete their alerts
       
       // Comments subcollection rules
