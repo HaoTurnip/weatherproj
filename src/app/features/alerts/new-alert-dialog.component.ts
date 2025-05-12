@@ -502,9 +502,6 @@ export class NewAlertDialogComponent {
         }, 2000);
         
       } catch (error: any) {
-        if (error.message && error.message.toLowerCase().includes('permission')) {
-          this.snackBar.open('Alert created! (Permission warning)', 'Close', { duration: 3000 });
-          this.dialogRef.close(true);
         console.error('Error creating alert:', error);
         // Suppress the specific Firestore insufficient permissions error after creation
         if (
@@ -531,7 +528,7 @@ export class NewAlertDialogComponent {
     }
   }
 
-  onCancel() {
+  onCancel(): void {
     this.dialogRef.close();
   }
 } 

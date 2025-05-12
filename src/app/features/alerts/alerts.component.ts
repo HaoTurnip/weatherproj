@@ -596,6 +596,30 @@ export class AlertsComponent implements OnInit, OnDestroy {
     private router: Router
   ) {}
 
+  private async loadAlerts(): Promise<void> {
+    try {
+      this.loading = true;
+      this.alertsSubscription?.unsubscribe();
+      
+      this.alertsSubscription = this.firebaseService.getAlertsRealtime().subscribe({
+        next: (alerts: Alert[]) => {
+          this.alerts = alerts;
+          this.filteredAlerts = [...alerts];
+          this.loading = false;
+        },
+        error: (error: Error) => {
+          console.error('Error loading alerts:', error);
+          this.error = 'Failed to load alerts';
+          this.loading = false;
+        }
+      });
+    } catch (error) {
+      console.error('Error in loadAlerts:', error);
+      this.error = 'Failed to load alerts';
+      this.loading = false;
+    }
+  }
+
   ngOnInit() {
     this.loading = true;
     this.alertsSubscription = this.firebaseService.getAlertsRealtime().subscribe({
