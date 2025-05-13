@@ -73,10 +73,6 @@ import { SkeletonLoaderComponent } from '../../shared/components/skeleton-loader
                         </div>
                       </mat-card-content>
                       <mat-card-actions>
-                        <button mat-button color="primary" (click)="onEditAlert(alert)">
-                          <mat-icon>edit</mat-icon>
-                          Edit
-                        </button>
                         @if (alert.id) {
                           <button mat-button color="warn" (click)="onDeleteAlert(alert.id)">
                             <mat-icon>delete</mat-icon>
@@ -466,10 +462,6 @@ export class ProfileComponent implements OnInit {
     } catch (error) {
       console.error('Error signing out:', error);
     }
-  }
-
-  onEditAlert(alert: Alert) {
-    // TODO: Do this at some point???
   }
 
   async onDeleteAlert(alertId: string) {
