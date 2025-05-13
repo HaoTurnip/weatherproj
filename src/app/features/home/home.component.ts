@@ -15,7 +15,7 @@ import { WeatherConditionPipe } from '../../shared/pipes/weather-condition.pipe'
 import { RouterModule } from '@angular/router';
 import { CityService } from '../../core/services/city.service';
 import { Hour12Pipe } from '../../shared/pipes/hour12.pipe';
-
+// do we need all these imports?
 @Component({
   selector: 'app-home',
   standalone: true,
