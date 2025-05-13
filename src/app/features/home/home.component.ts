@@ -28,9 +28,7 @@ import { Hour12Pipe } from '../../shared/pipes/hour12.pipe';
     MatChipsModule,
     MatDividerModule,
     RouterModule,
-    SkeletonLoaderComponent,
     TemperaturePipe,
-    WeatherConditionPipe,
     Hour12Pipe
   ],
   template: `
