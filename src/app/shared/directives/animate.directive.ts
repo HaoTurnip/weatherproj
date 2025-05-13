@@ -36,35 +36,3 @@ export class AnimateDirective implements OnInit {
   }
 }
 
-// Add these styles to your global styles
-/*
-.animate-fade {
-  opacity: 0;
-  transform: translateY(10px);
-}
-
-.animate-fade.animate-in {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.animate-slide {
-  opacity: 0;
-  transform: translateX(-20px);
-}
-
-.animate-slide.animate-in {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-.animate-scale {
-  opacity: 0;
-  transform: scale(0.95);
-}
-
-.animate-scale.animate-in {
-  opacity: 1;
-  transform: scale(1);
-}
-*/ 
