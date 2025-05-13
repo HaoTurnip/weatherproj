@@ -5,6 +5,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { AuthService } from './services/auth.service';
 import { WeatherService } from './services/weather.service';
 import { NotificationService } from './services/notification.service';
+import { CityService } from './services/city.service';
 
 @NgModule({
   imports: [
@@ -15,7 +16,8 @@ import { NotificationService } from './services/notification.service';
   providers: [
     AuthService,
     WeatherService,
-    NotificationService
+    NotificationService,
+    CityService
   ]
 })
 export class CoreModule {

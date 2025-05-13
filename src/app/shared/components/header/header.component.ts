@@ -11,7 +11,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
 import { AuthService } from '../../../core/services/auth.service';
 import { NavBarComponent } from '../nav-bar/nav-bar.component';
-import { CityService } from '../../../services/city.service';
+import { CityService } from '../../../core/services/city.service';
 import { WeatherService } from '../../../core/services/weather.service';
 import { Observable } from 'rxjs';
 

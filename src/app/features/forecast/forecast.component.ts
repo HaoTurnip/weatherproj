@@ -7,7 +7,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { WeatherService } from '../../core/services/weather.service';
 import { ForecastData } from '../../core/models/weather.model';
 import { SkeletonLoaderComponent } from '../../shared/components/skeleton-loader/skeleton-loader.component';
-import { CityService } from '../../services/city.service';
+import { CityService } from '../../core/services/city.service';
 import { TemperaturePipe } from '../../shared/pipes/temperature.pipe';
 
 @Component({

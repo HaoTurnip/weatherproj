@@ -12,7 +12,7 @@ import { Observable, firstValueFrom, filter } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
 import { FirebaseService } from '../../core/services/firebase.service';
 import { WeatherService } from '../../core/services/weather.service';
-import { CityService } from '../../services/city.service';
+import { CityService } from '../../core/services/city.service';
 
 interface UserSettings {
   location: string;

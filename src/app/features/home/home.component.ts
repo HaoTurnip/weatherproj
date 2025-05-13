@@ -13,7 +13,7 @@ import { SkeletonLoaderComponent } from '../../shared/components/skeleton-loader
 import { TemperaturePipe } from '../../shared/pipes/temperature.pipe';
 import { WeatherConditionPipe } from '../../shared/pipes/weather-condition.pipe';
 import { RouterModule } from '@angular/router';
-import { CityService } from '../../services/city.service';
+import { CityService } from '../../core/services/city.service';
 import { Hour12Pipe } from '../../shared/pipes/hour12.pipe';
 
 @Component({
