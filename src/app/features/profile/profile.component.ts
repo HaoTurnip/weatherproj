@@ -103,7 +103,8 @@ import { SkeletonLoaderComponent } from '../../shared/components/skeleton-loader
                     </mat-card>
                   }
                   @if (userActivity.length === 0) {
-                    <p class="no-activity">No recent activity.</p>
+                    <p class="no-activity">We never pushed any activity to the database. So have a picture of a cat instead.</p>
+                    <img src="https://media1.tenor.com/m/Cse00b9Ls-4AAAAC/goobers.gif" alt="Cat" class="cat-image">
                   }
                 </div>
               </mat-tab>
@@ -133,6 +134,17 @@ import { SkeletonLoaderComponent } from '../../shared/components/skeleton-loader
       color: var(--text-primary-dark, #f8fafc);
       border-color: var(--border-dark, #334155);
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    }
+    .cat-image{
+      width: 400px;
+      height: 400px;
+      border-radius: 10%;
+      object-fit: cover;
+      object-position: center;
+      margin-top: 16px;
+      margin-bottom: 16px;
+      margin-left: auto;
+      margin-right: auto;
     }
 
     .profile-header {
