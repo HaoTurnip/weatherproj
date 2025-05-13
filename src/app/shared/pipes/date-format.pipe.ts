@@ -39,3 +39,7 @@ export class DateFormatPipe implements PipeTransform {
     return new Intl.DateTimeFormat('en-US', options).format(date);
   }
 } 
+
+/**
+ * @deprecated we no longer use this pipe
+ */

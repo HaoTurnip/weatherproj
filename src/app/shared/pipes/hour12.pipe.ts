@@ -10,3 +10,7 @@ export class Hour12Pipe implements PipeTransform {
     return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true });
   }
 } 
+
+/**
+ * @deprecated we no longer use this pipe
+ */
