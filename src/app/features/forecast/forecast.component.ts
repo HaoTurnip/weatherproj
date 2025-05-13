@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -22,58 +22,7 @@ import { TemperaturePipe } from '../../shared/pipes/temperature.pipe';
     SkeletonLoaderComponent,
     TemperaturePipe
   ],
-  encapsulation: ViewEncapsulation.None,
   template: `
-    <style>
-      /* Global styles for forecast in dark mode */
-      .dark-theme .forecast-container {
-        color: var(--text-primary-dark);
-      }
-      
-      .dark-theme .forecast-card {
-        background-color: var(--card-dark) ;
-        border: 1px solid var(--border-dark) ;
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25) ;
-      }
-      
-      .dark-theme .forecast-card:hover {
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35) ;
-        transform: translateY(-8px);
-      }
-      
-      .dark-theme .forecast-card .mat-mdc-card-title {
-        color: var(--text-primary-dark) ;
-      }
-      
-      .dark-theme .forecast-card .mat-mdc-card-subtitle {
-        color: var(--text-secondary-dark) ;
-      }
-      
-      .dark-theme .forecast-container .error-container {
-        background-color: var(--card-dark) ;
-        border: 1px solid var(--border-dark) ;
-        color: var(--text-primary-dark) ;
-      }
-      
-      .dark-theme .forecast-container .error-container h2 {
-        color: var(--text-primary-dark) ;
-      }
-      
-      .dark-theme .forecast-container .error-container p {
-        color: var(--text-secondary-dark) ;
-      }
-      
-      /* Fix for the condition text in dark mode */
-      .dark-theme .details div {
-        background-color: rgba(51, 65, 85, 0.6) ;
-        color: var(--text-primary-dark) ;
-        border: 1px solid var(--border-dark) ;
-      }
-      
-      .dark-theme .details div:hover {
-        background-color: rgba(51, 65, 85, 0.8) ;
-      }
-    </style>
     <div class="forecast-container">
       @if (loading) {
         <div class="skeleton-container">
@@ -117,6 +66,55 @@ import { TemperaturePipe } from '../../shared/pipes/temperature.pipe';
     </div>
   `,
   styles: [`
+    /* Global styles for forecast in dark mode */
+    .dark-theme .forecast-container {
+      color: var(--text-primary-dark);
+    }
+    
+    .dark-theme .forecast-card {
+      background-color: var(--card-dark) ;
+      border: 1px solid var(--border-dark) ;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25) ;
+    }
+    
+    .dark-theme .forecast-card:hover {
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35) ;
+      transform: translateY(-8px);
+    }
+    
+    .dark-theme .forecast-card .mat-mdc-card-title {
+      color: var(--text-primary-dark) ;
+    }
+    
+    .dark-theme .forecast-card .mat-mdc-card-subtitle {
+      color: var(--text-secondary-dark) ;
+    }
+    
+    .dark-theme .forecast-container .error-container {
+      background-color: var(--card-dark) ;
+      border: 1px solid var(--border-dark) ;
+      color: var(--text-primary-dark) ;
+    }
+    
+    .dark-theme .forecast-container .error-container h2 {
+      color: var(--text-primary-dark) ;
+    }
+    
+    .dark-theme .forecast-container .error-container p {
+      color: var(--text-secondary-dark) ;
+    }
+    
+    /* Fix for the condition text in dark mode */
+    .dark-theme .details div {
+      background-color: rgba(51, 65, 85, 0.6) ;
+      color: var(--text-primary-dark) ;
+      border: 1px solid var(--border-dark) ;
+    }
+    
+    .dark-theme .details div:hover {
+      background-color: rgba(51, 65, 85, 0.8) ;
+    }
+
     .forecast-container {
       padding: 24px;
       max-width: 1200px;
@@ -198,7 +196,6 @@ import { TemperaturePipe } from '../../shared/pipes/temperature.pipe';
       justify-content: center;
       gap: 24px;
       margin: 8px 0;
-      align-items: baseline;
     }
 
     .max {

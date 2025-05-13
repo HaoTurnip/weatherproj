@@ -2,10 +2,11 @@ import { Routes } from '@angular/router';
 import { LoginComponent } from './auth/login/login.component';
 import { SignupComponent } from './auth/signup/signup.component';
 import { SettingsComponent } from './features/settings/settings.component';
-import { NotFoundComponent } from './core/pages/not-found/not-found.component';
-import { PrivacyPolicyComponent } from './layout/privacy-policy.component';
-import { TermsOfServiceComponent } from './layout/terms-of-service.component';
-import { ContactUsComponent } from './layout/contact-us.component';
+import { PrivacyPolicyComponent } from './extras/privacy-policy.component';
+import { TermsOfServiceComponent } from './extras/terms-of-service.component';
+import { ContactUsComponent } from './extras/contact-us.component';
+import { NotFoundComponent } from './shared/components/not-found/not-found.component';
+import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   {
@@ -36,16 +37,19 @@ export const routes: Routes = [
   },
   {
     path: 'alerts',
-    loadChildren: () => import('./features/alerts/alerts.module').then(m => m.AlertsModule)
+    loadChildren: () => import('./features/alerts/alerts.module').then(m => m.AlertsModule),
+    canActivate: [authGuard]
   },
   {
     path: 'settings',
     component: SettingsComponent,
-    title: 'Settings'
+    title: 'Settings',
+    canActivate: [authGuard]
   },
   {
     path: 'profile',
-    loadChildren: () => import('./features/profile/profile.module').then(m => m.ProfileModule)
+    loadChildren: () => import('./features/profile/profile.module').then(m => m.ProfileModule),
+    canActivate: [authGuard]
   },
   {
     path: 'privacy',
@@ -64,6 +68,7 @@ export const routes: Routes = [
   },
   {
     path: '**',
-    component: NotFoundComponent
+    component: NotFoundComponent,
+    title: 'Page Not Found'
   }
 ];

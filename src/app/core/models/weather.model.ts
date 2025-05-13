@@ -10,6 +10,22 @@ export interface WeatherData {
   cityName?: string;
 }
 
+/**
+ * Home component specific weather data interface with different property names
+ */
+export interface HomeWeatherData {
+  cityName: string;
+  temp_c: number;
+  condition: string;
+  icon: string;
+  humidity: number;
+  wind_kph: number;
+  wind_dir: string;
+  precip_mm: number;
+  uv: number;
+  feelsLike?: number;
+}
+
 export interface HourlyForecast {
   time: string;
   temperature: number;

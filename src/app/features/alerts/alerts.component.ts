@@ -13,7 +13,7 @@ import { FirebaseService } from '../../core/services/firebase.service';
 import { AuthService } from '../../core/services/auth.service';
 import { NewAlertDialogComponent } from './new-alert-dialog.component';
 import { Alert } from '../../core/models/alert.model';
-import { ConfirmDialogComponent } from '../../core/components/confirm-dialog/confirm-dialog.component';
+import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { FilterBarComponent } from '../../shared/components/filter-bar/filter-bar.component';
 import { SkeletonLoaderComponent } from '../../shared/components/skeleton-loader/skeleton-loader.component';
 import { CommentCardComponent } from '../../shared/components/comment-card/comment-card.component';
@@ -88,7 +88,7 @@ import { Comment } from '../../core/models/alert.model';
               <mat-card-content>
                 <h3 class="alert-title">{{ alert.title }}</h3>
                 <p class="alert-description">{{ alert.description }}</p>
-                
+
                 <div class="alert-details">
                   <div class="detail-item">
                     <mat-icon>place</mat-icon>
@@ -404,7 +404,7 @@ import { Comment } from '../../core/models/alert.model';
       justify-content: center;
       min-height: 36px;
     }
-    
+
     mat-card-actions button:disabled {
       opacity: 0.5 !important;
       background-color: #e0e0e0 !important;
@@ -412,14 +412,14 @@ import { Comment } from '../../core/models/alert.model';
       cursor: not-allowed !important;
       box-shadow: none !important;
     }
-    
+
     :host-context(.dark-theme) mat-card-actions button:disabled {
       opacity: 0.5 !important;
       background-color: #424242 !important;
       color: #757575 !important;
       box-shadow: none !important;
     }
-    
+
     mat-card-actions button mat-icon {
       font-size: 18px;
       height: 18px;
@@ -440,7 +440,7 @@ import { Comment } from '../../core/models/alert.model';
       position: relative;
       overflow: hidden;
     }
-    
+
     mat-card-actions button.comments-btn::after {
       content: '';
       position: absolute;
@@ -451,7 +451,7 @@ import { Comment } from '../../core/models/alert.model';
       left: -100%;
       transition: all 0.3s ease;
     }
-    
+
     mat-card-actions button.comments-btn:hover::after {
       left: 0;
     }
@@ -479,7 +479,7 @@ import { Comment } from '../../core/models/alert.model';
         transform: translateY(0);
       }
     }
-    
+
     .no-alerts {
       display: flex;
       flex-direction: column;
@@ -618,7 +618,7 @@ export class AlertsComponent implements OnInit, OnDestroy {
     try {
       this.loading = true;
       this.alertsSubscription?.unsubscribe();
-      
+
       this.alertsSubscription = this.firebaseService.getAlertsRealtime().subscribe({
         next: (alerts: Alert[]) => {
           this.alerts = alerts;
@@ -648,12 +648,12 @@ export class AlertsComponent implements OnInit, OnDestroy {
         this.alerts.forEach(alert => {
           if (alert.id) {
             this.showComments[alert.id] = false;
-            
+
             // Initialize votes with defaults to prevent undefined errors
             if (!this.votes[alert.id]) {
               this.votes[alert.id] = { upvotes: 0, downvotes: 0, userVote: null };
             }
-            
+
             // Subscribe to votes for each alert
             if (this.voteSubscriptions[alert.id]) {
               this.voteSubscriptions[alert.id].unsubscribe();
@@ -716,7 +716,7 @@ export class AlertsComponent implements OnInit, OnDestroy {
     // Filter by search query (location)
     if (filters.search) {
       const query = filters.search.toLowerCase();
-      result = result.filter(alert => 
+      result = result.filter(alert =>
         alert.location.toLowerCase().includes(query)
       );
     }
@@ -804,7 +804,7 @@ export class AlertsComponent implements OnInit, OnDestroy {
 
     // Get component instance to listen for the alertCreated event
     const componentInstance = dialogRef.componentInstance as NewAlertDialogComponent;
-    
+
     // Listen for alertCreated event to refresh alerts
     componentInstance.alertCreated.subscribe(() => {
       console.log('Alert created, refreshing alerts list');
@@ -979,4 +979,4 @@ export class AlertsComponent implements OnInit, OnDestroy {
   toggleComments(alertId: string) {
     this.showComments[alertId] = !this.showComments[alertId];
   }
-} 
+}

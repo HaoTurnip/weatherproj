@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewEncapsulation, AfterViewInit, OnDestroy, ElementRef, ViewChild, NgZone } from '@angular/core';
+import { Component, OnInit, AfterViewInit, OnDestroy, ElementRef, ViewChild, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -11,6 +11,7 @@ import { SkeletonLoaderComponent } from '../../shared/components/skeleton-loader
 import { ActivatedRoute, Router } from '@angular/router';
 import { WeatherService } from '../../core/services/weather.service';
 import { finalize } from 'rxjs';
+import { MapOverlay } from '../../core/models/map.model';
 
 declare global {
   interface Window {
@@ -18,8 +19,6 @@ declare global {
     L: any;
   }
 }
-
-type MapOverlay = 'wind' | 'temp' | 'pressure';
 
 @Component({
   selector: 'app-map',
@@ -33,137 +32,8 @@ type MapOverlay = 'wind' | 'temp' | 'pressure';
     MatProgressSpinnerModule,
     MatButtonToggleModule,
     MatSnackBarModule,
-    SkeletonLoaderComponent
   ],
-  encapsulation: ViewEncapsulation.None,
   template: `
-    <style>
-      /* Global styles for map component in dark mode */
-      .dark-theme .map-container {
-        color: var(--text-primary-dark);
-      }
-      
-      .dark-theme .map-card {
-        background-color: var(--card-dark) !important;
-        border: 1px solid var(--border-dark) !important;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25) !important;
-      }
-      
-      .dark-theme .map-card:hover {
-        box-shadow: 0 8px 28px rgba(0, 0, 0, 0.3) !important;
-      }
-      
-      .dark-theme .map-card .mat-mdc-card-title {
-        color: var(--text-primary-dark) !important;
-      }
-      
-      .dark-theme .map-card .mat-mdc-card-subtitle {
-        color: var(--text-secondary-dark) !important;
-      }
-      
-      /* Control label styling for dark mode */
-      .dark-theme .control-label {
-        color: #ffffff !important;
-      }
-      
-      .dark-theme .overlay-note {
-        color: #7fd1de !important;
-      }
-      
-      /* Button toggle group styling for dark mode */
-      .dark-theme .mat-button-toggle-group {
-        background-color: #1e293b !important;
-        border: 1px solid #334155 !important;
-        box-shadow: none !important;
-        padding: 2px !important;
-        border-radius: 50px !important;
-        gap: 0 !important;
-        display: flex !important;
-      }
-      
-      .dark-theme .mat-button-toggle {
-        background-color: transparent !important;
-        color: #94a3b8 !important;
-        border: none !important;
-        border-radius: 50px !important;
-        transition: all 0.2s ease !important;
-        overflow: hidden !important;
-        padding: 0 !important;
-        margin: 0 2px !important;
-      }
-      
-      .dark-theme .mat-button-toggle:not(.mat-button-toggle-checked):hover {
-        background-color: #334155 !important;
-        color: #e2e8f0 !important;
-      }
-      
-      .dark-theme .mat-button-toggle-checked {
-        background-color: #3b82f6 !important;
-        color: #ffffff !important;
-        font-weight: 500 !important;
-      }
-      
-      .dark-theme .mat-button-toggle-button {
-        color: inherit !important;
-        padding: 6px 16px !important;
-      }
-      
-      .dark-theme .mat-button-toggle-focus-overlay {
-        background-color: transparent !important;
-      }
-      
-      /* Error container styles */
-      .dark-theme .error-container {
-        background-color: var(--card-dark) !important;
-        color: var(--text-primary-dark) !important;
-        border: 1px solid var(--border-dark) !important;
-      }
-      
-      .dark-theme .error-icon {
-        color: var(--error-light) !important;
-      }
-      
-      /* Location input dark mode specific styles - matching header */
-      .dark-theme .location-input .search-field-wrapper {
-        background: var(--card-dark) !important;
-        border-color: var(--border-dark) !important;
-      }
-      
-      .dark-theme .location-input .search-icon {
-        color: var(--text-tertiary-dark) !important;
-      }
-      
-      .dark-theme .location-input .city-input {
-        background-color: transparent !important;
-        color: var(--text-primary-dark) !important;
-      }
-      
-      .dark-theme .location-input .city-input::placeholder {
-        color: var(--text-tertiary-dark) !important;
-      }
-      
-      .dark-theme .location-input .search-field-wrapper:focus-within {
-        border-color: var(--primary-light) !important;
-        box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2) !important;
-      }
-      
-      .dark-theme .location-input .search-field-wrapper:hover:not(:focus-within) {
-        border-color: var(--primary-light) !important;
-        background-color: rgba(30, 41, 59, 0.8) !important;
-      }
-      
-      .dark-theme .location-input button.mat-icon-button {
-        color: var(--primary-light) !important;
-      }
-      
-      .dark-theme .location-input button.mat-icon-button:hover:not([disabled]) {
-        background-color: rgba(59, 130, 246, 0.2) !important;
-      }
-      
-      .dark-theme .location-input mat-icon {
-        color: var(--primary-light) !important;
-      }
-    </style>
     <div class="map-container">
       <mat-card class="map-card">
         <mat-card-header>
@@ -236,6 +106,132 @@ type MapOverlay = 'wind' | 'temp' | 'pressure';
     </div>
   `,
   styles: [`
+    /* Global styles for map component in dark mode */
+    .dark-theme .map-container {
+      color: var(--text-primary-dark);
+    }
+    
+    .dark-theme .map-card {
+      background-color: var(--card-dark) !important;
+      border: 1px solid var(--border-dark) !important;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25) !important;
+    }
+    
+    .dark-theme .map-card:hover {
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.3) !important;
+    }
+    
+    .dark-theme .map-card .mat-mdc-card-title {
+      color: var(--text-primary-dark) !important;
+    }
+    
+    .dark-theme .map-card .mat-mdc-card-subtitle {
+      color: var(--text-secondary-dark) !important;
+    }
+    
+    /* Control label styling for dark mode */
+    .dark-theme .control-label {
+      color: #ffffff !important;
+    }
+    
+    .dark-theme .overlay-note {
+      color: #7fd1de !important;
+    }
+    
+    /* Button toggle group styling for dark mode */
+    .dark-theme .mat-button-toggle-group {
+      background-color: #1e293b !important;
+      border: 1px solid #334155 !important;
+      box-shadow: none !important;
+      padding: 2px !important;
+      border-radius: 50px !important;
+      gap: 0 !important;
+      display: flex !important;
+    }
+    
+    .dark-theme .mat-button-toggle {
+      background-color: transparent !important;
+      color: #94a3b8 !important;
+      border: none !important;
+      border-radius: 50px !important;
+      transition: all 0.2s ease !important;
+      overflow: hidden !important;
+      padding: 0 !important;
+      margin: 0 2px !important;
+    }
+    
+    .dark-theme .mat-button-toggle:not(.mat-button-toggle-checked):hover {
+      background-color: #334155 !important;
+      color: #e2e8f0 !important;
+    }
+    
+    .dark-theme .mat-button-toggle-checked {
+      background-color: #3b82f6 !important;
+      color: #ffffff !important;
+      font-weight: 500 !important;
+    }
+    
+    .dark-theme .mat-button-toggle-button {
+      color: inherit !important;
+      padding: 6px 16px !important;
+    }
+    
+    .dark-theme .mat-button-toggle-focus-overlay {
+      background-color: transparent !important;
+    }
+    
+    /* Error container styles */
+    .dark-theme .error-container {
+      background-color: var(--card-dark) !important;
+      color: var(--text-primary-dark) !important;
+      border: 1px solid var(--border-dark) !important;
+    }
+    
+    .dark-theme .error-icon {
+      color: var(--error-light) !important;
+    }
+    
+    /* Location input dark mode specific styles - matching header */
+    .dark-theme .location-input .search-field-wrapper {
+      background: var(--card-dark) !important;
+      border-color: var(--border-dark) !important;
+    }
+    
+    .dark-theme .location-input .search-icon {
+      color: var(--text-tertiary-dark) !important;
+    }
+    
+    .dark-theme .location-input .city-input {
+      background-color: transparent !important;
+      color: var(--text-primary-dark) !important;
+    }
+    
+    .dark-theme .location-input .city-input::placeholder {
+      color: var(--text-tertiary-dark) !important;
+    }
+    
+    .dark-theme .location-input .search-field-wrapper:focus-within {
+      border-color: var(--primary-light) !important;
+      box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2) !important;
+    }
+    
+    .dark-theme .location-input .search-field-wrapper:hover:not(:focus-within) {
+      border-color: var(--primary-light) !important;
+      background-color: rgba(30, 41, 59, 0.8) !important;
+    }
+    
+    .dark-theme .location-input button.mat-icon-button {
+      color: var(--primary-light) !important;
+    }
+    
+    .dark-theme .location-input button.mat-icon-button:hover:not([disabled]) {
+      background-color: rgba(59, 130, 246, 0.2) !important;
+    }
+    
+    .dark-theme .location-input mat-icon {
+      color: var(--primary-light) !important;
+    }
+
     .map-container {
       padding: 24px;
       max-width: 1200px;

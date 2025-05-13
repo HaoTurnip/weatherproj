@@ -1,43 +1,11 @@
 import { Injectable } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { Alert } from '../models/alert.model';
+import { AlertData, UserActivity } from '../models/activity.model';
+import { Comment } from '../models/comment.model';
 import { Observable, from, map } from 'rxjs';
 import firebase from 'firebase/compat/app';
 import { collection, query, where, orderBy, getDocs, addDoc } from '@angular/fire/firestore';
-
-interface AlertData {
-  title: string;
-  description: string;
-  type: string;
-  severity: string;
-  location: string;
-  startTime: firebase.firestore.Timestamp;
-  endTime: firebase.firestore.Timestamp;
-  userId: string;
-  upvotes: number;
-  downvotes: number;
-  comments: any[];
-  createdAt: firebase.firestore.Timestamp;
-  updatedAt: firebase.firestore.Timestamp;
-}
-
-interface UserActivity {
-  id: string;
-  userId: string;
-  type: string;
-  description: string;
-  timestamp: Date;
-}
-
-interface Comment {
-  id: string;
-  alertId: string;
-  userId: string;
-  userName: string;
-  content: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
 
 @Injectable({
   providedIn: 'root'

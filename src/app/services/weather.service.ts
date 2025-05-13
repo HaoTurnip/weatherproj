@@ -1,33 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
-
-export interface WeatherData {
-  temperature: number;
-  condition: string;
-  icon: string;
-  humidity: number;
-  windSpeed: number;
-  windDirection: string;
-  precipitation: number;
-  uvIndex: number;
-  cityName?: string;
-}
-
-export interface HourlyForecast {
-  time: string;
-  temperature: number;
-  condition: string;
-  icon: string;
-}
-
-export interface DailyForecast {
-  day: string;
-  high: number;
-  low: number;
-  condition: string;
-  icon: string;
-}
+import { WeatherData, HourlyForecast, DailyForecast } from '../core/models/weather.model';
 
 @Injectable({
   providedIn: 'root'

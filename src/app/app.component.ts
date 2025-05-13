@@ -10,7 +10,7 @@ import { RouterModule, RouterOutlet } from '@angular/router';
 import { MatMenuModule } from '@angular/material/menu';
 import { FormsModule } from '@angular/forms';
 import { HeaderComponent } from './shared/components/header/header.component';
-import { FooterComponent } from './core/components/footer/footer.component';
+import { FooterComponent } from './shared/components/footer/footer.component';
 import { HomeComponent } from './features/home/home.component';
 import { WeatherService } from './core/services/weather.service';
 import { AuthService } from './core/services/auth.service';
@@ -73,7 +73,7 @@ export class AppComponent implements OnInit {
   ngOnInit() {
     // Load settings from localStorage on app startup
     this.loadUserSettings();
-    
+
     // Also listen to auth state changes to load user settings when logged in
     this.authService.user$.subscribe(user => {
       if (user) {
@@ -85,7 +85,7 @@ export class AppComponent implements OnInit {
       }
     });
   }
-  
+
   private loadUserSettings() {
     try {
       const storedSettings = localStorage.getItem('userSettings');
@@ -93,7 +93,7 @@ export class AppComponent implements OnInit {
         const settings = JSON.parse(storedSettings);
         console.log('Loading settings from localStorage:', settings);
         this.weatherService.updateSettings(settings);
-        
+
         // Ensure the settings are immediately saved back to localStorage
         // This fixes a potential issue where settings might not persist
         localStorage.setItem('userSettings', JSON.stringify(settings));

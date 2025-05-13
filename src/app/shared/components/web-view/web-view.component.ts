@@ -5,12 +5,29 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 
+/**
+ * @deprecated This component is deprecated in favor of direct Windy.com API integration.
+ * See the MapComponent for the current implementation.
+ * 
+ * RIP web view idea
+ * 
+ * why does every site have to have to block the iframe?
+ * 
+ * I'm not even using the iframe for anything malicious i just want to load a map :(
+ * 
+ * Special thanks to Zoom earth for blocking the iframe and ruining my day
+ */
 @Component({
   selector: 'app-web-view',
   standalone: true,
   imports: [CommonModule, MatProgressSpinnerModule, MatIconModule, MatButtonModule],
   template: `
     <div class="web-view-container">
+      <div class="deprecation-warning">
+        <mat-icon class="warning-icon">warning</mat-icon>
+        <p class="warning-text">DEPRECATED: This component is no longer used thanks to direct Windy.com integration.</p>
+      </div>
+      
       <iframe
         *ngIf="safeUrl"
         [src]="safeUrl"
@@ -50,6 +67,37 @@ import { MatButtonModule } from '@angular/material/button';
       height: 100%;
       border: none;
       border-radius: var(--radius-lg);
+    }
+    
+    .deprecation-warning {
+      display: flex;
+      align-items: center;
+      background-color: #fff3cd;
+      color: #856404;
+      padding: 10px 15px;
+      border-radius: var(--radius-md);
+      margin-bottom: 15px;
+      border-left: 4px solid #ffc107;
+    }
+    
+    .warning-icon {
+      color: #ffc107;
+      margin-right: 10px;
+    }
+    
+    .warning-text {
+      font-weight: 500;
+      margin: 0;
+    }
+    
+    :host-context(.dark-theme) .deprecation-warning {
+      background-color: rgba(255, 193, 7, 0.2);
+      color: #ffd54f;
+      border-left-color: #ffd54f;
+    }
+    
+    :host-context(.dark-theme) .warning-icon {
+      color: #ffd54f;
     }
     
     .loading-container {
