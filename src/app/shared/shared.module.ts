@@ -19,8 +19,7 @@ import { AlertCardComponent } from './components/alert-card/alert-card.component
 import { HeaderComponent } from './components/header/header.component';
 import { TemperaturePipe } from './pipes/temperature.pipe';
 import { DateFormatPipe } from './pipes/date-format.pipe';
-import { DarkModeDirective } from './directives/dark-mode.directive';
-import { AnimateDirective } from './directives/animate.directive';
+
 
 @NgModule({
   imports: [
@@ -39,9 +38,7 @@ import { AnimateDirective } from './directives/animate.directive';
     AlertCardComponent,
     HeaderComponent,
     TemperaturePipe,
-    DateFormatPipe,
-    DarkModeDirective,
-    AnimateDirective
+    DateFormatPipe
   ],
   exports: [
     CommonModule,
@@ -59,9 +56,7 @@ import { AnimateDirective } from './directives/animate.directive';
     AlertCardComponent,
     HeaderComponent,
     TemperaturePipe,
-    DateFormatPipe,
-    DarkModeDirective,
-    AnimateDirective
+    DateFormatPipe
   ]
 })
 export class SharedModule { } 
