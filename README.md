@@ -18,55 +18,6 @@ ng serve
 
 Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
 
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
-
-## Weather Map Feature
-
-The Weather Map feature allows users to view interactive weather maps powered by the [Windy.com](https://www.windy.com) JavaScript API directly integrated within the application.
 
 ### Features
 
@@ -74,45 +25,9 @@ The Weather Map feature allows users to view interactive weather maps powered by
 - View different weather parameters:
   - Wind (default)
   - Temperature
-  - Rain & Thunder
-  - Rain Accumulation
-  - Clouds
-  - Humidity
-  - Precipitation Type
   - Pressure
 - Search for specific locations to view localized weather forecasts
-- Direct map interaction with pan and zoom controls
-- Responsive design that works well on mobile and desktop
+- Alerts in a forum stlye menu so you can view local alerts
 
-### How It Works
 
-1. The component uses the Windy JavaScript API and Leaflet to create an interactive map
-2. The application dynamically loads the Windy API libraries at runtime
-3. User location searches are geocoded to coordinates using the OpenMeteo API
-4. Map state (overlay type, coordinates, zoom level) is synchronized with URL parameters for sharing and navigation
 
-### Implementation
-
-The feature consists of:
-
-1. Windy API Integration - Loads and initializes the Windy JavaScript API with our API key
-2. Map Component - Manages the UI controls and API interactions
-3. Leaflet Integration - Uses the Leaflet mapping library which Windy is built on
-4. WeatherService - Provides geocoding functionality to convert city names to coordinates
-
-### Technical Details
-
-- API Key: The application uses a Windy API key for authentication
-- Dynamic Script Loading: JavaScript libraries are loaded at runtime
-- Zone Management: Angular Zone is used to handle updates from outside the Angular context
-- State Management: Map state is preserved in URL parameters
-- Error Handling: Comprehensive error handling for script loading, initialization, and API errors
-
-### Usage
-
-To use the weather map:
-
-1. Navigate to the Map section from the main navigation menu
-2. Select a map type to view global data for that parameter
-3. Enter a location name in the search field to view weather for that specific area
-4. Interact directly with the map through pan, zoom, and other Windy features
